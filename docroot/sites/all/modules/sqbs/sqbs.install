@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Simple Query Builder for SimpleViews install file.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function sqbs_schema() {
+  $schema['simpleviews_sqbs'] = array(
+    'description' => t('Stores additional information on simpleviews.'),
+    'fields' => array(
+      'svid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('Refers to {simpleviews}.svid.'),
+      ),
+      'page_items' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('Number of items to display on a page.')
+      ),
+      'block_items' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('Number of items to display in a block; if {simpleviews}.block is on.')
+      ),
+      'block_style' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => t("The output style of the listing {simpleviews} item in the block."),
+      ),
+      'tags' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => t('Serialized list of taxonomy terms this listing should be limited to.')
+      ),
+    ),
+    'primary key' => array('svid'),
+  );
+  return $schema;
+}
+
+/**
+ * Add the block_style field to additional simpleviews fields.
+ */
+function sqbs_update_7001() {
+  $ret = array();
+  db_add_field('simpleviews_sqbs', 'block_style', array('type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''));
+  db_query("UPDATE {simpleviews_sqbs} SET block_style = 'titles'");
+  return $ret;
+}

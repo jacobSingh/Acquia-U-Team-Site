@@ -1,0 +1,64 @@
+/** 
+* @file
+* Default dropdown style definitions.
+*/
+
+/* @group Behavior */
+
+.menu-dropdown .menu .menu {
+  display: none; /* Hide sub-menus */
+  left: 0; /* LTR */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: absolute;
+  top: 100%; /* match bottom of first lis. */
+  width: 15em;
+  z-index: 200;
+}
+
+.menu-dropdown .menu li,
+.menu-dropdown .menu a {
+  position: relative;
+}
+
+.menu-dropdown .menu li:hover {
+  visibility: inherit; /* fixes IE7 'sticky bug' */
+}
+
+.menu-dropdown .menu .menu .menu {
+  left: 15em; /* LTR */
+  top: 0;
+}
+
+.menu-dropdown .menu li:hover > .menu { /* Enable sub-menus on the main menu */
+  display: block;
+}
+
+.menu-dropdown .menu .menu li {
+  width: 100%;
+  z-index: 50;
+}
+
+.menu-dropdown .menu .menu li:hover,
+.menu-dropdown .menu .menu li a:hover {
+  cursor: pointer;
+}
+
+.menu-dropdown .menu .menu li:hover {
+  z-index: 51; /* Pull the active trail li's above the other li's */
+}
+
+.menu-dropdown .menu .menu li + li {
+  margin-left: 0; /* LTR */
+  padding-left: 0; /* LTR */
+}
+
+.menu-dropdown .menu .menu a {
+  display: block;
+  line-height: 1em; /* this prevents the value "normal" from being returned as the line-height */
+  position: relative;
+  width: auto;
+}
+
+/* @end */

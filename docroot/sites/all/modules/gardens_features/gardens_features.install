@@ -1,0 +1,209 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install, update and uninstall functions for the gardens_features module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function gardens_features_install() {
+  // Adjust the weight of the module so it runs after most others.
+  db_update('system')
+    ->fields(array(
+      'weight' => 10,
+    ))
+    ->condition('name', 'gardens_features')
+    ->execute();
+}
+
+/**
+ * Implements hook_enable().
+ */
+function gardens_features_enable() {
+  // Set variables to their defaults to avoid any Date API error messages.
+  _gardens_features_set_default_date_variables();
+  // Enable the gardens-flash CKEditor plugin to fix the % width bug.
+  _gardens_features_enable_gardens_flash_plugin();
+}
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function gardens_features_modules_enabled($modules) {
+  $t = get_t();
+
+  // Enable the gardens-flash CKEditor plugin to fix the % width bug.
+  foreach ($modules as $key => $module) {
+    if ($module === 'wysiwyg') {
+      _gardens_features_enable_gardens_flash_plugin();
+    }
+  }
+
+  // When using Simplified Modules, the intention of enabling taxonomy_access is
+  // really to enable tac_alt_ui. If tac_alt_ui_requirements('install') returns
+  // an error (in which case system_modules_submit() removes it from the modules
+  // it enables), prevent taxonomy_access from being enabled.
+  // @todo Would be nice to prevent system_modules_submit() from enabling
+  //   taxonomy_access in the first place, but that doesn't appear possible
+  //   without patching that function.
+  if (module_exists('simplified_modules') && in_array('taxonomy_access', $modules) && !in_array('tac_alt_ui', $modules)
+    && function_exists('tac_alt_ui_requirements')
+    && ($requirements = tac_alt_ui_requirements('install'))
+    && isset($requirements['tac_alt_ui_vocabularies']['severity']) && $requirements['tac_alt_ui_vocabularies']['severity'] == REQUIREMENT_ERROR
+  ) {
+    module_disable(array('taxonomy_access'));
+    // Hack the displayed error message to not reference an "alt ui" module,
+    // since as far as the administrator is concerned, the only visible module
+    // is just "Taxonomy access control".
+    if (isset($_SESSION['messages']['error'])) {
+      $message_key = array_search($requirements['tac_alt_ui_vocabularies']['description'], $_SESSION['messages']['error']);
+      if ($message_key !== FALSE) {
+        // @todo This message doesn't help the administrator solve the problem.
+        //   Which content types? Which vocabularies? It's a catch 22, because
+        //   without TAC enabled, there's no way within the UI to know which
+        //   vocabularies still have access control configuration from when the
+        //   module used to be enabled.
+        $_SESSION['messages']['error'][$message_key] = $t('Taxonomy access control cannot be re-enabled while there are content types capable of containing multiple access control terms.');
+      }
+    }
+    // The module was enabled and disabled in a single request. The net result
+    // is no change to content permissions. Therefore, remove the stray status
+    // message.
+    if (isset($_SESSION['messages']['status'])) {
+      $message_key = array_search($t('Content permissions have been rebuilt.'), $_SESSION['messages']['status']);
+      if ($message_key !== FALSE) {
+        unset($_SESSION['messages']['status'][$message_key]);
+        if (empty($_SESSION['messages']['status'])) {
+          unset($_SESSION['messages']['status']);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Sets date-related variables to their defaults to avoid Date API errors.
+ *
+ * If these variables are not set, Date API prints a requirements error telling
+ * you to set them. So in Gardens, we might as well set them to what we expect
+ * them to be, in order to avoid any confusion.
+ *
+ * @see date_api_requirements()
+ */
+function _gardens_features_set_default_date_variables() {
+  $date_default_timezone = variable_get('date_default_timezone');
+  if (!isset($date_default_timezone)) {
+    variable_set('date_default_timezone', date_default_timezone_get());
+  }
+
+  $date_first_day = variable_get('date_first_day');
+  if (!isset($date_first_day)) {
+    variable_set('date_first_day', 0);
+  }
+
+  $date_format_short = variable_get('date_format_short');
+  if (!isset($date_format_short)) {
+    variable_set('date_format_short', 'm/d/Y - H:i');
+  }
+
+  $date_format_medium = variable_get('date_format_medium');
+  if (!isset($date_format_medium)) {
+    variable_set('date_format_medium', 'D, m/d/Y - H:i');
+  }
+
+  $date_format_long = variable_get('date_format_long');
+  if (!isset($date_format_long)) {
+    variable_set('date_format_long', 'l, F j, Y - H:i');
+  }
+}
+
+/**
+ * Enable the gardens-flash CKEditor plugin for all formats.
+ */
+function _gardens_features_enable_gardens_flash_plugin() {
+  // Bail out if the wysiwyg module isn't installed.
+  if (!db_table_exists('wysiwyg')) {
+    return;
+  }
+
+  $result = db_query("SELECT format, settings FROM {wysiwyg} WHERE editor = :editor;", array(':editor' => 'ckeditor'));
+  foreach ($result as $config) {
+    // The settings array is stored in serialized format.
+    $config->settings = unserialize($config->settings);
+    // Turn the gardens-flash CKEditor plugin on.
+    if (!isset($config->settings['buttons']['drupal']['gardens-flash']) || $config->settings['buttons']['drupal']['gardens-flash'] != 1) {
+      $config->settings['buttons']['drupal']['gardens-flash'] = 1;
+
+      // Resave the settings array to the database.
+      db_update('wysiwyg')
+        ->fields(array(
+          'settings' => serialize($config->settings),
+        ))
+        ->condition('format', $config->format)
+        ->condition('editor', 'ckeditor')
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Adjust the weight of the module so it runs after most others.
+ */
+function gardens_features_update_7000() {
+  db_update('system')
+    ->fields(array(
+      'weight' => 10,
+    ))
+    ->condition('name', 'gardens_features')
+    ->execute();
+}
+
+/**
+ * Override some default media variables.
+ */
+function gardens_features_update_7001() {
+  variable_set('wysiwyg_allowed_types', array('image', 'video'));
+}
+
+/**
+ * Migrate all deprecated "small" file field formats to "thumbnail".
+ */
+function gardens_features_update_7002() {
+  // As part of Styles 1.x -> 2.x upgrade, media_youtube no longer adds a
+  // "small" style. Reuse the gardens_features_image_style_save() function,
+  // intended for custom image style name changes, to migrate any stray
+  // references.
+  if (function_exists('gardens_features_image_style_save')) {
+    gardens_features_image_style_save(array('old_name' => 'small', 'name' => 'thumbnail'));
+  }
+}
+
+/**
+ * Set variables to their defaults to avoid any Date API error messages.
+ */
+function gardens_features_update_7003() {
+  _gardens_features_set_default_date_variables();
+}
+
+/**
+ * Enable the gardens-flash CKEditor plugin for all formats.
+ */
+function gardens_features_update_11110() {
+  _gardens_features_enable_gardens_flash_plugin();
+}
+
+/**
+ * Updates on trunk after the 1.12 release start at 11120.
+ */
+
+/**
+ * Override the wysiwyg default media variables.
+ * menu location: admin/config/media/wysiwyg_types
+ * @see https://backlog.acquia.com/browse/DG-1582
+ */
+function gardens_features_update_11120() {
+  variable_set('media__wysiwyg_allowed_types', array('image', 'video', 'audio', 'default'));
+}

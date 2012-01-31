@@ -1,0 +1,11 @@
+name = Filter tips dialog
+description = Moves the filter tips page into a modal dialog.
+core = 7.x
+dependencies[] = dialog
+
+; Information added by drupal.org packaging script on 2011-04-19
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "filter_tips_dialog"
+datestamp = "1303704000"
+

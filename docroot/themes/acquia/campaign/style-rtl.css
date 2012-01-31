@@ -1,0 +1,185 @@
+/**
+ * @file
+ * Initial RTL style definition of the Campaign theme for Acquia Gardens.
+ */
+
+/* @group HTML Elements */
+
+/* @group Forms */
+
+fieldset legend {
+  margin: 0 7px 0 0;  
+}
+
+fieldset input {
+  margin: 0 5px 0 0;
+}
+
+/* @end */
+
+/* @group Typography */
+
+.logo {
+  float: right; 
+}
+
+.sidebar .block h2 {
+  /*background-position: left bottom;*/  /* Only if we flip the background image */
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Wrappers */
+
+.deco-content-top .layer-b,
+.deco-content-bottom .layer-b {
+  right: -10px;
+}
+
+/* @end */
+
+/* @group Grid */
+
+.sidebar.left {
+  border-width: 0 0 0 1px;
+  margin-left: 1.3333%;
+}
+
+.sidebar.right {
+  border-width: 0 1px 0 0;
+  margin-right: 1.3333%;
+}
+
+/* @end */
+
+/* @group Inflections */
+
+/* @group Lists */
+
+.action-links {
+  padding-right: 1.4615em;
+  padding-left: 0;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu .expanded + li {
+  margin-right: 0;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding: 3px 10px 2px 26px;
+}
+
+.menu-dropdown .menu .menu a {
+  padding: 0 10px 1em 15px;
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  left: 9px;
+  right: auto;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Components */
+
+/* @group FAQ */
+
+.faq-item-question-label {
+  float: right;
+  margin: 0 0 0 .5em;
+}
+
+/* @end */
+
+/* @group Testimonials */
+
+.field-name-field-testimonial-author,
+.field-name-field-testimonial-affiliation {
+  float: left;
+  margin-right: 0.3em;
+  margin-left: 0;
+}
+
+/* @end */
+
+/* @group Product Feature */
+
+#precontent .block .field-type-file {
+  float: right;
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+/* @end */
+
+/* @group forum */
+
+th {
+  border-width: 0 0 0 1px;
+}
+
+th:last-child { /* Doesn't work in IE */
+  border-left: medium none;
+}
+
+#forum tr td.forum { /* This has to be this specific to override forum.css - JB */
+  padding-right: 34px;
+}
+
+/* @end */
+
+/* @group feedback */
+
+#block-feedback-feedback {
+  left: 0;
+  right: auto;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group System Overrides */
+
+.stack-messages ul {
+  padding-right: 2em;
+  padding-left: 0;
+}
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+#gardens_ie7 .menu-dropdown .menu li {
+  margin-left: 0.6923em;
+  margin-right: 0;
+  padding-left: 0.6923em;
+  padding-right: 0;
+}
+
+#gardens_ie7 .menu-dropdown .pulldown-processed > .expanded > a {
+  padding: 5px 10px 4px 26px;
+}
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */
+

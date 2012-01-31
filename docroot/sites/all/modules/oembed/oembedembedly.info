@@ -1,0 +1,11 @@
+package = oEmbed
+name = oEmbed Embed.ly
+description = Provides definitions for all of Embed.ly:s providers
+core = 7.x
+dependencies[] = oembedcore
+; Information added by drupal.org packaging script on 2011-11-20
+version = "7.x-0.1-beta2"
+core = "7.x"
+project = "oembed"
+datestamp = "1321751977"
+

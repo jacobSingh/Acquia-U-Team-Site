@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Flexible blogs module.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function flexible_blogs_enable() {
+  // If the blog entry node type has not been modified from the default, update
+  // it to explain that blog entries can now be used for single, site-wide
+  // blogs in addition to multi-user ones.
+  $blog_type = node_type_load('blog');
+  $blog_default_info = blog_node_info();
+  if ($blog_type->name == $blog_default_info['blog']['name'] && $blog_type->description == $blog_default_info['blog']['description']) {
+    $blog_type->description = _flexible_blogs_blog_entry_description();
+    $blog_type->modified = 1;
+    node_type_save($blog_type);
+  }
+}
+
+/**
+ * Implements hook_disable().
+ */
+function flexible_blogs_disable() {
+  // Restore the original node type description for blog entries, if it has
+  // not been modified from this module's version.
+  $blog_type = node_type_load('blog');
+  if ($blog_type->description == _flexible_blogs_blog_entry_description()) {
+    $blog_default_info = blog_node_info();
+    $blog_type->description = $blog_default_info['blog']['description'];
+    node_type_save($blog_type);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function flexible_blogs_uninstall() {
+  variable_del('flexible_blogs_node_link_type');
+}
+
+/**
+ * Helper function to return our replacement description for blog entries.
+ */
+function _flexible_blogs_blog_entry_description() {
+  return 'Use <em>blog entries</em> for a site-wide or multi-user blog.';
+}
+

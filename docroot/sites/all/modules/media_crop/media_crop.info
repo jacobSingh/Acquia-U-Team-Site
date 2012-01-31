@@ -1,0 +1,13 @@
+name = Media Crop
+description = Adds image cropping to media embed
+core = 7.x
+dependencies[] = media
+dependencies[] = wysiwyg
+dependencies[] = libraries
+
+; Information added by drupal.org packaging script on 2012-01-20
+version = "7.x-1.0-beta3"
+core = "7.x"
+project = "media_crop"
+datestamp = "1327078552"
+

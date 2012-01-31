@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * Implement hook_library_alter().
+ */
+function dialog_contextual_library_alter(&$libraries, $module) {
+  // Add dialog_contextual.js to the page when contextual links are shown. This
+  // will make the contextual links process with a dialog box.
+  if ($module == 'contextual') {
+    $libraries['contextual-links']['dependencies'][] = array('dialog', 'dialog');
+    $libraries['contextual-links']['js'][drupal_get_path('module', 'dialog_contextual') . '/dialog_contextual.js'] = array();
+  }
+}
+
+/**
+ * Implement hook_page_alter().
+ */
+function dialog_contextual_init() {
+  if (isset($_GET['dialog_contextual'])) {
+    dialog_display(TRUE);
+  }
+}

@@ -1,0 +1,10 @@
+name = "Font management"
+description = "Enables access to professional fonts from other services."
+core = 7.x
+
+files[] = font_management.install
+files[] = font_management.module
+files[] = font_management.admin.inc
+files[] = includes/Monotype.inc
+
+version = 7.x-1.x-dev

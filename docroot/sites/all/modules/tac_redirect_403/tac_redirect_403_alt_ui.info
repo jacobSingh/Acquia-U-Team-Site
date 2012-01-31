@@ -1,0 +1,5 @@
+name = Taxonomy Access Redirect 403 Alt UI
+description = Simplifies the UI for Taxonomy Access Redirect 403 when using Taxonomy Access Alt UI
+dependencies[] = tac_alt_ui
+dependencies[] = tac_redirect_403
+core = 7.x

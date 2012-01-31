@@ -1,0 +1,31 @@
+/**
+ * @file
+ * Initial RTL style definition of the Broadway theme for Acquia Gardens.
+ */
+ 
+/* @group Inflections */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu li {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  left: 12px;
+  right: auto;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding-left: 27px;
+  padding-right: 1em;
+}
+
+.menu-dropdown .menu .menu a {
+  padding: 8px 1.1429em;
+}
+
+/* @end */
+
+/* @end */

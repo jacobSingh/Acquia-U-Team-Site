@@ -1,0 +1,16 @@
+; $Id$
+name = Site Verification
+description = "Verifies ownership of a site for use with search engines."
+core = 7.x
+files[] = site_verify.module
+files[] = site_verify.admin.inc
+files[] = site_verify.install
+files[] = site_verify.test
+configure = admin/config/search/verifications
+
+; Information added by drupal.org packaging script on 2011-02-20
+version = "7.x-1.0"
+core = "7.x"
+project = "site_verify"
+datestamp = "1298242613"
+

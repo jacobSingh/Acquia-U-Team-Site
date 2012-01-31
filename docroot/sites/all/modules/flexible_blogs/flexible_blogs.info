@@ -1,0 +1,12 @@
+name = Flexible blogs
+description = Enhances the Blog module with behavior for site-wide and multi-user blogs.
+dependencies[] = blog
+core = 7.x
+configure = admin/config/content/blog
+
+; Information added by drupal.org packaging script on 2011-06-24
+version = "7.x-1.0"
+core = "7.x"
+project = "flexible_blogs"
+datestamp = "1308937915"
+

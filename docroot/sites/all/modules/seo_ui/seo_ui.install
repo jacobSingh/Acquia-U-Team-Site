@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for SEO UI.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function seo_ui_install() {
+  // Set to a larger weight than the component modules that this module affects.
+  // Pathauto has weight=1.
+  db_update('system')
+    ->fields(array('weight' => 2))
+    ->condition('type', 'module')
+    ->condition('name', 'seo_ui')
+    ->execute();
+  // Set the redirect module alias purge ageing policy to six months
+  variable_set('redirect_purge_inactive,', 15552000);
+}
+
+

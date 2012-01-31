@@ -1,0 +1,146 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  options_element.inc,v 1.6 2010/03/29 03:22:11 quicksketch
+#  options_element.info,v 1.2 2010/03/24 23:53:14 quicksketch
+#  options_element.js,v 1.8 2010/03/29 03:22:11 quicksketch
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rus-drupal.ru\n"
+"POT-Creation-Date: 2010-03-31 03:04+0400\n"
+"PO-Revision-Date: 2010-03-31 03:32+0300\n"
+"Last-Translator: Andrey Mikheychik <andrey@armaturich.ru>\n"
+"Language-Team: Rus-Drupal <mail@rus-drupal.ru>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: Russia\n"
+
+#: options_element.inc:56
+msgid "Options"
+msgstr "Варианты выбора"
+
+#: options_element.inc:64
+msgid "Option settings"
+msgstr "Настройки варианта выбора"
+
+#: options_element.inc:99
+msgid "Customize keys"
+msgstr "Модифицировать ключи"
+
+#: options_element.inc:103
+msgid "Customizing the keys will allow you to save one value internally while showing a different option to the user."
+msgstr "Модификация ключей позволит сохранить одно значение внутренним, показывая другое значение пользователю."
+
+#: options_element.inc:110
+msgid "Allow multiple values"
+msgstr "Позволить различные значения"
+
+#: options_element.inc:114
+msgid "Multiple values will let users select multiple items in this list."
+msgstr "Различные значения позволят пользователям выбирать несколько пунктов из списка."
+
+#: options_element.inc:126
+msgid "List options one option per line."
+msgstr "Перечислите варианты выбора по одному варианту в строке."
+
+#: options_element.inc:141
+msgid "Key-value pairs may be specified by separating each option with pipes, such as <em>key|value</em>."
+msgstr "Пары ключ-значение могут быть определены разделением каждого пункта вертикальной чертой, например, <em>key|value</em>."
+
+#: options_element.inc:144
+msgid "If the %toggle field is checked, key-value pairs may be specified by separating each option with pipes, such as <em>key|value</em>."
+msgstr "Если поле %toggle отмечено, то пары ключ-значение могут быть определены разделением каждого пункта с помощью вертикальной черты, например <em>key|value</em>."
+
+#: options_element.inc:147
+msgid "This field requires all specified keys to be integers."
+msgstr "Это поле требует, чтобы все ключи были целочисленными."
+
+#: options_element.inc:154
+msgid "Default value"
+msgstr "Значение по умолчанию"
+
+#: options_element.inc:158
+msgid "Specify the keys that should be selected by default."
+msgstr "Определяет ключ, который должен быть выбран по умолчанию."
+
+#: options_element.inc:161
+msgid "Multiple default values may be specified by separating keys with commas."
+msgstr "Различные значения могут быть определены, указав ключи через запятую."
+
+#: options_element.inc:184
+msgid "The key %key has been used multiple times. Each key must be unique to display properly."
+msgstr "Ключ %key использован несколько раз. Каждый ключ должен быть уникальным, чтобы отображаться правильно."
+
+#: options_element.inc:189
+msgid "The following keys have been used multiple times. Each key must be unique to display properly."
+msgstr "Эти ключи использованы несколько раз. Каждый ключ должен быть уникальным для корректного отображения."
+
+#: options_element.inc:199
+msgid "At least one option must be specified."
+msgstr "Как минимум один вариант выбора должен быть определён."
+
+#: options_element.inc:206
+msgid "The keys for the %title field must be integers."
+msgstr "Ключи для поля %title должны быть целочисленными."
+
+#: options_element.inc:224
+msgid "The %title field supports a maximum of @count options. Please reduce the number of options."
+msgstr "Поле %title поддерживает максимум @count вариантов выбора. Пожалуйста, уменьшите количество вариантов."
+
+#: options_element.info:0
+msgid "Options element"
+msgstr "Элемент вариантов выбора"
+
+#: options_element.info:0
+msgid "A custom form element for entering the options in select lists, radios, or checkboxes."
+msgstr "Специальный элемент формы для ввода вариантов выбор в выпадающих списках, кнопках-переключателях или флаговой кнопки."
+
+#: options_element.js:0
+msgid "Custom keys have been specified in this list. Removing these custom keys may change way data is stored. Are you sure you wish to remove these custom keys?"
+msgstr "Отдельные ключи определяются в этом списке. Удаление этих отдельных ключей может изменить то, как хранятся данные. Вы уверены, что хотите удалить эти ключи?"
+
+#: options_element.js:0
+msgid "Normal entry"
+msgstr "Обычный ввод"
+
+#: options_element.js:0;0
+msgid "Manual entry"
+msgstr "Ввод вручную"
+
+#: options_element.js:0
+msgid "Add new option"
+msgstr "Добавить новый вариант выбора"
+
+#: options_element.js:0
+msgid "Add"
+msgstr "Добавить"
+
+#: options_element.js:0
+msgid "Remove option"
+msgstr "Удалить вариант выбора"
+
+#: options_element.js:0
+msgid "Remove"
+msgstr "Удалить"
+
+#: options_element.js:0
+msgid "Default"
+msgstr "По умолчанию"
+
+#: options_element.js:0
+msgid "Key"
+msgstr "Ключ"
+
+#: options_element.js:0
+msgid "Value"
+msgstr "Значение"
+
+#: options_element.js:0
+msgid "Add item"
+msgstr "Добавить пункт"
+

@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * Enables image styles to be applied to oEmbed thumbnails.
+ */
+
+/**
+ * Implements hook_file_formatter_info().
+ */
+function media_oembed_thumbnail_style_file_formatter_info() {
+  $formatters['media_oembed_thumbnail_style'] = array(
+    'label' => t('oEmbed Thumbnail with Image Style'),
+    'default settings' => array('image_style' => ''),
+    'view callback' => 'media_oembed_thumbnail_style_file_formatter_view',
+    'settings callback' => 'media_oembed_thumbnail_style_file_formatter_settings',
+  );
+  return $formatters;
+}
+
+/**
+ * Implements hook_file_formatter_view().
+ */
+function media_oembed_thumbnail_style_file_formatter_view($file, $display, $langcode) {
+  $scheme = file_uri_scheme($file->uri);
+  if ($scheme == 'oembed') {
+    $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
+    $element = oembedcore_render_cache('oembed_thumbnail', $wrapper->interpolateUrl(), $display['settings']);
+    if ($display['settings']['image_style']) {
+      $element['#theme'] = 'image_style';
+      $element['#style_name'] = $display['settings']['image_style'];
+    }
+    return $element;
+  }
+}
+
+/**
+ * Implements hook_file_formatter_settings().
+ */
+function media_oembed_thumbnail_style_file_formatter_settings($form, &$form_state, $settings) {
+  $element = array();
+  $element['image_style'] = array(
+    '#title' => t('Image style'),
+    '#type' => 'select',
+    '#options' => image_style_options(FALSE),
+    '#default_value' => $settings['image_style'],
+    '#empty_option' => t('None (unmodified oEmbed thumbnail)'),
+  );
+  return $element;
+}

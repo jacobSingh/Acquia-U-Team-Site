@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ *   Gardens Fixed Feedback link
+ */
+
+/**
+ * Implements hook_page_build().
+ */
+function feedback_page_build(&$page) {
+  $page['page_bottom']['feedback_block'] = array(
+    '#markup' => '<div id="block-feedback-feedback"><div class="content">' . l(t('Feedback'), 'contact') . '</div></div>',
+    '#attached' => array(
+      'css' => array(drupal_get_path('module', 'feedback') . '/feedback.css'),
+    ),
+  );
+}

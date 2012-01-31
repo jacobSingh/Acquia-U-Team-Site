@@ -1,0 +1,34 @@
+<?php
+/**
+ * @file
+ * Allow users to log in using their email address. Functionality from the
+ * logintoboggan module (http://drupal.org/project/logintoboggan).
+ */
+
+/**
+ * Implement hook_form_alter().
+ */
+function logintoboggan_email_login_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    case 'user_login':
+    case 'user_login_block':
+      // Ensure a valid validate array.
+      $form['#validate'] = is_array($form['#validate']) ? $form['#validate'] : array();
+      // Our validation function must run first.
+      array_unshift($form['#validate'],'logintoboggan_email_login_user_login_validate');
+      break;
+  }
+}
+
+/**
+ * Custom validation handler for user login forms.
+ */
+function logintoboggan_email_login_user_login_validate($form, &$form_state) {
+  if (isset($form_state['values']['name']) && $form_state['values']['name']) {
+    if ($name = db_query("SELECT name FROM {users} WHERE LOWER(mail) = LOWER(:name)", array(
+      ':name' => $form_state['values']['name'],
+    ))->fetchField()) {
+      form_set_value($form['name'], $name, $form_state);
+    }
+  }
+}

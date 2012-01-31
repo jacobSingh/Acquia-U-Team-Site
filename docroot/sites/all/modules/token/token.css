@@ -1,0 +1,26 @@
+
+.token-tree {
+  font-size: 0.85em;
+}
+
+.token-tree td, .token-tree th {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.token-tree tr .token-name {
+  padding-left: 25px;
+}
+
+.token-group {
+  font-weight: bold;
+}
+
+.js .token-group {
+  font-weight: normal;
+}
+
+/* Prevent the token columns from being wrapped. */
+.token-tree td.token-key {
+  white-space: nowrap;
+}

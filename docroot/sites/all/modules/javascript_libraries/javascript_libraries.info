@@ -1,0 +1,20 @@
+name = JavaScript libraries
+description = Enhance your site's functionality or appearance with custom JavaScript libraries.
+core = 7.x
+
+dependencies[] = file
+
+files[] = javascript_libraries.test
+
+configure = admin/config/system/javascript-libraries
+
+; Temporarily on dev
+version = "7.x-1.x"
+
+
+; Information added by drupal.org packaging script on 2011-12-20
+version = "7.x-1.0-rc3"
+core = "7.x"
+project = "javascript_libraries"
+datestamp = "1324404340"
+

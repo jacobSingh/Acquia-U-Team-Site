@@ -1,0 +1,13 @@
+name = Dialog User
+description = Provides dialog integration to the user module.
+core = 7.x
+package = User interface
+files[] = dialog_user.module
+dependencies[] = dialog
+
+; Information added by drupal.org packaging script on 2011-08-26
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "dialog"
+datestamp = "1303704000"
+

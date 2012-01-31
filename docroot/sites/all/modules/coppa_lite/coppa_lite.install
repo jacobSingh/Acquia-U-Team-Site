@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Installation file for COPPA Lite Module
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function coppa_lite_uninstall() {
+  // Remove  variables.
+  variable_del('coppa_lite_field');
+  variable_del('coppa_lite_min_age');
+  variable_del('coppa_lite_cookie_expire');
+}
+
+/**
+ * Implements hook_enable()
+ */
+function coppa_lite_enable() {
+  // If there are no date fields on the user entity
+  if (!coppa_lite_get_required_date_fields()) {
+    coppa_lite_create_field(); // Create our field
+  }
+
+  $url = 'admin/config/people/coppa_lite';
+  drupal_set_message(t('The COPPA Lite module has been enabled please visit the !link.page to make configuration changes.', array('!link' => l('settings', $url))));
+}
+
+/**
+ * Implements hook_disable()
+ */
+function coppa_lite_disable() {
+  // Remove our instance of the dob field
+  $instance = field_info_instance('user', 'field_coppa_lite_dob', 'user');
+  if ($instance) {
+    field_delete_instance($instance);
+  }
+}

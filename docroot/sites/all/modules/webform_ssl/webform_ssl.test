@@ -1,0 +1,206 @@
+<?php
+
+/**
+ * @file
+ * Tests for the Webform SSL module.
+ */
+
+class WebformSSLTestCase extends DrupalWebTestCase {
+  protected $profile = 'testing';
+  protected $webform_node;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Webform SSL',
+      'description' => 'Tests that webforms are correctly forced to use SSL.',
+      'group' => 'Webform SSL',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('securepages', 'webform_ssl', 'webform', 'block');
+    variable_set('https', TRUE);
+    variable_set('securepages_enable', TRUE);
+    $this->webform_node = $this->drupalCreateNode(array('type' => 'webform'));
+  }
+
+  /**
+   * Performs basic tests of the Webform SSL functionality.
+   */
+  function testWebformSSL() {
+    // We want to test the case where Webforms are secure but no other pages
+    // are, so configure the Secure Pages module to support that. Note that
+    // this variable is deliberately set to a blank space rather than an empty
+    // string (to work around http://drupal.org/node/566632).
+    variable_set('securepages_pages', ' ');
+
+    // Run the standard tests.
+    $this->_testWebformSSLHelper();
+  }
+
+  /**
+   * Tests that webforms are protected even if Secure Pages is configured to ignore them.
+   */
+  function testSecurePagesIgnore() {
+    // Ignore all pages associated with the webform node.
+    variable_set('securepages_ignore', "node/{$this->webform_node->nid}\nnode/{$this->webform_node->nid}/*");
+
+    // See comment in testWebformSSL().
+    variable_set('securepages_pages', ' ');
+
+    // Run the standard tests.
+    $this->_testWebformSSLHelper();
+  }
+
+  /**
+   * Tests that webforms are protected even if Secure Pages is configured to unprotect them.
+   */
+  function testSecurePagesSetInsecure() {
+    // Unprotect all pages associated with the webform node. (Note that we need
+    // to unprotect some other pages too, since the test is written to assume
+    // most of the site is not under HTTPS. However, that should not affect the
+    // integrity of what we are actually trying to test here.)
+    variable_set('securepages_secure', 0);
+    variable_set('securepages_pages', "node/{$this->webform_node->nid}\nnode/{$this->webform_node->nid}/*\nadmin\nadmin/*\nnode\nuser\nuser/*");
+
+    // Run the standard tests.
+    $this->_testWebformSSLHelper();
+  }
+
+  /**
+   * Performs basic tests of the Webform SSL functionality.
+   */
+  function _testWebformSSLHelper() {
+    // Configure the Secure Pages module to redirect back to insecure pages
+    // when it can, since that assumption is made throughout the tests below.
+    variable_set('securepages_switch', TRUE);
+
+    // Create an admin user who can perform necessary tasks in this test.
+    $admin_user = $this->drupalCreateUser(array('administer blocks', 'bypass node access'));
+
+    // Test the webform node. Since it has no form components to start with, it
+    // should not be forced to use HTTPS.
+    $node = $this->webform_node;
+    $this->drupalGet('node/' . $node->nid, array('https' => FALSE));
+    $this->assertUrl(url('node/' . $node->nid, array('https' => FALSE)));
+
+    // As the admin user, add a webform component.
+    $this->drupalLogin($admin_user);
+    $edit = array(
+      'add[name]' => $this->randomName(),
+      'add[type]' => 'textfield',
+    );
+    $this->drupalPost('node/' . $node->nid . '/webform', $edit, t('Add'));
+    $this->drupalPost(NULL, array(), t('Save component'));
+
+    // Ensure that an anonymous user is directed to the HTTPS version of the
+    // webform.
+    $this->drupalLogout();
+    $this->drupalGet('node/' . $node->nid, array('https' => FALSE));
+    $this->assertUrl(url('node/' . $node->nid, array('https' => TRUE, 'query' => array('wssl' => 1))));
+
+    // Ensure that the webform is submitted securely and redirects to a secure
+    // page after it is submitted.
+    $this->assertFieldByXPath('//form[@class="webform-client-form" and starts-with(@action, "https:")]', NULL, 'The webform client form action uses HTTPS.');
+    $this->drupalPost(NULL, array(), t('Submit'));
+    $sid = db_query("SELECT MAX(sid) FROM {webform_submissions}")->fetchField();
+    $this->assertUrl(url('node/' . $node->nid . '/done', array('https' => TRUE, 'query' => array('sid' => $sid, 'wssl' => 1))));
+
+    // Ensure that the front page of the site is not forced to use HTTPS.
+    $this->drupalGet('node', array('https' => FALSE));
+    $this->assertUrl(url('node', array('https' => FALSE)));
+
+    // Modify the webform so that it redirects to the front page after it is
+    // submitted, with a custom confirmation message. Also enable the block
+    // associated with this webform, so we can use it later.
+    $this->drupalLogin($admin_user);
+    $edit = array(
+      'confirmation[value]' => 'Example confirmation message',
+      'redirect' => 'url',
+      'redirect_url' => 'node',
+      'block' => TRUE,
+    );
+    $this->drupalPost('node/' . $node->nid . '/webform/configure', $edit, t('Save configuration'));
+
+    // As an anonymous user, check once again that HTTPS is used throughout the
+    // process of submitting the form.
+    $this->drupalLogout();
+    $this->drupalGet('node/' . $node->nid, array('https' => FALSE));
+    $this->assertUrl(url('node/' . $node->nid, array('https' => TRUE, 'query' => array('wssl' => 1))));
+    $this->assertFieldByXPath('//form[@class="webform-client-form" and starts-with(@action, "https:")]', NULL, 'The webform client form action uses HTTPS.');
+    $this->drupalPost(NULL, array(), t('Submit'));
+    $sid = db_query("SELECT MAX(sid) FROM {webform_submissions}")->fetchField();
+    $this->assertUrl(url('node', array('https' => TRUE, 'query' => array('sid' => $sid, 'wssl' => 1))));
+    // Make sure that the confirmation message is properly displayed (e.g.,
+    // that it wasn't eaten when sessions were switching between HTTP and
+    // HTTPS).
+    $this->assertText('Example confirmation message');
+
+    // Make sure that visiting the front page of the site directly still does
+    // not force HTTPS to be used.
+    $this->drupalGet('node', array('https' => FALSE));
+    $this->assertUrl(url('node', array('https' => FALSE)));
+
+    // Make sure that the user page is not forced to use HTTPS.
+    $this->drupalGet('user', array('https' => FALSE));
+    $this->assertUrl(url('user', array('https' => FALSE)));
+
+    // Set the webform block to appear only on the user page. We need to visit
+    // admin/structure/block first to work around an obscure core bug; if we
+    // haven't visited there after enabling the webform block above, the block
+    // won't be recorded in the database correctly, so we won't be able to edit
+    // some of its properties.
+    $this->drupalLogin($admin_user);
+    $this->drupalGet('admin/structure/block');
+    $default_theme = variable_get('theme_default', 'bartik');
+    $edit = array(
+      "regions[$default_theme]" => 'content',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'user',
+    );
+    $this->drupalPost("admin/structure/block/manage/webform/client-block-{$node->nid}/configure", $edit, t('Save block'));
+
+    // As an anonymous user, verify that the user page now uses HTTPS, submit
+    // the webform from the block that is placed there, and verify that HTTPS
+    // is used throughout.
+    $this->drupalLogout();
+    $this->drupalGet('user', array('https' => FALSE));
+    $this->assertUrl(url('user', array('https' => TRUE, 'query' => array('wssl' => 1))));
+    $this->assertFieldByXPath('//form[@class="webform-client-form" and starts-with(@action, "https:")]', NULL, 'The webform client form action uses HTTPS.');
+    $this->drupalPost(NULL, array(), t('Submit'));
+    $sid = db_query("SELECT MAX(sid) FROM {webform_submissions}")->fetchField();
+    $this->assertUrl(url('node', array('https' => TRUE, 'query' => array('sid' => $sid, 'wssl' => 1))));
+    // Make sure that the confirmation message is properly displayed (e.g.,
+    // that it wasn't eaten when sessions were switching between HTTP and
+    // HTTPS).
+    $this->assertText('Example confirmation message');
+
+    // Make sure that visiting the front page of the site directly still does
+    // not force HTTPS to be used.
+    $this->drupalGet('node', array('https' => FALSE));
+    $this->assertUrl(url('node', array('https' => FALSE)));
+
+    // Visit a bunch of pages on which we expect the webform results to be
+    // displayed. Make sure all of them use HTTPS.
+    $full_node = node_load($node->nid);
+    $component = reset($full_node->webform['components']);
+    $paths = array(
+      'node/' . $node->nid . '/webform-results',
+      'node/' . $node->nid . '/webform-results/submissions',
+      'node/' . $node->nid . '/webform-results/analysis',
+      'node/' . $node->nid . '/webform-results/analysis/' . $component['cid'],
+      'node/' . $node->nid . '/webform-results/table',
+      'node/' . $node->nid . '/webform-results/download',
+      'node/' . $node->nid . '/submissions',
+      'node/' . $node->nid . '/submission/' . $sid,
+      'node/' . $node->nid . '/submission/' . $sid . '/view',
+      'node/' . $node->nid . '/submission/' . $sid . '/edit',
+      'node/' . $node->nid . '/submission/' . $sid . '/delete',
+      'node/' . $node->nid . '/submission/' . $sid . '/resend',
+    );
+    foreach ($paths as $path) {
+      $this->drupalGet($path, array('https' => FALSE));
+      $this->assertUrl(url($path, array('https' => TRUE, 'query' => array('wssl' => 1))));
+    }
+  }
+}

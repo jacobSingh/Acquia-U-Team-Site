@@ -1,0 +1,7 @@
+/* $Id$ */
+
+.ui-widget-overlay {
+  background: #000;
+  opacity: .50;
+  filter: Alpha(Opacity=50);
+}

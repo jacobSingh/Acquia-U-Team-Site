@@ -1,0 +1,795 @@
+/** 
+* @file
+* Initial style definition of the Broadway theme by Acquia.
+*
+* The font size of all elements is set to 13px in default.css.  
+* All subsequent measurements such as line height, margins and padding are calculated from this 13px font size.
+* The line height is augmented from 18px to 19px for this theme
+*
+* @see default.css
+*/
+
+/* @group HTML Elements */
+
+/* @group Block Elements*/
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* @end */
+
+/* @group Headings */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Georgia,New Century Schoolbook,Nimbus Roman No9 L,serif;
+}
+
+h2 {
+  font-size: 1.3846em; /* 18px */
+  line-height: 1.3333em; /* 24px */
+  margin-top: 1em; /* 18px */
+}
+
+h3 {
+  font-size: 1.0769em; /* 14px */
+  line-height: 1.5em; /* 21px */
+  margin-top: 1.2857em; /* 18px */
+}
+
+h4, h5, h6 {
+  font-size: 0.9231em; /* 12px */
+  line-height: 1.5em; /* 18px */
+  margin-top: 1.5em; /* 18px */
+}
+
+/* @end */
+
+/* @group Tables */
+
+/* @end */
+
+/* @group Inline Elements */
+
+a {
+  text-decoration: underline;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.form-submit {
+  -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+/* @end */
+
+/* @group Typography */
+
+.site-name {
+  font-family: Georgia,New Century Schoolbook,Nimbus Roman No9 L,serif;
+  font-size: 2.7692em; /* 36px */
+  line-height: 1.1667em; /* 42px */
+}
+
+.site-slogan { 
+  font-size: 1.3846em; /* 18px */
+  line-height: 1.3333em; /* 24px */
+}
+
+.wrapper-header a,
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  text-decoration: none;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Stacks */
+
+.wrapper-content  {
+  margin-top: 0;
+}
+
+.wrapper-footer {
+  margin-top: 4.1538em;
+}
+
+.stack-footer-inner h2 {
+  display: none;
+}
+
+/* @end */
+
+/* @group Grid */
+
+/* @end */
+/* @group Regions */
+
+/* @group Header */
+
+.wrapper-header h2 {
+  display: none;
+}
+
+.stack-preheader {
+  border-style: solid;
+  border-width: 0 0 2px;
+}
+
+.stack-preheader {
+  padding-bottom: 0.6923em;
+  padding-top: 0.6923em;
+}
+
+.stack-preheader .menu {
+  padding-top: 0.6923em;
+}
+
+.stack-navigation {
+  margin-top: 2.7692em; 
+}
+
+.stack-header-inner {
+  margin-top: 0.6923em;
+}
+
+.stack-navigation .box {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.stack-navigation .menu li {
+  padding: 0;
+  margin: 0;
+}
+
+.stack-navigation .menu a {
+  display: inline-block;
+  padding: 0.6667em 1.3333em 0.6667em 1.3333em;
+}
+
+/* @end */
+
+/* @group Main */
+
+.stack-content-inner {
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
+.wrapper-content .stack-content-inner {
+  margin-top:  1.3846em;
+  padding-top: 1.3846em;
+}
+
+/* @end */
+
+/* @group Footer */
+
+.wrapper-footer {
+  border-style: solid;
+  border-width: 2px 0 0;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Inflections */
+
+/* @group Block */
+
+.sidebar .block {
+  border-style: solid;
+  border-width: 0 0 1px;
+  padding-bottom: 0.6923em;
+}
+
+.more-link {
+  margin-top: 8px;
+}
+
+/* @end */
+
+/* @group Menu */
+
+.stack-navigation .menu li + li {
+  margin-left:0;
+  padding-left:0;
+}
+
+/* @end */
+
+/* @group Breadcrumb */
+
+.stack-breadcrumb {
+  font-size: 0.9231em;
+}
+
+.stack-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* @end */
+
+/* @group Comments */
+
+.comments {
+  border-style: dotted;
+  border-width: 1px 0 0;
+}
+
+/* @end */
+
+/* @group Links */
+
+.node .links {
+  font-size: 0.9231em;
+}
+
+/* @end */
+
+/* @group Lists */
+
+ul.menu,
+ul.menu ul,
+ul.menu li.expanded,
+ul.menu li.collapsed,
+ul.menu li.leaf {
+  list-style-type: none;
+}
+
+ul.menu li.expanded {
+  list-style-image:url("images/menu-expanded.png");
+}
+
+ul.menu li.collapsed {
+  list-style-image:url("images/menu-collapsed.png");
+}
+
+.menu ul {
+  margin: 0;
+}
+
+.menu li li {
+  background: none;
+  border: medium none;
+  border-style: dotted;
+  border-width: 0 0 1px;
+}
+
+.menu li li li,
+.menu li .last {
+  border:none;
+}
+
+.menu li a {
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.menu li li a {
+  font-weight: normal;
+}
+
+.wrapper-header ul,
+.wrapper-header ul.menu,
+.wrapper-header ul.menu li.expanded,
+.wrapper-header ul.menu li.collapsed {
+  list-style-type: none;
+  list-style-image: none;
+}
+
+.stack-navigation .menu li + li {
+  margin-left: 0;  
+}
+
+.stack-navigation .menu li a {
+  font-weight: normal;
+  font-size: 1.1538em;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu .expanded + li {
+  margin-left: 0;
+}
+
+.menu-dropdown .menu .menu li {
+  border: medium none;
+}
+
+.menu-dropdown .menu .menu .menu {
+  padding-top: 0;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding-right: 27px; /* LTR */
+}
+
+.menu-dropdown .menu .menu a {
+  border-style: solid;
+  border-top-width: 1px;
+  font-size: 13px;
+  line-height: 1.1429em;
+  padding: 8px 1.1429em;
+}
+
+.menu-dropdown .menu .menu .last > a {
+  border-bottom-width: 1px;
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  height: 5px;
+  right: 12px; /* LTR */
+  top: 1.1818em;
+  width: 9px;
+}
+
+.menu-dropdown .menu .menu li > a > .more-indicator {
+  height: 9px;
+  top: 0.8571em;
+  width: 5px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Components */
+
+/* @group Comments */
+
+.comment h3 {
+  font-size: 1.2308em;
+  line-height: 1.3125em;
+}
+
+.comment h3 a {
+  text-decoration: none;
+}
+
+/* @end */
+
+/* @group Forum */
+
+.forum .login span {
+  font-weight: bold;
+}
+
+#forum table thead tr th {
+  border-style: solid;
+  border-width: 1px 0;  
+  font-weight: bold;
+}
+
+.forum table tr td {
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
+.forum table tr:first-child td {
+  border-top: medium none; 
+}
+
+.forum table {
+  border-style: solid;
+  border-width: 0 0 1px;
+}
+
+
+/* @end */
+
+/* @group Node */
+
+.node .meta {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.node-unpublished {
+  background-color: #330000;
+}
+
+/* @end */
+
+/* @group Feedback Link */
+
+#block-feedback-feedback a {
+  border-style: solid;
+  border-width: 1px;
+}
+
+/* @end */
+
+/* @group Rotating Banner */
+
+.stack-banner .block-rotating-banner {
+  display: block;
+  min-width: inherit;
+}
+
+.rotating-banner .rb-slides {
+  border-style: solid;
+  border-width: 10px;
+}
+
+.controls {
+  margin-top: 10px;
+}
+
+/* @end */
+
+/* @group Messages */
+
+.stack-messages a {
+  font-weight: bold;
+}
+
+/* @end */
+
+/* @group FAQ */
+
+.faq-item-question-label {
+  font-family: Georgia,New Century Schoolbook,Nimbus Roman No9 L,serif;
+  font-size: 22px;
+  font-style: italic;
+}
+
+.node-faq-item .faq-item-inline-question-title {
+  margin-top: 4px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group System Overrides */
+
+.stack-messages ul {
+  margin: 0;
+  padding-left: 2em;
+}
+
+/* @end */
+
+/* @group Palette */
+
+/**
+* Colors
+* white    #FFFFFF - White
+* black    #333333 - Charcoal
+* a        #e0db52 - Yellow
+* b        #c2bf70 - Light Blue
+* c        #93a9c0 - Slate Blue
+* d        #aaaaaa - Grey
+* e        #eeeeee - Light Grey
+*/
+
+body {
+  background-color: #333333;
+  color: #ffffff;
+}
+
+#block-feedback-feedback a {
+  background-color: #93a9c0;
+}
+
+.form-submit {
+  background-color: #93a9c0;
+}
+
+.controls.buttons a.activeSlide {
+  background-color: #e0db52;
+}
+
+.form-submit + input {
+  background-color: #eeeeee;
+}
+
+#block-feedback-feedback a:hover {
+  background-color: #aaaaaa;
+}
+
+.rotating-banner .rb-slides {
+  background-color: #aaaaaa;
+}
+
+tr.even td {
+  background-color: #333333;
+}
+
+.rotating-banner .rb-slides {
+  background-color: #333333;
+}
+
+a {
+  color: #93a9c0;
+}
+
+.page-forum .title {
+  color: #93a9c0;
+}
+
+a:hover {
+  color: #aaaaaa;
+}
+
+.site-slogan {
+  color: #aaaaaa;
+}
+
+.node .meta {
+  color: #aaaaaa;
+}
+
+h1 {
+  color: #e0db52;
+}
+
+h2 {
+  color: #e0db52;
+}
+
+h3 {
+  color: #e0db52;
+}
+
+h4 {
+  color: #e0db52;
+}
+
+h5 {
+  color: #e0db52;
+}
+
+h6 {
+  color: #e0db52;
+}
+
+.site-name a {
+  color: #e0db52;
+}
+
+#forum table thead tr th {
+  color: #e0db52;
+}
+ /* System Override */
+.forum table thead tr th a {
+  color: #e0db52;
+}
+
+.comment h3 a {
+  color: #e0db52;
+}
+
+th {
+  color: #93a9c0;
+}
+
+.stack-navigation .menu .active {
+  color: #e0db52;
+}
+
+.tabs ul.primary a {
+  color: #333333;
+}
+
+.stack-messages a {
+  color: #333333;
+}
+
+.rotating-banner {
+  color: #333333;
+}
+
+.form-submit {
+  color: #333333;
+}
+
+li a.active {
+  color: #ffffff;
+}
+
+.stack-navigation a {
+  color: #ffffff;
+}
+
+.stack-navigation a.active {
+  color: #ffffff;
+}
+
+.stack-preheader a.active {
+  color: #ffffff;
+}
+
+.stack-navigation a:hover {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .active-trail > a {
+  color: #e0db52;
+}
+
+.menu-dropdown .menu .active-trail:hover > a {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .menu a {
+  color: #dddddd;
+}
+
+#block-feedback-feedback a {
+  color: #ffffff;
+}
+
+#block-feedback-feedback a {
+  border-color: #ffffff;
+}
+
+.menu li li {
+  border-color: #cccccc;
+}
+
+.wrapper-footer {
+  border-color: #434343;
+}
+
+.sidebar .block {
+  border-color: #434343;
+}
+
+.stack-content-inner {
+  border-color: #434343;
+}
+
+.comments {
+  border-color: #434343;
+}
+
+.stack-preheader {
+  border-color: #434343;
+}
+
+table {
+  border-color: #434343;
+}
+
+td {
+  border-color: #434343;
+}
+
+thead th {
+  border-color: #434343;
+}
+
+tfoot td {
+  border-color: #434343;
+}
+
+.menu li li + li {
+  border-color: #434343;
+}
+
+/* @group Non-palette Colors */
+
+pre {
+  background-color: #3f3f3f;
+}
+
+th {
+  background-color: #ececec;
+}
+
+th.active {
+  background-color: #f6f7f9;  
+}
+
+table tr.even td.active {
+  background-color: #e4e5e9 !important;  
+}
+
+table tr.odd td.active {
+  background-color: #eeeff2 !important;  
+}
+
+#forum table thead tr th { /* System Override */
+  background-color: #222222 !important;
+}
+
+.stack-navigation {
+  background-color: #555555;
+}
+
+.stack-navigation .menu {
+  background-color: #555555;
+}
+
+.stack-navigation .menu a:hover {
+  background-color: #444444;
+}
+
+.menu-dropdown .menu .menu {
+  background-color: #262626;
+}
+
+.menu-dropdown .menu .active-trail:hover > a {
+  background-color: #393939;
+}
+
+.menu-dropdown .menu .expanded:hover > a {
+  background-color: #393939;
+}
+
+.menu-dropdown .menu .menu li:hover > a {
+  background-color: #393939;
+}
+
+.stack-messages {
+  color: #000000;
+}
+
+.stack-messages ul {
+  color: #000000;
+}
+
+.stack-messages ul li {
+  color: #000000;
+}
+
+.stack-breadcrumb {
+  color: #555555;
+}
+
+.stack-breadcrumb a {
+  color: #555555;
+}
+
+.status {
+  color: #222200;
+}
+
+.warning {
+  color: #e09010;
+}
+
+.rotating-banner .rb-slides {
+  border-color: #555555;
+}
+
+.menu-dropdown .menu .menu a {
+  border-color: #999999;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */

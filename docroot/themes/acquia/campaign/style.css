@@ -1,0 +1,1079 @@
+/** 
+* @file
+* Initial style definition of the Campaign theme for Acquia Gardens.
+*
+* The font size of all elements is set to 16px in default.css.  
+* All subsequent measurements such as line height, margins and padding are calculated from this 16px font size.
+*
+* @see default.css
+*/
+
+/* @group HTML Elements */
+
+/* @group Block  */
+
+body { 
+  font-family: "Helvetica Neue" ,Helvetica, Arial, sans-serif;
+}
+
+blockquote {
+  font-family: Georgia, "New Century Schoolbook", "Nimbus Roman No9 L", serif;
+}
+
+ul {
+  list-style-type: square;
+}
+
+ul ul {
+  list-style: disc;
+}
+
+ul ul ul {
+  list-style-type: circle;
+}
+
+/* @end */
+
+/* @group Headings */
+
+h1, h2, h3, h4, h5, h6 { 
+  font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+  font-weight: bold;
+}
+
+h2, h3 { 
+  font-weight: normal;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+  text-decoration: none;
+}
+
+h3 a:hover, h4 a:hover, h5 a:hover, h6 a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  font-size: 2.3077em; /* 30px */
+  line-height: 1.2em; /* 36px */
+  margin-top: 0.4em; /* 12px */
+}
+
+h2 {
+  font-size: 1.6154em; /* 21px */
+  line-height: 1.2857em; /* 27px */
+  margin-top: 0.4286em; /* 9px */
+}
+
+h3 {
+  font-size: 1.3846em; /* 18px */
+  line-height: 1.5em; /* 27px */
+  margin-top: 0.5em; /* 9px */
+}
+
+h4, h5 {
+  font-size: 1.2308em; /* 16px */
+  line-height: 1.3125em; /* 21px */
+  margin-top: 0.59375em; /* 15px */
+}
+
+/* @end */
+
+/* @group Inline */
+
+a:hover {
+  text-decoration: none;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.form-submit {
+  -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+/* @end */
+
+/* @group Typography */
+
+.site-name { 
+  font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
+  font-size: 3.2308em; /* 42px */
+  font-weight: bold;
+  line-height: 1.1429em; /* 48px */
+  margin-top: 0.2857em; /* 12px */
+}
+
+.site-name a,
+.site-name a:hover {
+  text-decoration: none;
+}
+
+.site-slogan { 
+  font-family: Georgia, "New Century Schoolbook", "Nimbus Roman No9 L", serif;
+  font-size: 1.4615em; /* 19px */
+  margin-top: 0.3158em; /* 6px */
+  line-height: normal;
+}
+
+.logo {
+  float: left; 
+}
+
+.stack-navigation .menu li {
+  font-size: 18px;
+}
+
+table h2 {
+  font-size: 18px;
+}
+
+.wrapper-header h2 {
+  display: none;
+}
+
+.sidebar .block h2 {
+  padding-bottom: 3px;
+  background-image: url(images/block-header-detail.png);
+  background-position: right bottom;
+  background-repeat: no-repeat;
+}
+
+.sidebar .content h2 {
+  padding-bottom: 0;
+  background-image: none;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Wrappers */
+
+.page {
+  width: auto;
+}
+
+.page .lining {
+  min-height: 970px;
+  padding-top: 18px;
+}
+
+.wrapper-content {
+  margin-top: 36px;
+}
+
+.wrapper-content .deco + .stack-breadcrumb {
+  padding-top: 0.3077em;
+}
+
+.wrapper-footer {
+  margin-top: 10px;
+}
+ 
+.stack-breadcrumb + .stack {
+  padding-top: 0.6923em;
+}
+ 
+.stack-content-inner {
+  min-height: 400px;
+  padding-bottom: 36px;
+}
+
+.deco {
+  display: block;
+}
+
+.deco-page-top .layer-a {
+  background-image: url("images/campaign-header.png");
+  background-repeat: repeat-x;
+  background-position: top;
+  height: 426px;
+}
+
+.deco-page-bottom .layer-a {
+  background-image:url("images/footer.png");
+  background-position:center top;
+  background-repeat:repeat-x;
+  height:773px;
+  position: relative;
+  top:150px;
+}
+
+.deco-content-top .layer-a {
+  background-image: url("images/content-background-left.png");
+  background-position: top left;
+  background-repeat: no-repeat;
+  height: 365px;
+  left: -10px;
+  top: -10px;
+  width: 20px;
+}
+
+.deco-content-top .layer-b {
+  background-image: url("images/content-background-right.png");
+  background-position: top right;
+  background-repeat: no-repeat;
+  height: 365px;
+  left: 10px;
+  right: 0;
+  top: -10px;
+}
+
+.deco-content-bottom .layer-a {
+  background-image: url("images/content-background-bottom-left.png");
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  bottom: -10px;
+  height: 365px;
+  left: -10px;
+  width: 20px;
+}
+
+.deco-content-bottom .layer-b {
+  background-image: url("images/content-background-bottom-right.png");
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  bottom: -10px;
+  height: 365px;
+  left: 10px;
+  right: 0;
+}
+
+/* @end */
+
+/* @group Stacks */
+
+.stack-navigation {
+  margin-top: 16px;
+}
+
+.wrapper-content .stack-banner {
+  padding: 1em;
+  width: auto;
+}
+
+/* @end */
+
+/* @group Grid */
+
+.sidebar {
+  width: 24%;
+}
+
+.sidebar .region {
+  padding-top: 0.6154em;
+}
+
+.front .sidebar .region {
+  padding-top: 0;
+}
+
+.sidebar.left {
+  border-style: dotted;
+  border-width: 0 1px 0 0; /* LTR */
+  margin-right: 1.3333%; /* LTR */
+}
+
+.sidebar.right {
+  border-style: dotted;
+  border-width: 0 0 0 1px; /* LTR */
+  margin-left: 1.3333%; /* LTR */
+}
+
+/* @end */
+
+/* @group Regions */
+
+.region-preheader-second {
+  padding-top: 0.6923em;
+}
+
+/* @end */
+
+/* @group Inflections */
+
+/* @group Breadcrumb */
+
+.stack-breadcrumb {
+  padding-top: 1.2308em;
+}
+
+/* @end */
+
+/* @group Comments */
+
+.comment-wrapper h2,
+.comment-new-form .title,
+.comment {
+  border-top: 1px solid #999999;
+}
+
+.comment-wrapper h2 {
+  padding-top: 0.6923em;
+}
+
+.comment .links {
+  border-top: 1px solid #999999;
+}
+
+/* @end */
+
+/* @group Lists */
+
+ul.menu,
+ul.menu ul,
+ul.menu li.expanded,
+ul.menu li.collapsed,
+ul.menu li.leaf {
+  list-style-type: none;
+}
+
+ul.menu li.expanded {
+  list-style-image:url("images/menu-expanded.png");
+}
+
+ul.menu li.collapsed {
+  list-style-image:url("images/menu-collapsed.png");
+}
+
+ul.menu ul {
+
+}
+
+ul.menu ul ul {
+
+}
+
+.action-links {
+  list-style-image: url(images/new-plus.png);
+  font-weight: bold;
+  padding-left: 1.4615em;
+}
+
+.wrapper-header ul,
+.wrapper-header ul.menu,
+.wrapper-header ul.menu li.expanded,
+.wrapper-header ul.menu li.collapsed {
+  list-style-type: none;
+  list-style-image: none;
+}
+
+/* @end */
+
+/* @group Messages */
+
+.stack-messages a {
+  font-weight: bold;
+}
+
+/* @end */
+
+/* @group Tabs */
+
+ul.primary {
+  white-space: normal;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu .expanded + li {
+  margin-left: 0;
+}
+
+.menu-dropdown .menu .menu {
+  -moz-border-radius-bottomleft: 6px;
+  -moz-border-radius-bottomright: 6px;
+  -o-border-bottom-left-radius: 6px;
+  -o-border-bottom-right-radius: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -webkit-border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-style: solid;
+  border-width: 2px;
+  padding-top: 1em;
+  top: 20px;
+}
+
+.menu-dropdown .menu .menu .menu {
+  -moz-border-radius: 6px;
+  -o-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  border-width: 2px;
+  top: -20px;
+}
+
+.menu-dropdown .menu .expanded {
+  padding-left: 0;
+}
+
+.menu-dropdown .menu .expanded a {
+  border-color: transparent;
+  border-style: solid;
+  -moz-border-radius-topleft: 6px;
+  -moz-border-radius-topright: 6px;
+  -o-border-top-left-radius: 6px;
+  -o-border-top-right-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-width: 2px 2px 0 2px;
+  padding: 3px 26px 2px 10px;
+  position: relative;
+  z-index: 250;
+}
+
+.menu-dropdown .content > .menu > .expanded > a {
+  height: 18px;
+  margin-top: -5px;
+  padding-bottom: 4px;
+}
+      
+.menu-dropdown .menu .menu a {
+  font-size: 0.8333em;
+  padding: 0 15px 1em 10px; /* LTR */
+}
+
+.menu-dropdown .menu .menu .active:hover {
+  cursor: default;
+}
+
+.menu-dropdown .menu .menu li a {
+  border: medium none;
+  z-index: 1;
+}
+
+.menu-dropdown .more-indicator {
+  right: 0; /* LTR */
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  height: 5px;
+  right: 9px; /* LTR */
+  top: 0.6667em;
+  width: 9px;
+  z-index: 250;
+}
+
+.menu-dropdown .menu .menu li > a > .more-indicator {
+  height: 9px;
+  top: 0.25em;
+  width: 5px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Components */
+
+/* @group Aggregator */
+
+.block-aggregator ul {
+  list-style: none;
+  padding: 0;
+}
+
+.block-aggregator ul li {
+  border-bottom: 1px dotted;
+  padding: 0.5em;
+}
+
+.block-aggregator ul li.first {
+  padding-top: 0;
+}
+
+/* @end */
+
+/* @group FAQ */
+
+.page-faq #page-title {
+  margin-bottom: 24px;
+}
+
+.node-faq-item + .node-faq-item {
+  margin-top: 14px;
+}
+
+.faq-item-question-label {
+  -moz-border-radius: 6px;
+  -o-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+  float: left;
+  font-family: Georgia,New Century Schoolbook,Nimbus Roman No9 L,serif;
+  font-size: 22px;
+  font-style: italic;
+  line-height: 0.8em;
+  margin: 0 .5em 0 0;
+}
+
+.faq-item-inline-question-title {
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.node-faq-item .content {
+}
+
+.node-faq-item .content p:first-child {
+  margin-top: 0;
+}
+
+.float-overflow {
+  overflow: hidden;
+}
+
+/* @end */
+
+/* @group Feedback Link */
+
+#block-feedback-feedback a {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* @end */
+
+/* @group Testimonials */
+
+.block .node-testimonial .content {
+  display: inline-block;
+  width: 100%;
+}
+
+.block .node-testimonial .field-name-body p {
+  margin-bottom: 0;
+}
+
+.field-name-field-testimonial-author,
+.field-name-field-testimonial-affiliation {
+  float: right;
+  margin-left: 0.3em;
+}
+
+/* @end */
+
+/* @group Product Feature */
+
+#precontent .block h2,
+#precontent .block p {
+  margin-top: 0;
+}
+
+#precontent .block .field-type-file {
+  float: left;
+  line-height: 0;
+  margin-right: 10px;
+}
+
+/* @end */
+
+
+/* @group Nodes */
+
+.node .meta .submitted .date {
+  font-family: Georgia, "New Century Schoolbook", "Nimbus Roman No9 L", serif;
+  font-style: italic;
+}
+
+.node .meta .submitted .username {
+  font-weight: bold;
+}
+
+.node .links {
+  font-size: 0.9231em;
+}
+
+.sidebar .node-customer {
+  margin-top: 0.6923em;
+}
+  
+/* @end */
+
+/* @group forum */
+
+th {
+  border-bottom: medium none;
+  border-style: dotted;
+  border-width: 0 1px 0 0; /* LTR */
+  font-size: 14px;
+  font-weight: bold;
+}
+
+th:last-child { /* Doesn't work in IE */
+  border-right: medium none;
+}
+
+td {
+  border-top-style: dotted;
+  border-top-width: 1px;
+}
+
+#forum tr td.forum { /* This has to be this specific to override forum.css - JB */
+  padding-left: 34px;
+  background-position: 4px 3px;
+}
+
+.forum .name {
+  font-weight: bold;
+}
+
+/* @end */
+
+/* @group Banner */
+
+.rotating-banner {
+  background-repeat: no-repeat;
+}
+
+.rotating-banner p {
+  margin-top: 0;
+}
+
+/* @end */
+
+/* @group Webform */
+
+.webform-client-form input {
+  /* Chosen so it fits on a page with a three column layout */
+  max-width: 32em;
+}
+
+.webform-client-form .webform-container-inline input {
+  /* Chosen as above, but also taking into account the inline label width */
+  max-width: 23em;
+}
+
+.webform-client-form fieldset input {
+  /* Chosen so it fits within a fieldset on a page with a three column layout */
+  max-width: 30em;
+}
+
+.webform-client-form fieldset .webform-container-inline input {
+  /* Chosen as above, but also taking into account the inline label width */
+  max-width: 22em;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group System Overrides */
+
+.stack-messages,
+.stack-messages ul,
+.stack-messages ul li {
+  color: #000;
+}
+
+.stack-messages ul {
+  margin: 0;
+  padding-left: 2em;
+}
+
+/* @end */
+
+/* @group Palette */
+
+/**
+* Colors
+* white    #ffffff - White
+* black    #212121 - Charcoal
+* a        #a42470 - Dark Purple
+* b        #444444 - Purple
+* c        #cd1069 - Light Purple
+* d        #e1267c - Light Blue
+* e        #4dabf5 - Dark Gray
+*/
+
+body {
+  color: #444444;
+}
+
+body {
+  background-color: #FFFFFF;
+}
+
+.wrapper-content .stack {
+  background-color: #FFFFFF;
+}
+
+#block-feedback-feedback a {
+  background-color: #cd1069;
+}
+
+#block-feedback-feedback a:hover {
+  background-color: #444444;
+}
+
+.form-submit {
+  background-color: #ffffff;
+}
+
+.deco-page-top .layer-a {
+  background-color: #a42470;
+}
+
+.controls.buttons a.activeSlide {
+  background-color: #e1267c;
+}
+
+.stack-navigation .menu .expanded:hover a {
+  background-color: #ffffff;
+}
+
+.stack-navigation .menu .expanded:hover li a {
+  background-color: transparent;
+}
+
+.stack-navigation .menu .menu {
+  background-color: #ffffff;
+}
+
+a {
+  color: #a42470;
+}
+
+a:link {
+  color: #a42470;
+}
+
+a:visited {
+  color: #a42470;
+}
+
+.node-faq-item h2.faq-item-inline-question-title a:active {
+  color: #a42470;
+}
+
+a:hover {
+  color: #444444;
+}
+
+a:focus {
+  color: #444444;
+}
+
+a:active {
+  color: #444444;
+}
+
+.active {
+  color: #444444;
+}
+
+li a.active {
+  color: #444444;
+}
+
+.stack-breadcrumb a {
+  color: #444444;
+}
+
+.stack-breadcrumb a:link {
+  color: #444444;
+}
+
+.stack-breadcrumb a:visited {
+  color: #444444;
+}
+
+.stack-breadcrumb a:hover {
+  color: #444444;
+}
+
+.stack-breadcrumb a:focus {
+  color: #444444;
+}
+
+.stack-breadcrumb a:active {
+  color: #444444;
+}
+
+.stack-messages a {
+  color: #444444;
+}
+
+.stack-messages a:link {
+  color: #444444;
+}
+
+.stack-messages a:visited {
+  color: #444444;
+}
+
+.wrapper-header {
+  color: #ffffff;
+}
+
+.wrapper-header a {
+  color: #ffffff;
+}
+
+.wrapper-header a:visited {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .expanded:hover > a {
+  color: #cd1069;
+}
+
+.menu-dropdown .menu .active-trail > a {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .active-trail:hover > a {
+  color: #cd1069;
+}
+
+.menu-dropdown .menu .menu a {
+  color: #212121;
+}
+
+.menu-dropdown .menu .menu a:visited {
+  color: #212121;
+}
+
+.menu-dropdown .menu .menu a:focus {
+  color: #212121;
+}
+
+.menu-dropdown .menu .menu a:active {
+  color: #a42470;
+}
+
+.menu-dropdown .menu .menu li:hover > a {
+  color: #cd1069;
+}
+
+.menu-dropdown .menu .menu a.active {
+  color: #a42470;
+}
+
+.menu-dropdown .menu .menu li:hover > a.active {
+  color: #cd1069;
+}
+
+.menu-dropdown .menu .menu .active-trail > a {
+  color: #a42470;
+}
+
+.menu-dropdown .menu .menu .active-trail:hover > a {
+  color: #cd1069;
+}
+
+.site-name {
+  color: #ffffff;
+}
+
+.site-slogan {
+  color: #ffffff;
+}
+
+.wrapper-footer {
+  color: #ffffff;
+}
+
+.wrapper-footer h2 {
+  color: #ffffff;
+}
+
+.wrapper-footer h3 {
+  color: #ffffff;
+}
+
+.wrapper-footer a {
+  color: #ffffff;
+}
+
+.wrapper-footer a:link {
+  color: #ffffff;
+}
+
+.wrapper-footer a:visited {
+  color: #ffffff;
+}
+
+#block-feedback-feedback a {
+  color: #ffffff;
+}
+
+.wrapper-header a {
+  color: #ffffff;
+}
+
+.wrapper-header a:hover {
+  color: #ffffff;
+}
+
+.wrapper-header a:focus {
+  color: #ffffff;
+}
+
+.wrapper-header a:active {
+  color: #ffffff;
+}
+
+.wrapper-header a.active {
+  color: #ffffff;
+}
+
+.stack-navigation a {
+  color: #e1267c;
+}
+
+.stack-navigation a:visited {
+  color: #e1267c;
+}
+
+.stack-navigation a:hover {
+  color: #ffffff;
+}
+
+.stack-navigation a:focus {
+  color: #ffffff;
+}
+
+.stack-navigation a:active {
+  color: #ffffff;
+}
+
+.stack-navigation a.active {
+  color: #ffffff;
+}
+
+h1 {
+  color: #212121;
+}
+
+h5 {
+  color: #212121;
+}
+
+h6 {
+  color: #212121;
+}
+
+fieldset legend {
+  color: #212121;
+}
+
+fieldset label {
+  color: #212121;
+}
+
+.form-submit {
+  color: #212121;
+}
+
+h2 {
+  color: #cd1069;
+}
+
+.sidebar h2 { 
+  color: #4dabf5;
+}
+
+.wrapper-footer h2 { 
+  color: #4dabf5;
+}
+
+h3 { 
+  color: #4dabf5;
+}
+
+h4 { 
+  color: #4dabf5;
+}
+
+.menu-dropdown .menu .menu {
+  border-color: #cd1069;
+}
+
+.menu-dropdown .menu .expanded:hover > a {
+  border-color: #cd1069;
+}
+
+/* @group Non-palette Colors */
+
+.sidebar.left {
+  border-color: #999999;
+}
+
+.sidebar.right {
+  border-color: #999999;
+}
+
+th {
+  border-color: #cccccc;
+}
+
+td {
+  border-top-color: #cccccc;
+}
+
+th.active {
+  background-color: #F6F7F9;  
+}
+
+tr.even td {
+  background-color: #f9f9f9;
+}
+
+table tbody tr.even td.active {
+  background-color: #e4e5e9 !important;  
+}
+
+table tbody tr.odd td.active {
+  background-color: #eeeff2 !important;  
+}
+
+#block-feedback-feedback a {
+  border-color: #ffffff;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+#gardens_ie7 .wrapper-content {
+  min-height: 650px;
+}
+
+#gardens_ie7 .item-list ul li {
+  list-style-type: square;
+}
+
+#gardens_ie7 hr {
+  width: 100%;
+}
+
+#gardens_ie7 .sidebar h2 {
+  display: inline-block;
+}
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */

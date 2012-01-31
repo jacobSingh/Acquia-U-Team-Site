@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for Pathauto Live Preview.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function pathauto_live_preview_install() {
+  // Set to the same weight as Pathauto.
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('type', 'module')
+    ->condition('name', 'pathauto_live_preview')
+    ->execute();
+}

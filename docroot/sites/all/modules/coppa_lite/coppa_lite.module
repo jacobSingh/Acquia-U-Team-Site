@@ -1,0 +1,252 @@
+<?php
+
+/**
+ * @file
+ * Basic COPPA compliance for user registration
+ */
+
+/**
+ * Implements hook_menu()
+ */
+function coppa_lite_menu() {
+  $items = array();
+  $items['admin/config/people/coppa_lite'] = array(
+    'title' => 'COPPA configuration',
+    'description' => 'Adjust settings for COPPA compliance.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('coppa_lite_admin_form'),
+    'access arguments' => array('administer users'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Get all required date fields for an entity
+ */
+function coppa_lite_get_required_date_fields() {
+  // Get all the fields belonging to the user entity
+  $fields = field_info_instances('user', 'user');
+  $result = array();
+
+  // Initialize the array of all our date fields
+  foreach ($fields as $field) {
+    if ($field['widget']['module'] == 'date' && $field['required']) {
+      $result[$field['field_name']] = $field['label'];
+    }
+  }
+
+  if (count($result)) {
+    return $result;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * The COPPA Lite administration form
+ */
+function coppa_lite_admin_form() {
+  $options = array();
+  $form = array();
+  $fields = coppa_lite_get_required_date_fields();
+
+  // Initialize the array of all our date fields\
+  if ($fields) {
+    foreach ($fields as $field_name => $field_label) {
+      $options[$field_name] = $field_label . " (" . $field_name . ")";
+    }
+  }
+
+  // If our field does not exist add create new field option
+  if (!isset($options['field_coppa_lite_dob'])) {
+    $options['coppa_lite_create'] = t('Create new field');
+  }
+
+  // Create the radio buttons
+  $form['fields'] = array(
+    '#type' => 'radios',
+    '#title' => t('Fields'),
+    '#options' => $options,
+    '#required' => TRUE,
+    '#default_value' => variable_get('coppa_lite_field', ''),
+    '#description' => t('Select the field you wish to use as your COPPA date of birth. Only fields marked as <strong>Required</strong> will show on this list.'),
+  );
+
+  // Form Submit
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
+
+  return $form;
+}
+
+/**
+ * Submit handler for the coppa_lite_admin_form
+ */
+function coppa_lite_admin_form_submit($form, &$form_state) {
+  if ($form_state['values']['fields'] != variable_get('coppa_lite_field')) {
+    $url = 'admin/config/people/accounts/fields';
+    drupal_set_message(t('You have changed the field you wish to use for checking COPPA compliance. Please ensure you do not have any unnecessary fields in your user profile by visiting the !link page', array('!link' => l('manage fields', $url))));
+  }
+
+  // Check if the user is creating a new field or assigning an existing field
+  if ($form_state['values']['fields'] == 'coppa_lite_create')  {
+    coppa_lite_create_field();
+    drupal_set_message("The COPPA date of birth field has been created and assigned for use.");
+  }
+  elseif ($form_state['values']['fields']) {
+    variable_set('coppa_lite_field', $form_state['values']['fields']);
+    drupal_set_message("Saved");
+  }
+}
+
+/**
+ * Programatically create a field (field_coppa_lite_dob) on the User entity
+ */
+function coppa_lite_create_field() {
+  // Check if our field is not already created.
+  if (!field_info_field('field_coppa_lite_dob')) {
+    $field = array(
+      'field_name' => 'field_coppa_lite_dob',
+      'type' => 'datetime',
+      'settings' => array(
+        'todate' => '',
+        'repeat' => 0,
+        'granularity' => drupal_map_assoc(array('year', 'month', 'day')),
+      ),
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'field_coppa_lite_dob',
+      'entity_type' => 'user',
+      'label' => 'Date of Birth',
+      'bundle' => 'user',
+      'required' => TRUE,
+      'settings' => array(
+          'user_register_form' => 1,
+          'default_value' => 'blank', // No initial value
+          'default_value_code' => '',
+      ),
+      'widget' => array(
+        'type' => 'date_select',
+        'settings' => array(
+          'year_range' => '-110:+0',
+          'input_format' => 'custom',
+          'input_format_custom' => 'F d Y H:i:s',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+    variable_set('coppa_lite_field', 'field_coppa_lite_dob');
+  }
+}
+
+/**
+ * Custom validation function for user registration
+ */
+function coppa_lite_user_validate($form, &$form_state) {
+  // Get the machine name of the DOB field we want to check
+  $field = variable_get('coppa_lite_field');
+
+  // make sure we all necessary feilds are available
+  if(!isset($field) || !isset($form_state['values']['mail'])
+  || !isset($form_state['values'][$field]['und'][0]['value'])) {
+    return;
+  }
+
+  // populate necessary variables
+  $cookie_index = md5("coppa_lite_" . trim($form_state['values']['mail']));
+  $warning_message = t('We are unable to register you at this time.');
+
+  // check to see if there was a cookie set for this email address
+  if(isset($_COOKIE[$cookie_index])) {
+    form_set_error('', $warning_message);
+    // don't need to create another one, so bounce out.
+    return;
+  }
+
+  // Get the time difference in years between now and the entered date
+  $dob_field = $form_state['values'][$field]['und'][0]['value'];
+  $diff = coppa_lite_calculate_age_in_years($dob_field);
+
+  // Check the age entered and set a cookie if under the minimum age
+  if ($diff <= variable_get('coppa_lite_min_age', 13) - 1) {
+    $expire = time() + (60 * 60 * 24 * variable_get('coppa_lite_cookie_expire', 1)); // Cookie age
+    setcookie($cookie_index, date("G:i - m/d/y"), $expire);
+    form_set_error('', $warning_message);
+  }
+}
+
+/**
+ * Calculates the difference measured in years between the specified date and
+ * right now.
+ *
+ * This is effectively floor($now - $date_str); it returns the number of
+ * complete years between the specified date and now.
+ *
+ * @param {String} $date_str
+ *   The string form of the date.  Example: "1999-01-31"
+ * @return {int}
+ *   The number of complete years between the specified date and today.
+ */
+function coppa_lite_calculate_age_in_years($date_str) {
+  $dob = date_parse($date_str);
+  $now = getdate(time());
+
+  // Calculate the difference of each component.
+  $delta = array(
+    'days' => ($now['mday'] - $dob['day']),
+    'months' => ($now['mon'] - $dob['month']),
+    'years' => ($now['year'] - $dob['year'])
+  );
+  if ($delta['days'] < 0) {
+    // Offset the month.
+    $delta['months'] = $delta['months'] - 1;
+  }
+  if ($delta['months'] < 0) {
+    // Offset the year.
+    $delta['years'] = $delta['years'] - 1;
+  }
+  return $delta['years'];
+}
+
+/**
+ * Implements hook_form_alter()
+ */
+function coppa_lite_form_alter(&$form, &$form_state, $form_id) {
+  // Set our custom validation handler for the registration form.
+  // Reverse the order of the years in the date form
+  if ($form_id == 'user_register_form') {
+    $form['#validate'][] = 'coppa_lite_user_validate';
+    if ($field_name = variable_get('coppa_lite_field', '')) {
+      $form[$field_name]['und']['#after_build'][] = '_coppa_lite_reverse_years';
+    }
+  }
+
+  // Make the "Required" field un-editable if the field is set as the COPPA field
+  if ($form_id == 'field_ui_field_edit_form') {
+    $field_name = variable_get('coppa_lite_field', '');
+    if ($form['#field']['field_name'] == $field_name) {
+      $form['instance']['required']['#disabled'] = TRUE;
+    }
+  }
+}
+
+/**
+ * Reverse the years in a date field
+ */
+function _coppa_lite_reverse_years($element, &$form_state) {
+  $options = &$element[0]['value']['year']['#options'];
+  $label = array();
+  $slice_position = 0;
+  // Check if the first option is blank and pull it out of the array
+  if(!is_numeric(current($options))) {
+    $label = array_slice($options, 0, 1, TRUE);
+    $slice_position++;
+  }
+  $reverse_years = array_reverse(array_slice($options, $slice_position, NULL, TRUE), TRUE);
+  $options = $label + $reverse_years;
+  return $element;
+}

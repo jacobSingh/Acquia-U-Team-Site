@@ -1,0 +1,730 @@
+/** 
+* @file
+* Initial style definition of the Minima theme by Acquia.
+*
+* The font size of all elements is set to 13px in default.css.  
+* All subsequent measurements such as line height, margins and padding are calculated from this 13px font size.
+* The line height is augmented from 18px to 19px for this theme
+*
+* @see default.css
+*/
+
+/* @group HTML Elements */
+
+/* @group Block Elements */
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* @end */
+
+/* @group Forms */
+
+.form-submit {
+  -moz-border-radius: 5px;
+  -o-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+/* @end */
+
+/* @group Typography */
+
+.site-name {
+  line-height: 1.1667em; /* 42px */
+  margin-top: 0.1667em; /* 6px */
+}
+
+.site-slogan {
+  font-size: 1.2308em; /* 16px */
+  line-height: 1.3125em; /* 21px */
+}
+
+.sidebar h2,
+.wrapper-footer h2 {
+  font-size: 1.3846em; /* 18px (16:1.125) */
+  line-height: 1.5em;
+}
+  
+.sidebar h2 {
+  margin-top: 0.3333em;
+}
+
+.sidebar a {
+  text-decoration: underline;
+}
+
+.stack-navigation h2 {
+  display: none;
+}
+
+.stack-navigation a {
+  font-size: 1.2308em; /* 16px */
+  line-height: 1.3125em; /* 21px */
+}
+
+.stack-navigation .menu a {
+  line-height: normal;
+  padding: 8px 1em;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Stacks */
+
+.wrapper-header {
+  padding-top: 1em;
+}
+
+.wrapper-content {
+  margin-top: 0;
+  padding-bottom: 4.1538em;
+}
+
+.wrapper-footer {
+  margin-top: 2.0769em;
+  padding-bottom: 2.0769em;
+}
+
+.stack-preheader {
+  border-style: solid;
+  border-width: 0 0 2px;
+  padding-bottom: 0.5em;
+}
+
+.stack-content-inner {
+  border-style: solid;
+  border-width: 2px 0 0;
+  margin-top: 0.6923em;
+}
+
+.wrapper-content .stack-content-inner {
+  padding-top: 1.3846em;
+}
+
+.wrapper-content .deco-bottom .deco-bottom {
+  display: block;
+}
+
+.wrapper-footer {
+  border-style: solid;
+  border-width: 1px 0 0;
+}
+
+.stack-copyright {
+  padding: 0;
+}
+
+.stack-copyright .inner {
+  border-style: solid;
+  border-width: 1px 0;
+  padding-bottom: 1em;
+  padding-top: 1em;
+  margin-bottom: 1em;
+}
+
+.stack-copyright .inner .inner {
+  border: medium none;
+  margin: 0;
+  padding: 0;
+}
+
+/* @end */
+
+/* @group Regions */
+
+/* @group Header */
+
+.stack-preheader .menu {
+  padding-top: 0.6923em;
+}
+
+.stack-preheader .block h2,
+.stack-preheader .item-list h2 {
+  display: none;
+}
+
+.stack-header-inner {
+  margin-top: 0.6923em;
+}
+
+/* @end */
+
+/* @group Navigation */
+
+.stack-navigation {
+  margin-top: 4.1538em;
+}
+
+.stack-navigation .box {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Inflections */
+
+/* @group Block */
+
+.sidebar .block {
+  border-style: solid;
+  border-width: 0 0 1px;
+  padding-bottom: 9px;
+}
+
+.sidebar .block + block {
+  margin-top: 27px;
+}
+
+
+
+/* @end */
+
+/* @group Menu */
+
+.sidebar .menu {
+  padding-left: 0;
+}
+
+.sidebar .menu .menu {
+  padding-left: 1.3846em;
+}
+
+ul.menu,
+ul.menu ul,
+ul.menu li.expanded,
+ul.menu li.collapsed,
+ul.menu li.leaf {
+  list-style-type: none;
+}
+
+ul.menu li.expanded {
+  list-style-image:url("images/menu-expanded.png");
+}
+
+ul.menu li.collapsed {
+  list-style-image:url("images/menu-collapsed.png");
+}
+
+.menu li li {
+  border-top-width: 1px;
+  border-top-style: dotted;
+}
+
+.menu li li.first {
+  border-top: medium none
+}
+
+.menu li li li {
+  border: medium none;
+}
+
+.menu li li a {
+  font-weight: normal;
+}
+
+.wrapper-header ul,
+.wrapper-header ul.menu,
+.wrapper-header ul.menu li.expanded,
+.wrapper-header ul.menu li.collapsed {
+  list-style-type: none;
+  list-style-image: none;
+}
+
+.stack-navigation .menu li + li {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.stack-navigation .menu li a {
+  display: inline-block;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+/* @end */
+
+/* @group Breadcrumb */
+
+.stack-breadcrumb a {
+  text-decoration: none;
+}
+
+.stack-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* @end */
+
+/* @group Comments */
+
+.comment,
+.comment-wrapper h2 {
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+/* @end */
+
+/* @group Tables */
+
+table {
+  border-style: solid;
+  border-width: 0 0 2px;
+}
+
+.col-primary table {
+  border-collapse: separate;
+}
+
+table h2 {
+  font-size: 18px;
+}
+
+thead th, td {
+  border-style: solid;
+}
+
+thead th {
+  border-width: 1px 0;
+}
+
+tfoot td {
+  border-width: 1px 0 0 0;
+}
+
+td {
+  border-style: solid;
+  border-width: 1px 0 0 0;
+}
+
+/* @end */
+
+/* @group Node */
+
+.node .meta {
+  font-size: 0.8462em;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu .expanded + li {
+  margin-left: 0; /* LTR */
+}
+
+.menu-dropdown .menu .menu li {
+  border: medium none;
+}
+
+.menu-dropdown .menu .menu .menu {
+  padding-top: 0;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding-right: 27px; /* LTR */
+}
+
+.menu-dropdown .menu .menu a {
+  border-style: solid;
+  border-top-width: 1px;
+  font-size: 1.0769em;
+  line-height: 1.1429em;
+  padding: 8px 1.1429em; /* LTR */
+}
+
+.menu-dropdown .menu .menu .last > a {
+  border-bottom-width: 1px;
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  height: 5px;
+  right: 12px; /* LTR */
+  top: 1em;
+  width: 9px;
+}
+
+.menu-dropdown .menu .menu li > a > .more-indicator {
+  height: 9px;
+  top: 0.8571em;
+  width: 5px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Components */
+
+/* @group Aggregator */
+
+.block-aggregator ul li + li {
+  border-top-width: 1px;
+  border-top-style: dotted;
+}
+
+/* @end */
+
+/* @group FAQ */
+
+.faq-item-question-label {
+  font-family: Georgia, "New Century Schoolbook", "Nimbus Roman No9 L", serif;
+  font-style: italic;
+}
+
+.node-faq-item .faq-item-inline-question-title {
+  margin-top: 3px;
+}
+
+/* @end */
+
+/* @group Feedback Link */
+
+#block-feedback-feedback a {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* @end */
+
+/* @group Forum */
+
+.forum .login span {
+  font-weight: bold;
+}
+
+/* @end */
+
+/* @group Rotating Banner */
+
+.rotating-banner .rb-slides {
+  border-width: 10px;
+  border-style: solid;
+}
+
+/* @end */
+
+/* @group Tags */
+
+.field-name-taxonomy-tags .field-items {
+  margin: 0 0 20px;
+}
+
+.field-name-taxonomy-tags .field-item {
+  display: inline;
+  margin: 0 10px 0 0;
+}
+
+/* @end */
+
+/* @group jQuery UI adjustments */
+
+.ui-datepicker table {
+  border-bottom: 0 none;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Palette */
+
+/**
+* Colors
+* white    #FFFFFF - White
+* black    #000000 - Black
+* a        #ff7800 - Orange
+* b        #333333 - Charcoal
+* c        #666666 - Grey Tint 1
+* d        #999999 - Grey Tint 2
+* e        #eeeeee - Grey Tint 3
+*/
+
+body {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.stack-navigation .menu {
+  background-color: #333333;
+}
+
+#block-feedback-feedback a {
+  background-color: #ff7800;
+}
+
+.controls.buttons a.activeSlide {
+  background-color: #ff7800;
+}
+
+#block-feedback-feedback a:hover {
+  background-color: #666666;
+}
+
+.form-submit {
+  background-color: #eeeeee;
+}
+
+.form-submit + input {
+  background-color: #ffffff;
+}
+
+.menu-dropdown .menu .menu {
+  background-color: #484848;
+}
+
+a {
+  color: #ff7800;
+}
+
+li a.active {
+  color: #ff7800;
+}
+
+.site-name a {
+  color: #ff7800;
+}
+
+.page-forum h1 {
+  color: #ff7800;
+}
+
+.messages {
+  color: #000000;
+}
+.messages ul {
+  color: #000000;
+}
+.messages ul li {
+  color: #000000;
+}
+.wrapper-header .active-trail a {
+  color: #000000;
+}
+.form-submit {
+  color: #000000;
+}
+
+#block-feedback-feedback a {
+  color: #ffffff;
+}
+
+.messages a {
+  color: #333333;
+}
+
+h1 {
+  color: #333333;
+}
+h2 {
+  color: #333333;
+}
+h3 {
+  color: #333333;
+}
+h4 {
+  color: #333333;
+}
+h5 {
+  color: #333333;
+}
+h6 {
+  color: #333333;
+}
+
+.forum a {
+  color: #333333;
+}
+
+#forum table thead tr th {
+  color: #333333;
+}
+
+#forum table thead tr th a {
+  color: #333333;
+}
+
+.rotating-banner {
+  color: #333333;
+}
+
+.rotating-banner a {
+  color: #333333;
+}
+
+h2 a {
+  color: #666666;
+}
+
+a:hover {
+  color: #666666;
+}
+
+.site-slogan {
+  color: #666666;
+}
+
+h2 a:hover {
+  color: #999999;
+}
+
+.forum .description {
+  color: #999999;
+}
+
+.stack-navigation .menu li a {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .expanded:hover > a {
+  background-color: #666666;
+}
+
+.menu-dropdown .menu .active-trail:hover > a {
+  background-color: #666666;
+}
+
+#block-feedback-feedback a {
+  border-color: #ffffff;
+}
+
+.stack-navigation .menu li a:hover {
+  background-color: #666666;
+}
+
+.stack-navigation .menu .active-trail > a {
+  color: #FFA600;
+}
+
+.wrapper-footer {
+  border-color: #333333;
+}
+
+.stack-preheader {
+  border-color: #333333;
+}
+
+.stack-content-inner {
+  border-color: #333333;
+}
+
+.stack-copyright .inner {
+  border-color: #333333;
+}
+
+.sidebar .block,
+.block-aggregator ul li + li {
+  border-color: #EEEEEE;
+}
+
+.comment {
+  border-top-color: #999999;
+}
+
+.comment-wrapper h2 {
+  border-top-color: #999999;
+}
+
+.sidebar.left {
+  border-right-color: #999999;
+}
+
+.sidebar.right {
+  border-left-color: #999999;
+}
+
+.menu-dropdown .menu .menu a {
+  border-color: #ffffff;
+}
+
+/* @group Non-palette Colors */
+
+
+.breadcrumb a {
+  color: #bababa;
+}
+
+.node .meta {
+  color: #bababa;
+}
+
+th {
+  background-color: #ECECEC;
+}
+
+table {
+  border-color: #CCCCCC;
+}
+
+td {
+  border-color: #CCCCCC;
+}
+
+th {
+  border-color: #CCCCCC;
+}
+
+tfoot td {
+  border-color: #CCCCCC;
+}
+
+.menu li li {
+  border-color: #CCCCCC;
+}
+
+thead th {
+  border-bottom-color: #ffffff;
+}
+
+.forum thead th {
+  border-color: #CCCCCC;
+}
+
+th.active {
+  background-color: #F6F7F9;  
+}
+
+tr.even td {
+  background-color: #F9F9F9;
+}
+
+table tbody tr.even td.active {
+  background-color: #e4e5e9 !important;  
+}
+
+table tbody tr.odd td.active {
+  background-color: #eeeff2 !important;  
+}
+
+.rotating-banner .rb-slides {
+  border-color: #dddddd;
+  background: #dddddd;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */

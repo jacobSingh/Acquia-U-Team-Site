@@ -1,0 +1,345 @@
+<?php
+// $Id$
+
+/**
+ * Test Simpleviews functionality with Simple Query Builder.
+ */
+class SQBSUnitTest extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Simple Query Builder for SimpleViews',
+      'description' => 'Test SimpleViews with the Simple Query Builder',
+      'group' => 'Simple Query Builder for SimpleViews',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('simpleviews', 'sqbs');
+    // Node administration permissions included so that we can save taxonomy
+    // terms for the nodes via the node editing UI in testing.
+    $web_user = $this->drupalCreateUser(array('create article content', 'create page content', 'administer simpleviews', 'administer blocks', 'administer nodes', 'bypass node access'));
+    $this->drupalLogin($web_user);
+  }
+
+  /**
+   * Create four nodes and ensure they're loaded correctly.
+   */
+  function testSimpleViews() {
+    // Make sure we have a defined order for these nodes in terms of date.
+    $node1 = $this->drupalCreateNode(
+      array(
+        'type'    => 'article',
+        'promote' => 1,
+        'created' => REQUEST_TIME - 5,
+        'body'    => array(LANGUAGE_NONE => array(array('summary' => $this->randomName(32)))),
+        'title'   => 'f' . $this->randomName(8),
+      )
+    );
+    $edit['taxonomy_tags[' . LANGUAGE_NONE . ']'] = 'first tag, second tag';
+    $this->drupalPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
+
+    $node2 = $this->drupalCreateNode(
+      array(
+        'type'    => 'article',
+        'promote' => 1,
+        'created' => REQUEST_TIME - 4,
+        'body'    => array(LANGUAGE_NONE => array(array('summary' => $this->randomName(32)))),
+        'title'   => 'z' . $this->randomName(8),
+      )
+    );
+    $edit['taxonomy_tags[' . LANGUAGE_NONE . ']'] = 'first tag, second tag';
+    $this->drupalPost('node/' . $node2->nid . '/edit', $edit, t('Save'));
+
+    $node3 = $this->drupalCreateNode(
+      array(
+        'type'    => 'article',
+        'promote' => 0,
+        'created' => REQUEST_TIME - 3,
+        'body'    => array(LANGUAGE_NONE => array(array('summary' => $this->randomName(32)))),
+        'title'   => 'a' . $this->randomName(8),
+      )
+    );
+    $edit['taxonomy_tags[' . LANGUAGE_NONE . ']'] = 'second tag, third tag';
+    $this->drupalPost('node/' . $node3->nid . '/edit', $edit, t('Save'));
+
+    $node4 = $this->drupalCreateNode(
+      array(
+        'type'    => 'page',
+        'promote' => 0,
+        'created' => REQUEST_TIME - 2,
+        'body'    => array(LANGUAGE_NONE => array(array('summary' => $this->randomName(32)))),
+        'title'   => 'k' . $this->randomName(8),
+      )
+    );
+
+    // Test listing all nodes --------------------------------------------------
+
+    $edit = array(
+      'path' => 'all-nodes',
+      'title' => 'All nodes',
+    );
+    $this->drupalPost('admin/structure/simpleviews/add', $edit, t('Submit'));
+    $this->assertText('All nodes', t('All nodes listing saved'));
+    $simpleview1 = db_query("SELECT * FROM {simpleviews} WHERE path = :path", array(':path' => 'all-nodes'))->fetch();
+
+    $this->drupalGet('all-nodes');
+    $this->assertText($node1->title, t('Node title appears on all nodes listing.'));
+    $this->assertText($node2->title, t('Node title appears on all nodes listing.'));
+    $this->assertText($node3->title, t('Node title appears on all nodes listing.'));
+    $this->assertText($node4->title, t('Node title appears on all nodes listing.'));
+
+    // Test listing articles only ----------------------------------------------
+
+    $edit = array(
+      'path' => 'articles',
+      'title' => 'List of articles',
+      'filter' => 'node:article',
+    );
+    $this->drupalPost('admin/structure/simpleviews/add', $edit, t('Submit'));
+    $this->assertText('List of articles', t('Articles listing saved'));
+    $simpleview2 = db_query("SELECT * FROM {simpleviews} WHERE path = :path", array(':path' => 'articles'))->fetch();
+
+    $this->drupalGet('articles');
+    $this->assertText($node1->title, t('Article title appears on article listing.'));
+    $this->assertText($node2->title, t('Article title appears on article listing.'));
+    $this->assertText($node3->title, t('Article title appears on article listing.'));
+    $this->assertNoText($node4->title, t('Page node title does not appear on article listing.'));
+
+    // Test editing, limit and ordering ----------------------------------------
+
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'newest',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($node3->title, t('Article title appears on limited article listing.'));
+    $this->assertNoText($node1->title, t('Article title does not appear on limited article listing.'));
+    $this->assertNoText($node2->title, t('Article title does not appear on limited article listing.'));
+
+    // Test oldest first ordering ----------------------------------------------
+
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'oldest',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($node1->title, t('Article title appears on limited article listing.'));
+    $this->assertNoText($node2->title, t('Article title does not appear on limited article listing.'));
+    $this->assertNoText($node3->title, t('Article title does not appear on limited article listing.'));
+
+    // Test title ordering -----------------------------------------------------
+
+    $titles = array($node1->title, $node2->title, $node3->title);
+    sort($titles);
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'a-z',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($titles[0], t('Article title appears on limited article listing.'));
+    $this->assertNoText($titles[1], t('Article title does not appear on limited article listing.'));
+    $this->assertNoText($titles[2], t('Article title does not appear on limited article listing.'));
+
+    // Test RSS exposure -------------------------------------------------------
+
+    $edit = array(
+      'rss' => FALSE,
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('all-nodes');
+    $this->assertNoRaw('All nodes RSS', t('No RSS listing created when not requested.'));
+    $this->assertNoRaw(url('all-nodes/feed', array('absolute' => TRUE)), t('No RSS listing created when not requested.'));
+    $this->assertNoRaw(url('all-nodes/feed', array('absolute' => TRUE)), t('No RSS listing created when not requested.'));
+
+    $edit = array(
+      'rss' => TRUE,
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('all-nodes');
+    $this->assertRaw('All nodes RSS', t('RSS listing created when requested.'));
+    $this->assertRaw(url('all-nodes/feed', array('absolute' => TRUE)), t('RSS listing created when requested.'));
+
+    $this->drupalGet('all-nodes/feed');
+    $this->assertText($node1->title, t('Node title appears on all nodes listing RSS.'));
+    $this->assertText($node2->title, t('Node title appears on all nodes listing RSS.'));
+    $this->assertText($node3->title, t('Node title appears on all nodes listing RSS.'));
+    $this->assertText($node4->title, t('Node title appears on all nodes listing RSS.'));
+
+    // Test block exposure -----------------------------------------------------
+
+    $this->drupalGet('admin/structure/block');
+    $this->assertText('All nodes', t('Block exposed when set to be exposed.'));
+
+    $edit = array(
+      'block' => FALSE,
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('admin/structure/block');
+    $this->assertNoText('All nodes', t('Block not exposed when not set to be exposed.'));
+
+    $edit = array(
+      'block' => TRUE,
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('admin/structure/block');
+    $this->assertText('All nodes', t('Block exposed when set to be exposed.'));
+
+    // Test block placement ----------------------------------------------------
+
+    $block = array(
+      'title' => 'All nodes',
+      'module' => 'sqbs',
+      'delta' => $simpleview1->svid,
+    );
+    $region = array('name' => 'sidebar_first');
+    $this->moveBlockToRegion($block, $region);
+
+    $this->drupalGet('user');
+    $this->assertText($node1->title, t('Node title appears when listing block appears.'));
+    $this->assertText($node2->title, t('Node title appears when listing block appears.'));
+    $this->assertText($node3->title, t('Node title appears when listing block appears.'));
+    $this->assertText($node4->title, t('Node title appears when listing block appears.'));
+
+    // Test block limits -------------------------------------------------------
+
+    $edit = array(
+      'block_items' => 1,
+      'sort' => 'oldest',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('user');
+    $this->assertText($node1->title, t('Node title appears when limited listing block appears.'));
+    $this->assertNoText($node2->title, t('Node title does not appear when limited listing block appears.'));
+    $this->assertNoText($node3->title, t('Node title does not appear when limited listing block appears.'));
+    $this->assertNoText($node4->title, t('Node title does not appear when limited listing block appears.'));
+
+    // Test listing types ------------------------------------------------------
+
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'oldest',
+      'style' => 'full',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($node1->title, t('Node title appears in full listing.'));
+    $this->assertText($node1->body[LANGUAGE_NONE][0]['value'], t('Node body appears in full listing.'));
+    $this->assertNoText($node1->body[LANGUAGE_NONE][0]['summary'], t('Node summary does not appear in full listing.'));
+    $this->assertRaw(t('Go to next page'), t('Pager displayed.'));
+
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'oldest',
+      'style' => 'teasers',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($node1->title, t('Node title appears in teasers listing.'));
+    $this->assertNoText($node1->body[LANGUAGE_NONE][0]['value'], t('Node body does not appear in teasers listing.'));
+    $this->assertText($node1->body[LANGUAGE_NONE][0]['summary'], t('Node summary appears in teasers listing.'));
+    $this->assertRaw(t('Go to next page'), t('Pager displayed.'));
+
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'oldest',
+      'style' => 'titles',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($node1->title, t('Node title appears in titles listing.'));
+    $this->assertNoText($node1->body[LANGUAGE_NONE][0]['value'], t('Node body does not appear in titles listing.'));
+    $this->assertNoText($node1->body[LANGUAGE_NONE][0]['summary'], t('Node summary does not appear in titles listing.'));
+    $this->assertRaw(t('Go to next page'), t('Pager displayed.'));
+
+    $edit = array(
+      'page_items' => 1,
+      'sort' => 'oldest',
+      'style' => 'table',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview2->svid . '/edit', $edit, t('Submit'));
+
+    $this->drupalGet('articles');
+    $this->assertText($node1->title, t('Node title appears in table view.'));
+    $this->assertNoText($node1->body[LANGUAGE_NONE][0]['value'], t('Node body does not appear in table view.'));
+    $this->assertNoText($node1->body[LANGUAGE_NONE][0]['summary'], t('Node summary does not appear in table view.'));
+    $this->assertText(t('Title'), t('Table header appears in table view.'));
+    $this->assertText(t('Author'), t('Table header appears in table view.'));
+    $this->assertText(t('Submitted'), t('Table header appears in table view.'));
+    $this->assertRaw(t('Go to next page'), t('Pager displayed.'));
+
+    // Test taxonomy filter ----------------------------------------------------
+
+    $edit = array(
+      'page_items' => '10',
+      'taxonomy_tags' => 'first tag',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+    $this->drupalGet('all-nodes');
+    $this->assertText($node1->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertText($node2->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertNoText($node3->title, t('Node title does not appear on taxonomy filtered list.'));
+    $this->assertNoText($node4->title, t('Node title does not appear on taxonomy filtered list.'));
+
+    $edit = array(
+      'taxonomy_tags' => 'second tag',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+    $this->drupalGet('all-nodes');
+    $this->assertText($node1->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertText($node2->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertText($node3->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertNoText($node4->title, t('Node title does not appear on taxonomy filtered list.'));
+
+    $edit = array(
+      'taxonomy_tags' => 'first tag, third tag',
+    );
+    $this->drupalPost('admin/structure/simpleviews/' . $simpleview1->svid . '/edit', $edit, t('Submit'));
+    $this->drupalGet('all-nodes');
+    $this->assertText($node1->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertText($node2->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertText($node3->title, t('Node title appears on taxonomy filtered list.'));
+    $this->assertNoText($node4->title, t('Node title does not appear on taxonomy filtered list.'));
+  }
+
+  /**
+   * @see block.test.
+   */
+  function moveBlockToRegion($block, $region) {
+    // If an id for an region hasn't been specified, we assume it's the same as the name.
+    if (!(isset($region['class']))) {
+      $region['class'] = 'region region-' . str_replace('_', '-', $region['name']);
+    }
+
+    // Set the created block to a specific region.
+    $edit = array();
+    $edit[$block['module'] . '_' . $block['delta'] . '[region]'] = $region['name'];
+    $this->drupalPost('admin/structure/block', $edit, t('Save blocks'));
+
+    // Confirm that the block was moved to the proper region.
+    $this->assertText(t('The block settings have been updated.'), t('Block successfully moved to %region_name region.', array( '%region_name' => $region['name'])));
+
+    // Confirm that the block is being displayed.
+    $this->drupalGet('node');
+    $this->assertText(t($block['title']), t('Block successfully being displayed on the page.'));
+
+    // Confirm that the custom block was found at the proper region.
+    $xpath = '//div[@class="' . $region['class'] . '"]//div[@id="block-' . $block['module'] . '-' . $block['delta'] . '"]/*';
+    $this->assertFieldByXPath($xpath, FALSE, t('Custom block found in %region_name region.', array('%region_name' => $region['name'])));
+  }
+
+}

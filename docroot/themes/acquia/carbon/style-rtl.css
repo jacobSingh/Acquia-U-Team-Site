@@ -1,0 +1,84 @@
+/**
+ * @file
+ * Initial RTL style definition of the Carbon theme for Acquia Gardens.
+ */
+
+/* @group Regions */
+
+.sidebar.left {
+  border-width: 0 0 0 1px;
+  margin-left: 28px;
+  padding-left: 14px;
+}
+
+.sidebar.right {
+  border-width: 0 1px 0 0; 
+  margin-right: 28px;
+  padding-right: 14px;
+}
+
+/* @end */
+
+/* @group Inflections */
+
+/* @group Lists */
+
+.action-links {
+  padding-right: 1.4615em;
+  padding-left: 0;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu .expanded {
+  margin-right: 18px;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding-left: 14px;
+  padding-right: 0;
+}
+
+.menu-dropdown .menu .menu {
+  -moz-box-shadow: 2px -2px 8px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 2px -2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px -2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.menu-dropdown .menu .menu a {
+  padding: 8px 0.8462em; 
+}
+
+/* @end */
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+/* #gardens_ie7 .wrapper-header #navigation-region {
+  direction: ltr;
+}*/
+
+#gardens_ie7 .menu-dropdown .menu li {
+  margin-left: 0.6923em;
+  margin-right: 0;
+  padding-left: 0.6923em;
+  padding-right: 0;
+}
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */
+

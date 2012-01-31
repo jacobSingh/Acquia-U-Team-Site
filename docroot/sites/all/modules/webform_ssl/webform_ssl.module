@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * @file
+ * Forces all of a site's webforms to be redirected to a secure (SSL) version.
+ */
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function webform_ssl_form_webform_client_form_alter(&$form, &$form_state) {
+  if (!webform_ssl_secure_redirect_allowed()) {
+    return;
+  }
+
+  // If we're viewing the webform client form and aren't already on a secure
+  // page, redirect to the secure version.
+  webform_ssl_redirect_if_required();
+
+  // Make sure that the form will be submitted via a secure URL.
+  $form['#https'] = TRUE;
+
+  // Custom submit handler to make sure the confirmation page is secure also.
+  $form['#submit'][] = 'webform_ssl_webform_client_form_submit';
+}
+
+/**
+ * Custom form submit handler for the webform client form.
+ *
+ * @see webform_ssl_form_webform_client_form_alter()
+ */
+function webform_ssl_webform_client_form_submit($form, &$form_state) {
+  // If we're staying on the current page, there's no need to modify anything.
+  if (!isset($form_state['redirect'])) {
+    return;
+  }
+
+  if (!is_array($form_state['redirect'])) {
+    $form_state['redirect'] = array($form_state['redirect']);
+  }
+
+  // After the form is submitted, make sure the page we redirect to is secure.
+  // This is necessary so that any confirmation messages that are intended to
+  // be displayed to the user via drupal_set_message() are stored in the same
+  // session and actually displayed to the user when they are supposed to be.
+  $form_state['redirect'][1]['https'] = TRUE;
+
+  // Similar to webform_ssl_redirect_if_required(), if the Secure Pages module
+  // is (or was) configured to redirect pages it doesn't know about back to the
+  // http version, we need to prevent that behavior for the page that we are
+  // trying to force to be https.
+  if (variable_get('securepages_switch', FALSE) || !empty($_GET['wssl'])) {
+    // Prevent it on this page, while the redirect is happening; see
+    // securepages_drupal_goto_alter().
+    $GLOBALS['conf']['securepages_switch'] = FALSE;
+    // Prevent it on the next page reload (after the redirect happens); see
+    // webform_ssl_init().
+    $form_state['redirect'][1]['query']['wssl'] = 1;
+  }
+}
+
+/**
+ * Determines if redirecting to a secure page is allowed.
+ *
+ * The conditions in this function match those found in securepages_init() in
+ * the Secure Pages module itself.
+ *
+ * @return
+ *   TRUE if it is safe to redirect to a secure page, or FALSE if it isn't.
+ */
+function webform_ssl_secure_redirect_allowed() {
+  return variable_get('securepages_enable', FALSE) && !drupal_is_cli();
+}
+
+/**
+ * Redirect to a secure page if we aren't already there.
+ *
+ * Generally this function should only be called after first checking that
+ * webform_ssl_secure_redirect_allowed() returns TRUE.
+ */
+function webform_ssl_redirect_if_required() {
+  // Do not redirect if we're already on a secure page, and we don't want to
+  // interrupt an in-progress POST either.
+  if (empty($GLOBALS['is_https']) && empty($_POST)) {
+    // If the Secure Pages module is configured to redirect pages it doesn't
+    // know about back to the http version, we would hit an infinite loop. To
+    // prevent that, add a special query parameter before redirecting; we will
+    // check that in webform_ssl_init() on the next page load.
+    if (variable_get('securepages_switch', FALSE)) {
+      $_GET['wssl'] = 1;
+    }
+    securepages_goto(TRUE);
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function webform_ssl_init() {
+  // If this is a page that we expect will display webform submission results,
+  // redirect to the secure version.
+  if (webform_ssl_secure_redirect_allowed()) {
+    $item = menu_get_item();
+    // Checking the access callbacks is usually sufficient, but other modules
+    // may have altered them in hook_menu_alter(), so we check for the standard
+    // Webform page callbacks associated with displaying webform submission
+    // results also.
+    $access_callback_matches = isset($item['access_callback']) && in_array($item['access_callback'], array('webform_results_access', 'webform_submission_access'));
+    $page_callback_matches = isset($item['page_callback']) && in_array($item['page_callback'], array('webform_results_submissions', 'webform_results_analysis', 'webform_results_table', 'webform_submission_page'));
+    if ($access_callback_matches || $page_callback_matches) {
+      webform_ssl_redirect_if_required();
+    }
+  }
+
+  // If we're forcing this to be an SSL page, prevent Secure Pages from trying
+  // to redirect back to the http version of the page and triggering an
+  // infinite loop. See webform_ssl_form_webform_client_form_alter().
+  if (!empty($_GET['wssl'])) {
+    $GLOBALS['conf']['securepages_switch'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function webform_ssl_module_implements_alter(&$implementations, $hook) {
+  // Our hook_init() implementation needs to run first, so it acts before
+  // Secure Pages does.
+  if ($hook == 'init') {
+    $implementations = array('webform_ssl' => $implementations['webform_ssl']) + $implementations;
+  }
+}

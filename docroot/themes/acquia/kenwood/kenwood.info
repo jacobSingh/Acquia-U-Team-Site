@@ -1,0 +1,73 @@
+name = Kenwood
+description = An elegant and traditional design with subtle floral patterns.
+version = 1.25
+core = 7.x
+engine = phptemplate
+base_theme = kenwood
+
+stylesheets[all][] = 'defaults.css'
+stylesheets[all][] = 'style.css'
+stylesheets[all][] = 'palette.css'
+stylesheets[all][] = 'custom.css'
+stylesheets[all][] = 'advanced.css'
+stylesheets[all][] = 'font-families.css'
+
+scripts[] = local.js
+
+regions[page_top] = Above page
+regions[preheader_first] = Preheader first
+regions[preheader_second] = Preheader second
+regions[header] = Header
+regions[navigation] = Navigation
+regions[highlight] = Highlighted content
+regions[help] = System help
+regions[banner] = Banner
+regions[precontent_first] = Precontent first
+regions[precontent_second] = Precontent second
+regions[precontent_third] = Precontent third
+regions[precontent_bottom] = Precontent bottom
+regions[content] = Page content
+regions[sidebar_a] = Sidebar A
+regions[sidebar_b] = Sidebar B
+regions[prefooter_first] = Prefooter first
+regions[prefooter_second] = Prefooter second
+regions[prefooter_third] = Prefooter third
+regions[footer_first] = Footer first
+regions[footer_second] = Footer second
+regions[page_bottom] = Below page
+regions[copyright] = Copyright
+
+configurations[fixed][3-col][abc] = default
+configurations[fixed][3-col][acb] = default
+configurations[fixed][3-col][cab] = default
+configurations[fixed][2-col][ac] = default
+configurations[fixed][2-col][bc] = default
+configurations[fixed][2-col][ca] = default
+configurations[fixed][2-col][cb] = default
+configurations[fixed][1-col][c] = default
+
+layout[<global>] = body-layout-fixed-acb
+
+palette[id] = "8A0AA164-ECCA-0E4E-BE824CA8DF22D011"
+palette[name] = "Kenwood"
+palette[author] = "Acquia"
+palette[a][hex] = 272a0f
+palette[b][hex] = 63591b
+palette[c][hex] = 646a2c
+palette[d][hex] = bbab56
+palette[e][hex] = dfdb92
+palette[black][hex] = 2a1911
+palette[white][hex] = FFFFFF
+
+selectorMap[.active .active] = .tabs .tabs .active a
+selectorMap[.tabs li a] = .tabs .tabs li a
+selectorMap[#navigation .block .menu .active-trail .active] = .stack-navigation .block .menu .active-trail a
+selectorMap[#banner-region .active .rb-background-image] = '.stack-banner .rb-slide'
+selectorMap[#banner-region .block .rb-slides .rb-slide] = '.stack-banner .rb-slide'
+
+layout[forum] = 'body-layout-fixed-ac'
+layout[forum*] = 'body-layout-fixed-ac'
+
+settings[block_everything][site_name] = header
+settings[block_everything][site_slogan] = header
+settings[block_everything][logo] = header

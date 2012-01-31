@@ -1,0 +1,62 @@
+<?php
+
+function gardens_link_ui_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['instance']['settings'])) {
+    $fields_to_restrict = array(
+      'validate_url' => null,
+      'url' => null,
+      'title' => null,
+      'title_value' => null,
+      'title_maxlength' => null,
+      'tokens' => null,
+      'enable_tokens' => null,
+      'display' => array(
+        // An empty string means no truncation will be applied.
+        'url_cutoff' => '',
+      ),
+      'attributes' => array(
+        'class' => null,
+        'rel' => null,
+        'configurable_title' => null,
+        'title' => null,
+      ),
+    );
+    // Restrict access to fields we want to hide for now.
+    _gardens_link_ui_restrict_field_access($form['instance']['settings'], $fields_to_restrict);
+    // Set up sensible defaults.
+  }
+  // Collapse the default value widget by default.
+  if (isset($form['instance']['default_value_widget'])) {
+    $form['instance']['default_value_widget']['#collapsible'] = 1;
+    $form['instance']['default_value_widget']['#collapsed'] = 1;
+  }
+  // Change a few labels. Because this module is meant to be lightweight, the
+  // labels will be changed with JavaScript because the alter is simply
+  // cosmetic. Digging around in the form and its field elements is a little
+  // hazard.
+  $form['#attached']['js'][drupal_get_path('module', 'gardens_link_ui') . '/js/gardens_link_ui.js'] = array(
+    'type' => 'file',
+  );
+}
+
+function _gardens_link_ui_restrict_field_access(&$form_item, $properties) {
+  foreach ($properties as $property => $value) {
+    if (isset($form_item[$property])) {
+      // If the property is an array, loop through it recursively.
+      if (is_array($value)) {
+        _gardens_link_ui_restrict_field_access($form_item[$property], $value);
+      }
+      else {
+        // Only act on items that have #type, meaning they're FAPI elements.
+        if (!empty($form_item[$property]['#type'])) {
+          // Restrict access to fields we want to hide for now.
+          $form_item[$property]['#access'] = false;
+          // Change the default if necessary.
+          if (isset($value)) {
+            $form_item[$property]['#value'] = $value;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+; $Id: mailing_list.info,v 1.1.4.1 2010/02/05 20:23:51 litwol Exp $
+name = Mailing List
+description = Minimalistic mailing list module
+package = Mail
+core = 7.x
+files[] = mailing_list.module
+files[] = mailing_list.install
+
+; Information added by drupal.org packaging script on 2010-10-22
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "mailing_list"
+datestamp = "1287782732"
+

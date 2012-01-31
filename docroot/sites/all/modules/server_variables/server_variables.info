@@ -1,0 +1,11 @@
+name = Analytics Variables
+description = Select server-side events to be inserted to client-side Javascript.
+core = 7.x
+configure = admin/settings/system/server-variables
+files[] = tests/server_variables.test
+package = Statistics
+version = "7.x-1.x"
+datestamp = "1325285810"
+project = ""
+; url = http://git.drupal.org/sandbox/drupalgardens/1389764.git
+; commit = 4850a54712dac6407218773dd06a13a4c6193e6e

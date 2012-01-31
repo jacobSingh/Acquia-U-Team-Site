@@ -1,0 +1,11 @@
+name = Simplified modules
+description = Simplifies the modules page by allowing related modules to be grouped under a single checkbox.
+core = 7.x
+files[] = simplified_modules.test
+
+; Information added by drupal.org packaging script on 2011-07-13
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "simplified_modules"
+datestamp = "1310587919"
+

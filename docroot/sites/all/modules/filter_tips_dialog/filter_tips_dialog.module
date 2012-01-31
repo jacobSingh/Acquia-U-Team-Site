@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Moves the filter tips page into a modal dialog.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function filter_tips_dialog_menu() {
+  $items['filter/tips/ajax'] = array(
+    'page callback' => 'filter_tips_dialog_ajax',
+    'delivery callback' => 'ajax_deliver',
+    'theme callback' => 'ajax_base_page_theme',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function filter_tips_dialog_theme_registry_alter(&$theme_registry) {
+  $theme_registry['filter_tips_more_info']['function'] = 'filter_tips_dialog_filter_tips_more_info';
+}
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function filter_tips_dialog_element_info_alter(&$info) {
+  $info['text_format']['#process'][] = 'filter_tips_dialog_process_format';
+}
+
+/**
+ * Overrides theme_dialog_filter_tips_more_info() to add dialog and ajax classes.
+ */
+function filter_tips_dialog_filter_tips_more_info() {
+  return '<p>' . l(t('More information about text formats'), 'filter/tips/nojs', array('attributes' => array('class' => array('use-ajax', 'use-dialog')))) . '</p>';
+}
+
+/**
+ * Ajax page callback to output the dialog content.
+ */
+function filter_tips_dialog_ajax() {
+  $output = theme('filter_tips', array('tips' => _filter_tips(-1, TRUE), 'long' => TRUE));
+  $commands = array();
+  $commands[] = dialog_command_display($output, array(
+    'title' => t('Compose tips'),
+    'width' => '950',
+    'height' => '400',
+  ));
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Process function for text_format elements that adds needed JS libraries.
+ */
+function filter_tips_dialog_process_format($element) {
+  $element['#attached']['library'][] = array('dialog', 'dialog');
+  $element['#attached']['library'][] = array('system', 'drupal.ajax');
+  return $element;
+}

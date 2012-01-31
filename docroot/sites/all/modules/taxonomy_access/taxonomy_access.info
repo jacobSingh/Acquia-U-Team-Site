@@ -1,0 +1,14 @@
+name = Taxonomy Access Control
+description = Access control for user roles based on taxonomy categories.
+dependencies[] = taxonomy (>=7.8)
+core = 7.x
+configure = admin/config/people/taxonomy_access
+
+files[] = taxonomy_access.test
+
+; Information added by drupal.org packaging script on 2011-12-14
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "taxonomy_access"
+datestamp = "1323763200"
+

@@ -1,0 +1,10 @@
+name = Fivestar
+description = Enables fivestar ratings on content, users, etc.
+package = Voting
+core = 7.x
+dependencies[] = votingapi
+
+; Drupal Gardens development branch of Fivestar is available
+; to download here: https://github.com/bryanhirsch/fivestar/downloads.
+project = "fivestar"
+version = 7.x-2.x-gardens

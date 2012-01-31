@@ -1,0 +1,8 @@
+name = Gardens feedback
+description = Provides a fixed feedback link on the side of site to let users provide feedback to you.
+core = 7.x
+package = Drupal Gardens
+files[] = feedback.module
+dependencies[] = contact
+
+version = 7.x-1.x-dev

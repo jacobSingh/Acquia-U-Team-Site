@@ -1,0 +1,6 @@
+name = "Improved Text Trim"
+description = "Improves the text trimming algorithm (commonly used when displaying text field content in a teaser) to not count HTML markup characters against the trim length."
+core = 7.x
+
+dependencies[] = text
+dependencies[] = filter

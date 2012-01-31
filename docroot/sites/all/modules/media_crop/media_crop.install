@@ -1,0 +1,126 @@
+<?php
+
+/**
+ * @file
+ * Contains install functions for Media crop.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function media_crop_schema() {
+  $schema = array();
+
+  $schema['media_crop_instance'] = array(
+    'description' => '',
+    'fields' => array(
+      'mciid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'fid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'image_style_name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'angle' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'crop_x' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'crop_y' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'crop_w' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'crop_h' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'crop_scale_w' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+      'crop_scale_h' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+      ),
+    ),
+    'primary key' => array('mciid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_enable().
+ */
+function media_crop_enable() {
+  _media_crop_enable_media_crop_ckeditor_plugin();
+}
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function media_crop_modules_enabled($modules) {
+  // Enable the media_crop_edit_instance-flash CKEditor plugin to fix the % width bug.
+  foreach ($modules as $key => $module) {
+    if ($module === 'wysiwyg') {
+      _media_crop_enable_media_crop_ckeditor_plugin();
+    }
+  }
+}
+
+/**
+ * Enable the media_crop_edit_instance CKEditor plugin for all formats.
+ */
+function _media_crop_enable_media_crop_ckeditor_plugin() {
+// Bail out if the wysiwyg module isn't installed.
+  if (!db_table_exists('wysiwyg')) {
+    return;
+  }
+
+  $result = db_query("SELECT format, settings FROM {wysiwyg} WHERE editor = :editor;", array(':editor' => 'ckeditor'));
+  foreach ($result as $config) {
+    // The settings array is stored in serialized format.
+    $config->settings = unserialize($config->settings);
+    // Turn the media_crop_edit_instance CKEditor plugin on.
+    if (!isset($config->settings['buttons']['media_crop_ckeditor']['media_crop_edit_instance']) || $config->settings['buttons']['media_crop_ckeditor']['media_crop_edit_instance'] != 1) {
+      $config->settings['buttons']['media_crop_ckeditor']['media_crop_edit_instance'] = 1;
+
+      // Resave the settings array to the database.
+      db_update('wysiwyg')
+        ->fields(array(
+          'settings' => serialize($config->settings),
+        ))
+        ->condition('format', $config->format)
+        ->condition('editor', 'ckeditor')
+        ->execute();
+    }
+  }
+}

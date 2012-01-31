@@ -1,0 +1,20 @@
+/** 
+* @file
+* Default dropdown style definitions for RTL overrides.
+*/
+
+.menu-dropdown .menu .menu {
+  left: auto;
+  right: 0;
+}
+
+.menu-dropdown .menu .menu .menu {
+  left: auto;
+  right: 15em;
+}
+
+.menu-dropdown .menu .menu li + li {
+  margin-left: auto;
+  margin-right: 0;
+  padding-right: 0;
+}

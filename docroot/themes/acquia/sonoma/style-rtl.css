@@ -1,0 +1,58 @@
+/**
+ * @file
+ * Initial RTL style definition of the Sonoma theme for Acquia Gardens.
+ */
+
+/* @group Inflections */
+ 
+/* @group Dropdown */
+ 
+.menu-dropdown .menu .expanded + li {
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+.menu-dropdown .menu .expanded {
+  padding-left: 0;
+  padding-right: 0.6667em;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding: 0 0 0 20px;
+}
+
+.menu-dropdown .menu .menu a {
+  padding: 0 9px 0 12px;
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  left: 4px;
+  right: auto;
+}
+ 
+/* @end */
+ 
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+#gardens_ie7 .menu-dropdown .menu li {
+  margin-left: 0.6923em;
+  margin-right: 0;
+  padding-left: 0.6923em;
+  padding-right: 0;
+}
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */

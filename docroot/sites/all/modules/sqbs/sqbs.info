@@ -1,0 +1,7 @@
+; $Id: $
+name = Simple Query Builder for SimpleViews
+description = Backend for building simple queries needed for SimpleViews.
+dependencies[] = simpleviews
+core = 7.x
+files[] = sqbs.module
+files[] = sqbs.install

@@ -1,0 +1,560 @@
+/**
+* @file
+* Default Acquia Gardens theme style RTL definitions.
+*
+*/
+
+/* @group CSS Reset */
+
+caption, th, td {
+  text-align: right;
+}
+
+/* @end */
+
+/* @group Block Elements */
+
+body {
+  direction: rtl;
+}
+
+ul,
+ol {
+  padding: 0 1.5em 0 0; /* 16px */
+}
+
+blockquote { /* Isn't these two should be the other way around ? (tsi) */
+  padding-left: 3.0769em;
+  padding-right: 0;
+}
+
+blockquote cite {
+  margin-left: -3.0769em; /* 40px */
+  margin-left: 0;
+  text-align: left;
+}
+
+/* @end */
+
+/* @group Tags */
+
+.field-type-taxonomy-term-reference .field-item {
+  margin-right: .3em;
+}
+
+/* @end Tags */
+
+/* @group Tables */
+
+th + th,
+td + td {
+  padding-left: 1.0769em;
+  padding-right: 0.4615em;
+}
+
+/* @end */
+
+/* @group Typography */
+
+.indent { /* Used in list-tables */
+  padding-left: 0;
+  padding-right: 1.3846em;
+}
+
+/* @end */
+
+/* @group Wrappers */
+
+.page-width {
+  text-align: right;
+}
+
+.stack-width,
+.deco-width {
+  text-align: right;
+}
+
+/* @end */
+
+/* @group Grid */
+
+.left {
+  float: right;
+}
+
+.right {
+  float: left;
+}
+
+.col.right {
+  margin-left: 1%;
+  margin-right: 0;
+  padding-left: 1%;
+  padding-right: 0;
+}
+
+.col.left {
+  margin-left: 0;
+  margin-right: 1%;
+  padding-right: 1%;
+  padding-left: 0;
+}
+
+.col.right:first-child {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.col.left:first-child {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.sidebar.left {
+  margin-left: 1.5%;
+  margin-right: 0;
+  padding-left: 1%;
+  padding-right: 0;
+}
+
+.sidebar.right {
+  margin-left: 0;
+  margin-right: 1.5%;
+  padding-left: 0;
+  padding-right: 1%;
+}
+
+/* @end */
+
+/* @group Regions */
+
+.stack-main .col-c ul,
+.stack-main .col-c ol {
+  padding: 0 1.5385em 0 0; /* 20px */
+}
+
+.region-header .block {
+  clear: left;
+  float: left;
+}
+
+/* @end */
+
+/* @group Block */
+
+.block {
+  clear: right;
+}
+
+.more-link { /* System RTL Overrides */
+  text-align: left;
+}
+
+/* @end */
+
+/* @group Lists */
+
+.block ul { /* System Overrides */
+  padding-left: 0;
+  padding-right: 1.3846em; /* 16px */
+}
+
+/* @group Links */
+
+ul.links {
+  padding-right: 0;
+}
+
+ul.links.inline {
+  float: right;
+}
+
+ul.links.inline + ul.links.inline {
+  margin-left: 0;
+  margin-right: 0.4615em;
+  padding-left: 0;
+  padding-right: 0.4615em;
+}
+
+ul.links.actions {
+  float: left;
+}
+
+ul.links li {
+  float: right;
+}
+
+ul.links li + li {
+  margin-left: 0;
+  margin-right: 0.2308em;
+  padding-left: 0;
+  padding-right: 0.2308em;
+}
+
+/* @end */
+
+ul.menu { /* System RTL Override */
+  text-align:right;
+}
+
+ul.menu li { /* System Override */
+  margin-right: 0;
+}
+
+.item-list ul, /* System Override */
+.action-links {
+  padding-left: 0;
+  padding-right: 1.3846em; /* 18px */
+}
+
+.search-results {
+  padding-right: 0;
+}
+
+/* @end */
+
+/* @group Horizontal List */
+
+.horizontal ul {
+  padding-right: 0;
+}
+
+.horizontal .menu li {
+  float: right;
+}
+
+.horizontal .menu li {
+  margin-left: 0;
+  margin-right: 0.6923em;
+  padding-left: 0;
+  padding-right: 0.6923em;
+}
+
+.horizontal .menu li.first {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.col-align-last-right .last .menu,
+.col-align-right.horizontal .menu {
+  float: left;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .more-indicator {
+  left: 0;
+  right: auto;
+}
+
+.menu-dropdown .menu .expanded {
+  padding-right: 0;
+}
+
+.menu-dropdown .menu .expanded + li {
+  margin-left: 0;
+}
+
+.menu-dropdown .menu .menu li {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.menu-dropdown .menu .menu li > a > .more-indicator {
+  background-position: right top;
+  left: 5px;
+  right: auto;
+}
+
+.menu-dropdown .menu .menu li:hover > a > .more-indicator {
+  background-position: right center;
+}
+
+.menu-dropdown .menu .menu li > .active > .more-indicator {
+  background-position: right bottom;
+}
+
+.menu-dropdown .menu .menu li:hover > .active > .more-indicator {
+  background-position: right center;
+}
+
+.menu-dropdown .menu .menu li > .active-trail > .more-indicator {
+  background-position: right bottom;
+}
+
+.menu-dropdown .menu .menu li:hover > .active-trail > .more-indicator {
+  background-position: right center;
+}
+
+/* @end */
+
+/* @group Table */
+
+.sidebar td,
+.sidebar th {
+  padding-left: 0.4615em;
+  padding-right: 0.4615em;
+}
+
+/* @end */
+
+/* @group Tabs */
+
+.tabs ul.primary { /* System Override */
+  padding: 0 0.4615em 0 0;
+}
+
+.tabs ul.primary li + li {
+  margin-left: 0;
+  margin-right: 0.4615em;
+}
+
+/* @end */
+
+/* @group Comments */
+
+.comment-wrapper .links,
+.comment-by-viewer .links {
+  float: left;
+}
+
+.comment .links li {
+  float: left;
+}
+
+.comment .links li + li {
+  margin-left: 0.2308em;
+  margin-right: 0;
+  padding-left: 0.2308em;
+  padding-right: 0;
+}
+
+.user-picture {
+  float: right;
+  margin: 0 0 0 1em;
+}
+
+/* @end */
+
+/* @group Customer */
+
+.simpleview-teasers .node-customer {
+  float: right;
+  margin: 0 0 0 2%;
+}
+
+/* @end */
+
+/* @group FAQ */
+
+.faq-item-question-label {
+  float: right;
+  margin: 0 0 0 0.5em;
+}
+
+/* @end */
+
+/* @group Follow Links */
+
+.follow-links .follow-link {
+  padding-left: 0;
+  padding-right: 28px;
+}
+
+a.follow-link {
+  background-position: 100% 0;
+}
+
+/* @end */
+
+/* @group Logo */
+
+.logo {
+  float: right;
+  margin-left: 2em;
+  margin-right: 0;
+}
+
+/* @end */
+
+/* @group Testimonials */
+
+.field-name-field-testimonial-author {
+  text-align: left;
+}
+
+.field-name-field-testimonial-affiliation {
+  margin-left: 0;
+  margin-right: 0.3em;
+}
+
+/* @end */
+
+/* @group User Profile */
+
+.profile .user-picture {
+  float: left;
+  margin: 0 1em 1em 0;
+}
+
+/* @end */
+
+/* @group Mailing List */
+
+.block-mailing-list label {
+  float: right;
+}
+
+.block-mailing-list input[type="text"] {
+  float: right;
+}
+
+.block-mailing-list .form-submit {
+  float: left;
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+/* @end */
+
+/* @group Product Feature */
+
+.stack-precontent .field-type-file {
+  float: right;
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+/* @end */
+
+/* @group Search */
+
+.col-align-last-right .col.last .block-search {
+  text-align: left;
+}
+
+.search-results .search-snippet-info {
+  padding-right: 0; /* System Override */
+}
+
+.search-form fieldset input {
+  margin-right: 0; /* System Override */
+}
+
+.search-form fieldset input[type="checkbox"] {
+  margin-left: 2px;
+  margin-right: 0;
+}
+
+/* @end */
+
+/* @group Forum */
+
+#forum tr td.forum { /* System Override */
+  padding-left: 0;
+  padding-right: 1.0769em;
+}
+
+.forum th.active .active img {
+  left: 0;
+  padding: 3px 4px 4px 3px;
+  right: auto;
+}
+
+/* @end */
+
+/* @group Toolbar */
+
+#toolbar {
+  direction: ltr; /* We are not RTLing toolbar unless we enable RTL core style sheets with locale.module */
+}
+
+/* @end */
+
+/* @group Fields */
+
+fieldset {
+  padding-left: 0;
+  padding-right: 1em;
+}
+
+.filter-wrapper .form-item { /* System Override */
+  float: right;
+}
+
+.filter-help { /* System Override */
+  float: left;
+}
+
+.filter-guidelines { /* System Override */
+  clear: right;
+}
+
+.password-strength { /* System gap */
+  margin-left: 10px;
+}
+
+.form-submit ~ * {
+  margin-right: 0.6923em;
+}
+
+/* @end */
+
+/* @group media gallery */
+
+.mg-col .node-media-gallery.node-teaser {
+  float: right;
+}
+
+.media-gallery-media > .field-items > .field-item {
+  float: right;
+}
+
+.media-gallery-detail-info .media-license {
+  left: 0;
+  right: auto;
+}
+
+.media-gallery-detail {
+  float: right;
+  margin-left: 1em;
+  margin-right: 0;
+}
+
+.media-gallery-detail-image-info-wrapper {
+  clear: left;
+  float: left;
+}
+
+/* @end */
+
+/* @group User Login */
+
+#user-login-form li {
+  text-align: right;
+}
+
+#user-login-form {
+  text-align: right;
+}
+
+/* @end */
+
+/* @group Powered by Drupal Gardens */
+.powered-by-drupal-gardens-text {
+  text-align: left;
+}
+
+/* @group IE */
+
+/* @group IE7 */
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */

@@ -1,0 +1,13 @@
+.view table td {
+  vertical-align: top;
+}
+.view form input.form-text,
+.view form select {
+  width: 180px;
+}
+.view .description {
+  display: none;
+}
+.view form select#edit-status {
+  width: auto;
+}

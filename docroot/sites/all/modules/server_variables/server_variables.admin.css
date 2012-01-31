@@ -1,0 +1,23 @@
+
+.page-admin-config-system-server-variables .form-type-textfield {
+  padding-top: 0;
+}
+
+.page-admin-config-system-server-variables .form-type-checkbox .form-checkbox {
+  width: 16px;
+}
+
+.page-admin-config-system-server-variables .form-type-checkbox label {
+  font-weight: bold;
+}
+
+.page-admin-config-system-server-variables .form-type-textfield label {
+  float: left;
+  font-weight: normal;
+  margin-left: 20px;
+  width: 60px;
+}
+
+.page-admin-config-system-server-variables .form-type-textfield .description {
+  margin-left: 80px;
+}

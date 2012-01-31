@@ -1,0 +1,65 @@
+/**
+ * @file
+ * Initial RTL style definition of the Impact theme for Acquia Gardens.
+ */
+
+/* @group Regions */
+ 
+/* @group Navigation */
+ 
+.stack-navigation .menu li {
+  background-position: right top;
+  margin-left: 0;
+  margin-right: 1.6923em;
+  padding-left: 0;
+  padding-right: 1.6923em;
+}
+ 
+ /* @end */
+  
+  /* @end */
+ 
+ /* @group Inflections */
+ 
+ /* @group Dropdown */
+ 
+.menu-dropdown .menu .expanded a {
+  padding-left: 24px;
+  padding-right: 1.6923em;
+}
+ 
+.menu-dropdown .menu li > a > .more-indicator {
+  left: 0;
+  right: auto;
+}
+ 
+/* @end */
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE6 */
+
+/* @end */
+
+/* @group IE7 */
+
+#gardens_ie7 .menu-dropdown .pulldown-processed > li {
+  margin-left: 1.3846em;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0.6923em;
+}
+
+#gardens_ie7 .menu-dropdown .pulldown-processed > li > a {
+  padding-right: 0.6923em;
+}
+
+/* @end */
+
+/* @group IE8 */
+
+/* @end */
+
+/* @end */

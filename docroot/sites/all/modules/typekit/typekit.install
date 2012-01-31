@@ -1,0 +1,28 @@
+<?php
+// $Id: typekit.install,v 1.4 2010/05/17 14:42:45 jpamental Exp $
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Typekit module.
+ *
+ * @ingroup typekit
+ */
+
+/**
+ * Implements hook_install().
+ */
+function typekit_install() {
+  // Do install stuff
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function typekit_uninstall() {
+  // Get module variables.
+  $variables = db_query("SELECT name FROM variable WHERE name LIKE :pattern", array(":pattern" => db_like('typekit_') . '%'))->fetchCol();
+  // Remove variables.
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}

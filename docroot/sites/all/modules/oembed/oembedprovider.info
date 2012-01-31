@@ -1,0 +1,14 @@
+package = oEmbed
+name = oEmbed Provider
+description = Turns your site into a oEmbed provider
+core = 7.x
+dependencies[] = oembedcore
+files[] = oembedprovider.inc
+files[] = oembedprovider.module
+
+; Information added by drupal.org packaging script on 2011-11-20
+version = "7.x-0.1-beta2"
+core = "7.x"
+project = "oembed"
+datestamp = "1321751977"
+

@@ -1,0 +1,103 @@
+<?php
+
+
+class JavaScriptLibrariesCustomTestCase extends DrupalWebTestCase {
+
+  function setUp($modules = array()) {
+    $modules[] = 'javascript_libraries';
+    parent::setUp($modules);
+  }
+
+  public static function getInfo() {
+    return array(
+      'name' => 'test for custom JS',
+      'description' => 'Test management of custom libraries.',
+      'group' => 'JavaScript Libraries Manager',
+    );
+  }
+
+  /**
+   * Test adding and removing custom URLs and files.
+   */
+  public function testAddRemoveCustom() {
+    // Verify that anonymous users cannot access admin pages.
+    $this->drupalGet('admin/config/system/javascript-libraries/custom');
+    $this->assertResponse(403, 'admin/config/system/javascript-libraries/custom');
+    $this->drupalGet('admin/config/system/javascript-libraries/custom/add');
+    $this->assertResponse(403, 'admin/config/system/javascript-libraries/custom/add');
+    $web_user = $this->drupalCreateUser(array('administer site configuration'));
+    $this->drupalLogin($web_user);
+    $edit = array();
+    $edit["name"] = $this->randomName();
+    $edit["library_type"] = 'external';
+    $edit["external_url"] = url('<front>', array('absolute' => TRUE)) . 'misc/timezone.js';
+    $edit["scope"] = 'header';
+    $this->drupalPost('admin/config/system/javascript-libraries/custom/add', $edit, t('Save'));
+    $this->drupalGet('admin/config/system/javascript-libraries/custom');
+    $this->assertText($edit["name"], 'Found added link');
+    // Get the current variable value from the DB.
+    $value = db_query("SELECT value FROM {variable} WHERE name = :name", array(':name' => 'javascript_libraries_custom_libraries'))->fetchField();
+    $custom = unserialize($value);
+    list($id, $library) = each($custom);
+    $this->assertEqual($library['scope'], 'header', 'Library is in the header');
+    // Check that we have the edit and delete links.
+    $this->assertLinkByHref("admin/config/system/javascript-libraries/custom/$id/edit");
+    $this->assertLinkByHref("admin/config/system/javascript-libraries/custom/$id/delete");
+    // Check that this JS file is in the page.
+    $this->drupalGet('node');
+    $this->assertPattern('@<script type="text/javascript" src="http[^"]+/misc/timezone.js"></script>@');
+    $edit = array();
+    $edit["libraries[$id][scope]"] = 'disabled';
+    $edit["libraries[$id][weight]"] = '2';
+    $this->drupalPost('admin/config/system/javascript-libraries/custom', $edit, t('Save'));
+    $value = db_query("SELECT value FROM {variable} WHERE name = :name", array(':name' => 'javascript_libraries_custom_libraries'))->fetchField();
+    $custom = unserialize($value);
+    list($id, $library) = each($custom);
+    $this->assertEqual($library['scope'], 'disabled', 'Library is disabled');
+    // Check that this JS file is not in the page.
+    $this->drupalGet('node');
+    $this->assertNoPattern('@<script type="text/javascript" src="http[^"]+/misc/timezone.js"></script>@');
+  }
+}
+
+class JavaScriptLibrariesDrupalTestCase extends DrupalWebTestCase {
+
+  function setUp($modules = array()) {
+    $modules[] = 'javascript_libraries';
+    parent::setUp($modules);
+  }
+
+  public static function getInfo() {
+    return array(
+      'name' => 'test for Drupal JS',
+      'description' => 'Test management of built-in libraries.',
+      'group' => 'JavaScript Libraries Manager',
+    );
+  }
+
+  /**
+   * Test adding and removing build-in libraries.
+   */
+  function testEnableDisableLibrary() {
+    variable_set('preprocess_js', FALSE);
+    // Verify that anonymous users cannot access admin pages.
+    $this->drupalGet('admin/config/system/javascript-libraries');
+    $this->assertResponse(403, 'admin/config/system/javascript-libraries');
+    $this->drupalGet('admin/config/system/javascript-libraries/default');
+    $this->assertResponse(403, 'admin/config/system/javascript-libraries/default');
+    $web_user = $this->drupalCreateUser(array('administer site configuration'));
+    $this->drupalLogin($web_user);
+    $edit = array();
+    $edit['enable[system-ui-datepicker]'] = TRUE;
+    $this->drupalPost('admin/config/system/javascript-libraries', $edit, t('Save'));
+    $this->drupalGet('admin/config/system/javascript-libraries');
+    $this->assertText('jQuery UI: Autocomplete', 'Found jQuery UI: Autocomplete library');
+    $this->assertFieldChecked("edit-enable-system-ui-datepicker", 'jQuery UI datepicker is marked as enabled');
+    // Make sure the script does not appear in the head of this admin page.
+    $this->assertNoPattern('@<script type="text/javascript" src="http[^"]+/misc/ui/jquery.ui.datepicker.min.js\?[^"]+"></script>@');
+    // Make sure the script appears in the head of a non-admin page.
+    $this->drupalGet('node');
+    $this->assertPattern('@<script type="text/javascript" src="http[^"]+/misc/ui/jquery.ui.datepicker.min.js\?[^"]+"></script>@');
+  }
+}
+

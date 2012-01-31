@@ -1,0 +1,197 @@
+<?php
+
+/**
+ * @file
+ * Main module file for the font_management module.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function font_management_help($section) {
+  switch ($section) {
+    case 'admin/help#font-management':
+    case 'admin/config/user-interface/font-management':
+      $output = '<p>' . t('Use professional fonts from third-party services.') . '</p>';
+      return $output;
+
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function font_management_permission() {
+  return array('administer third-party fonts' => array(
+      'title' => t('Administer professional fonts from other services'),
+    ));
+}
+
+/**
+ * Implements hook_menu().
+ */
+function font_management_menu() {
+  $items = array();
+
+  $items['admin/config/user-interface/font-management'] = array(
+    'title' => 'Font management',
+    'description' => 'Administrative settings for professional third-party fonts.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('font_management_admin_settings'),
+    'access arguments' => array('administer third-party fonts'),
+    'file' => 'font_management.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_init().
+ */
+function font_management_init() {
+  if (variable_get('font_management_typekit_enable', FALSE)) {
+    font_management_add_typekit_code();
+  }
+  if (variable_get('font_management_webfonts_enable', FALSE)) {
+    font_management_add_webfonts_code();
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function font_management_cron() {
+  $token = variable_get('font_management_webfonts_token', '');
+  if (empty($token)) {
+    return;
+  }
+  // See whether the user's Fonts.com account is paid or free. This information
+  // is used to determine whether to add CSS to the page (faster, but allowed
+  // for paid accounts only) or JS (the only method allowed for free accounts).
+  try {
+    $monotype = FontManagementMonotype::getInstance();
+    if ($monotype->isFreeAccount($token)) {
+      variable_set('font_management_webfonts_free', TRUE);
+    }
+    else {
+      variable_set('font_management_webfonts_free', FALSE);
+    }
+  }
+  catch (FontManagementMonotypeException $e) {
+    font_management_monotype_handle_exception($e, FALSE);
+  }
+}
+
+/**
+ * Generate the Fonts.com CSS/JS snippet and add it to the page.
+ */
+function font_management_add_webfonts_code() {
+  $project_key = variable_get('font_management_webfonts_project', FALSE);
+  if ($project_key) {
+    if (variable_get('font_management_webfonts_free', TRUE)) {
+      // For free accounts, add fonts via JS.
+      drupal_add_js('http://fast.fonts.com/jsapi/' . check_plain($project_key) . '.js', 'external');
+    }
+    else {
+      // For paid accounts, add fonts via the faster CSS method.
+      drupal_add_css('http://fast.fonts.com/cssapi/' . check_plain($project_key) . '.css', array('type' => 'external', 'every_page' => TRUE));
+    }
+  }
+}
+
+/**
+ * Generate the Typekit JS snippet and add it to the page.
+ */
+function font_management_add_typekit_code() {
+  $key = variable_get('font_management_typekit_key', '');
+
+  // If a key exists, add the supporting code to the page.
+  if (!empty($key)) {
+    // Include the Typekit code.
+    drupal_add_js('http://use.typekit.com/' . check_plain($key) . '.js', 'external');
+    drupal_add_js('try{Typekit.load();}catch(e){};', 'inline');
+  }
+}
+
+/**
+ * Handles the specified Monotype exception.
+ *
+ * @param {FontManagementMonotypeException} $e
+ *   The exception.
+ * @param $display_errors
+ *   (optional) Whether or not to display errors to the screen (if not
+ *   displayed to the screen, errors will be written to watchdog instead).
+ *   Defaults to TRUE.
+ */
+function font_management_monotype_handle_exception($e, $display_errors = TRUE) {
+  // The content of some of the messages depends on whether or not we are
+  // already on the admin page.
+  $admin_path = 'admin/config/user-interface/font-management';
+  $on_admin_page = $admin_path == current_path();
+
+  $classname = get_class($e);
+  switch ($classname) {
+    case 'FontManagementMonotypeInvalidResponseException':
+      if ($display_errors) {
+        drupal_set_message(t('An invalid response was received from Fonts.com.  Please try again.'), 'error');
+      }
+      else {
+        watchdog('font_management', 'An invalid response was received from Fonts.com.  Please try again.', array(), WATCHDOG_ERROR);
+      }
+      return;
+
+    case 'FontManagementMonotypeUnknownProjectException':
+      if ($on_admin_page) {
+        if ($display_errors) {
+          drupal_set_message(t('An invalid Fonts.com project identifier has been specified.  Please verify that you have entered the correct value.'), 'error');
+        }
+        else {
+          watchdog('font_management', 'An invalid Fonts.com project identifier has been specified.  Please verify that you have entered the correct value.', array(), WATCHDOG_ERROR);
+        }
+      }
+      else {
+        if ($display_errors) {
+          drupal_set_message(t('An invalid Fonts.com project identifier has been specified.  Please visit the <a href="@config-page">configuration page</a> and verify the project identifier.', array('@config-page' => url($admin_path))), 'error');
+        }
+        else {
+          watchdog('font_management', 'An invalid Fonts.com project identifier has been specified.  Please visit the <a href="@config-page">configuration page</a> and verify the project identifier.', array('@config-page' => url($admin_path)), WATCHDOG_ERROR);
+        }
+      }
+      return;
+
+    default:
+      // For some reason, authentication errors don't always come through as a
+      // 'FontManagementMonotypeAuthenticationException', so check for an
+      // expected string and print the authentication-related error message if
+      // we see that also.
+      if ($classname == 'FontManagementMonotypeAuthenticationException' || strpos($e->getMessage(), 'AuthenticationFailed') !== FALSE) {
+        if ($on_admin_page) {
+          if ($display_errors) {
+            drupal_set_message(t('The Fonts.com authentication key is not recognized.  Please verify that you have entered the correct value.'), 'error');
+          }
+          else {
+            watchdog('font_management', 'The Fonts.com authentication key is not recognized.  Please verify that you have entered the correct value.', array(), WATCHDOG_ERROR);
+          }
+        }
+        else {
+          if ($display_errors) {
+            drupal_set_message(t('The Fonts.com authentication key is not recognized.  Please visit the <a href="@config-page">configuration page</a> and verify the authentication key.', array('@config-page' => url($admin_path))), 'error');
+          }
+          else {
+            watchdog('font_management', 'The Fonts.com authentication key is not recognized.  Please visit the <a href="@config-page">configuration page</a> and verify the authentication key.', array('@config-page' => url($admin_path)), WATCHDOG_ERROR);
+          }
+        }
+      }
+      // Handle the normal default error case here.
+      else {
+        if ($display_errors) {
+          drupal_set_message(t('An unrecognized error occurred when communicating with Fonts.com.  (@message)', array('@message' => $e->getMessage())), 'error');
+        }
+        else {
+          watchdog('font_management', 'An unrecognized error occurred when communicating with Fonts.com.  (@message)', array('@message' => $e->getMessage()), WATCHDOG_ERROR);
+        }
+      }
+      return;
+  }
+}

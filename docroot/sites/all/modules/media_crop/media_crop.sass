@@ -1,0 +1,190 @@
+.media-crop-invisible
+  display: none
+
+form#media-format-form
+  div.media-thumbnail
+    overflow: hidden
+  img.crop-active-button,
+  img.scale-active-button
+    display: none
+    margin: 2px
+    float: left
+    cursor: pointer
+  img.crop-button,
+  img.scale-button
+    margin: 2px
+    float: left
+    cursor: pointer
+  span.crop-description
+    display: none
+    margin: 4px 2em
+    float: left
+    vertical-align: middle
+  div.media-thumbnail img:hover
+    border: none
+  div.media-thumbnail img
+    border: none
+    vertical-align: middle
+  div.media-item
+    width: 350px
+    height: 350px
+    float: none
+    clear: left
+    border: none
+  fieldset
+    border: none
+    margin: 0
+    padding: 0
+    float: right
+  fieldset.crop-dimensions-container
+    display: none
+    float: left
+    padding: 20px 0 0 0
+    width: 180px
+    .fieldset-legend
+      margin: 0
+      height: 20px
+      display: block
+      float: left
+    .fieldset-wrapper
+      float: left
+      display: block
+      img.crop-aspect-ratio-lock
+        float: left
+        cursor: pointer
+        padding: 9px 0px
+      img.crop-aspect-ratio-unlock
+        display: none
+        float: left
+        cursor: pointer
+        padding: 9px 0px
+      div.crop-dimensions
+        padding: 9px 0px 9px 5px
+        float: left
+        .label
+          display: block
+          float: left
+          width: 60px
+          font-weight: bold
+        .value
+          font-weight: normal
+  fieldset.scale-image-container
+    display: none
+    float: left
+    padding: 20px 0 0 0
+    width: 180px
+    .fieldset-legend
+      margin: 0
+      height: 20px
+      display: block
+      float: left
+    .fieldset-wrapper
+      float: left
+      display: block
+      padding-top: 10px
+      .form-item
+        padding: 0
+        float: left
+        label
+          display: block
+          float: left
+          width: 60px
+          font-weight: bold
+        input
+          display: block
+          float: left
+        .field-suffix
+          display: block
+          float: left
+
+html.js
+  fieldset.crop-dimensions-container,
+  fieldset.scale-image-container
+    &.collapsed,
+    &.collapsible
+      .fieldset-legend
+        background: none
+
+div.rotated-images img.rotated
+  display: none
+
+img.rotate-button
+  margin: 2px
+  float: left
+  cursor: pointer
+
+div.form-item-format
+  float: left
+  label
+    display: inline
+
+div.crop-override-description,
+div.image-style-description,
+div.scale-image-description
+  display: none
+  float: left
+  font-style: italic
+  font-size: 95%
+  margin: 0 0 9px 0
+  padding: 0 0 0 26px
+  background: transparent url(warning.png) no-repeat left center
+
+div.form-item-image-style
+  float: right
+  padding: 0
+  select
+    padding-right: 10px
+    background: transparent url(select_arrow.png) right 65% no-repeat
+    border: none
+    color: #0074BD
+    -webkit-appearance: initial
+    -moz-appearance: window
+    appearance: initial
+    &:focus
+      border: 1px dashed #0074BD
+      outline: none
+      color: #0074BD
+      border-radius: 0
+
+
+img.rotated
+  width: auto
+  height: 100%
+  display: inline-block
+
+img.rotated.rotated-180
+  width: 100%
+  height: auto
+
+div.crop-status
+  padding-top: 9px
+  float: right
+
+div.format-and-crop-container
+  width: 350px
+  overflow: hidden
+
+@mixin animate-rotation($from, $to)
+  $diff: $from - $to
+  $from_anim: $from
+  $to_anim: $to
+  @if $diff == 270
+    $from_anim: 270
+    $to_anim: 359
+  @else if $diff == -270
+    $from_anim: 359
+    $to_anim: 270
+  @each $vendor in -webkit, -moz, -o, -ms
+    @#{$vendor}-keyframes rotate-#{$from}-#{$to}
+      from
+        #{$vendor}-transform: rotate(#{$from_anim}deg)
+      to
+        #{$vendor}-transform: rotate(#{$to_anim}deg)
+    .image-rotate-#{$from}-#{$to}
+      #{$vendor}-animation: rotate-#{$from}-#{$to} 0.25s linear
+      #{$vendor}-transform: rotate(#{$to}deg)
+
+@each $from in 0, 90, 180, 270
+  @each $to in 0, 90, 180, 270
+    @if $from != $to
+      @include animate-rotation($from, $to)

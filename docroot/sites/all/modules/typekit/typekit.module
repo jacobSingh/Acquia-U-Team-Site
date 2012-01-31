@@ -1,0 +1,94 @@
+<?php
+// $Id: typekit.module,v 1.6 2010/05/17 14:42:45 jpamental Exp $
+
+/**
+ * @file
+ * Main module file for Typekit module
+ */
+
+/**
+ * Implements hook_help().
+ */
+function typekit_help($section) {
+  switch ($section) {
+    // Help page for Typekit
+    case 'admin/help#typekit':
+      $output = '<p>' . t('Easy way to include Typekit in your site.') . '</p>';
+      return $output;
+
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function typekit_permission() {
+  return array('administer typekit' => array(
+      'title' => t('Administer typekit'),
+    ));
+}
+
+/**
+ * Implements hook_menu().
+ */
+function typekit_menu() {
+  $items = array();
+
+  // Admin Settings.
+  $items['admin/config/user-interface/typekit'] = array(
+    'title' => 'Typekit settings',
+    'description' => 'Site settings for Typekit.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('typekit_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer typekit'),
+    'file' => 'includes/typekit.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+
+
+  return $items;
+}
+
+/**
+ * Implements hook_init().
+ */
+function typekit_init() {
+  $enabled = variable_get('typekit_enable', TRUE);
+  $key = variable_get('typekit_key', '');
+  $visibility = variable_get('typekit_visibility_settings', 0);
+  $visibility_pages = variable_get('typekit_visibility_pages', '');
+
+  // Match path if necessary (taken from block module)
+  if ($visibility_pages) {
+    if ($visibility < 2) {
+      $path = drupal_get_path_alias($_GET['q']);
+      // Compare with the internal and path alias (if any).
+      $page_match = drupal_match_path($path, $visibility_pages);
+      if ($path != $_GET['q']) {
+        $page_match = $page_match || drupal_match_path($_GET['q'], $visibility_pages);
+      }
+      // When $visibility has a value of 0, the block is displayed on
+      // all pages except those listed in $visibility_pages. When set to 1, it
+      // is displayed only on those pages listed in $visibility_pages.
+      $page_match = !($visibility xor $page_match);
+    }
+    elseif (module_exists('php')) {
+      $page_match = php_eval($visibility_pages);
+    }
+    else {
+      $page_match = FALSE;
+    }
+  }
+  else {
+    $page_match = TRUE;
+  }
+
+  // Check for key
+  if (!empty($key) && $page_match && $enabled) {
+    // Include the TypeKit code.
+    drupal_add_js('http://use.typekit.com/' . check_plain($key) . '.js', 'external');
+    drupal_add_js('try{Typekit.load();}catch(e){};', 'inline');
+  }
+}

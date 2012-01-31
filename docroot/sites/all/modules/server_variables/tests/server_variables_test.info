@@ -1,0 +1,10 @@
+name = Analytics variables test
+description = Support module for testing Analytics variables.
+package = Testing
+core = 7.x
+hidden = TRUE
+version = "7.x-1.x"
+datestamp = "1325285810"
+project = ""
+; url = http://git.drupal.org/sandbox/drupalgardens/1389764.git
+; commit = 4850a54712dac6407218773dd06a13a4c6193e6e

@@ -1,0 +1,19 @@
+
+/**
+ * Preview of the automatic alias.
+ */
+.form-item-path-pathauto-live-preview {
+  display: none; /* Hide from users without JS. Shown via Drupal.states. */
+}
+
+.form-item-path-pathauto-live-preview label {
+  display: inline;
+}
+
+.form-item-path-pathauto-live-preview-ajax-trigger {
+  display: none; /* Hide from user interaction. "Clicked" via JS only. */
+}
+
+.pathauto-live-preview-needs-update {
+  color: #999;
+}

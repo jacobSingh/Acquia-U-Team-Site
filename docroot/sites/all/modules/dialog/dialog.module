@@ -1,0 +1,250 @@
+<?php
+
+/**
+ * @file
+ * The Dialog module provides an API for displaying and interacting with
+ * jQuery UI Dialog modals.
+ *
+ * This API is an integration with Drupal's AJAX Framework.  Using the
+ * ajax "commands" provided, dialogs can be displayed, modified, and
+ * closed.
+ *
+ * @link
+ *   http://api.drupal.org/api/group/ajax/7
+ *   Drupal AJAX framework documentation.
+ */
+
+/**
+ * Implementation of hook_page_alter().
+ */
+function dialog_page_alter(&$page) {
+  // Alter the current page to display as a dialog box if desired.
+  if ($options = dialog_display()) {
+    // Construct the contents of the dialog box.
+    $content = render(drupal_set_page_content());
+
+    // Cleanse the dialog options.
+    if (!isset($options['title'])) {
+      $options['title'] = drupal_get_title();
+    }
+
+    // Send over the commands.
+    $commands = array();
+    $commands[] = dialog_command_display($content, $options);
+    ajax_render($commands);
+  }
+}
+
+/**
+ * Provides an easy way of representing the current page context as a dialog.
+ *
+ * @param $options
+ *   (optional) If set, will become the options that are used when displaying the dialog
+ *   to the user. See the jQuery UI Dialog options documentation for more
+ *   information on this: http://jqueryui.com/demos/dialog/ .
+ *
+ * @return
+ *   FALSE if the page is not to become a dialog box. Otherwise, will be an
+ *   array of options that were previously set through the call to
+ *   dialog_display. These options define how the resulting dialog box should
+ *   be displayed.
+ */
+function dialog_display($options = NULL) {
+  $dialog = &drupal_static(__FUNCTION__, FALSE);
+  if (isset($options)) {
+    // Make sure that an array is passed in as the options.
+    $dialog = is_array($options) ? $options : array('dialogClass' => drupal_html_class($_GET['q']));
+  }
+  return $dialog;
+}
+
+/**
+ * Implement hook_library().
+ */
+function dialog_library() {
+  $libraries['dialog'] = array(
+    'title' => 'Dialog',
+    'website' => 'http://drupal.org/project/dialog',
+    'version' => '7.x',
+    'js' => array(
+      'misc/ajax.js' => array('weight' => JS_DEFAULT - 5),
+      drupal_get_path('module', 'dialog') . '/dialog.js' => array('weight' => JS_DEFAULT + 5),
+      drupal_get_path('module', 'dialog') . '/jquery.xLazyLoader.js' => array('weight' => JS_LIBRARY),
+    ),
+    'dependencies' => array(
+      array('system', 'form'),
+      array('system', 'ui.resizable'),
+      array('system', 'ui.draggable'),
+      array('system', 'ui.dialog'),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Check to see if the incoming menu item is able to use dialogs.
+ *
+ * @TODO: Move this to Drupal core?
+ */
+function dialog_js_load($js = 'nojs') {
+  if ($js == 'ajax') {
+    return TRUE;
+  }
+  return 0;
+}
+
+/**
+ * Implement hook_ajax_render_alter().
+ *
+ * Using the xLazyLoader library and command, load additional css and
+ * javascript into the page.
+ *
+ * TODO: Deal with overloading one theme's css onto another.
+ */
+function dialog_ajax_render_alter(&$commands) {
+  if (dialog_display()) {
+    $loader = array();
+    $allowed_media = array('all', 'screen');
+    // Inject additional JavaScript and CSS to the browser's client.
+    $css = drupal_add_css();
+    drupal_alter('css', $css);
+    foreach ($css as $data => $options) {
+      if ($options['type'] == 'file' && in_array($options['media'], $allowed_media)) {
+        $loader['css'][] = base_path() . $options['data'];
+      }
+    }
+    $scripts = drupal_add_js();
+    drupal_alter('js', $scripts);
+    foreach ($scripts as $data => $options) {
+      if ($options['type'] == 'file') {
+        $loader['js'][] = base_path() . $options['data'];
+      }
+    }
+    if (!empty($loader)) {
+      array_unshift($commands, dialog_command_xlazyloader($loader));
+    }
+
+    // Prepend status messages to the dialog content.
+    $commands[] = ajax_command_prepend('#dialog', theme('status_messages'));
+  }
+}
+
+/**
+ * Process a form and prepare it for the dialog.
+ */
+function dialog_process_ajax_form($element) {
+  dialog_fix_element_id($element);
+  return $element;
+}
+
+/**
+ * Fix element and its chilren's id's so they are unique in the page.
+ */
+function dialog_fix_element_id(&$element) {
+  if (!isset($element['#id'])) {
+    $element['#id'] = drupal_html_id('edit-' . implode('-', $element['#parents']));
+  }
+  $element['#id'] .= '-dialog';
+  foreach (element_children($element) as $child) {
+    // Don't squash an existing tree value.
+    if (!isset($element[$child]['#tree'])) {
+      $element[$child]['#tree'] = $element['#tree'];
+    }
+
+    // Don't squash existing parents value.
+    if (!isset($element[$child]['#parents'])) {
+      // Check to see if a tree of child elements is present. If so,
+      // continue down the tree if required.
+      $element[$child]['#parents'] = $element[$child]['#tree'] && $element['#tree'] ? array_merge($element['#parents'], array($child)) : array($child);
+    }
+
+    dialog_fix_element_id($element[$child]);
+  }
+}
+
+/**
+ * Creates a Drupal AJAX command to open the modal with a loading animation.
+ */
+function dialog_command_loading() {
+  return array(
+    'command' => 'dialog_loading',
+  );
+}
+
+/**
+ * Creates a Drupal AJAX command to place HTML within the modal and open it.
+ *
+ * @param $content
+ *   The contents of the dialog box. This can be either straight HTML, or a
+ *   renderable array.
+ * @param $options
+ *   An array of ui.dialog options. See the
+ *   {@link http://jqueryui.com/demos/dialog/ jQuery UI Dialog} documentation
+ *   for available options.
+ */
+function dialog_command_display($content, $options = array()) {
+  return array(
+    'command' => 'dialog_display',
+    'content' => render($content),
+    'options' => $options,
+  );
+}
+
+/**
+ * Creates a Drupal AJAX command to close the modal.
+ */
+function dialog_command_dismiss() {
+  return array(
+    'command' => 'dialog_dismiss',
+  );
+}
+
+/**
+ * Force a client-side redirect.
+ *
+ * @param $path
+ *   The url to be redirected to.
+ * @param $options
+ *   Any additional options for the URL.
+ */
+function dialog_command_redirect($path, $options = array()) {
+  $options['absolute'] = TRUE;
+  return array(
+    'command' => 'dialog_redirect',
+    'url' => url($path, $options),
+  );
+}
+
+/**
+ * Force a client-side reload.
+ */
+function dialog_command_reload() {
+  return array(
+    'command' => 'dialog_reload',
+  );
+}
+
+/**
+ * Creates a Drupal AJAX 'xLazyLoader' command.
+ *
+ * The 'xLazyLoader' command loads additional JavaScript, CSS and images through
+ * the xLazyLoader library (http://code.google.com/p/ajaxsoft/wiki/xLazyLoader).
+ *
+ * This command is implemented by Drupal.ajax.prototype.commands.xlazyloader()
+ * defined in dialog.js.
+ *
+ * @param $options
+ *   An associative of what JavaScript, CSS or images the client should load.
+ *   - "js": An array of JavaScript files to load.
+ *   - "css": An array of CSS files to load.
+ *   - "img": An array of images to load.
+ *
+ * @return
+ *   An array suitable for use with the ajax_render() function.
+ */
+function dialog_command_xlazyloader($options = array()) {
+  return array(
+    'command' => 'xlazyloader',
+    'options' => $options,
+  );
+}

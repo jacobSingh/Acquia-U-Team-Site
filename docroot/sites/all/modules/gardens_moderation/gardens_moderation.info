@@ -1,0 +1,6 @@
+name = Gardens moderation
+description = Content and comment moderation features for site maintainers.
+dependencies[] = views_bulk_operations
+; Adding as a direct dependency to harden security.
+dependencies[] = actions_permissions
+core = 7.x

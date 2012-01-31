@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * @file
+ * Helps modules define fields without requiring any instances to exist.
+ */
+
+/**
+ * Returns information provided by hook_modulefield_info() implementations.
+ */
+function modulefield_info($field_name = NULL) {
+  $info = &drupal_static(__FUNCTION__);
+  if (!isset($info)) {
+    $info = module_invoke_all('modulefield_info');
+    drupal_alter('modulefield_info', $info);
+  }
+  if (isset($field_name)) {
+    return isset($info[$field_name]) ? $info[$field_name] : NULL;
+  }
+  else {
+    return $info;
+  }
+}
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function modulefield_modules_enabled($modules) {
+  drupal_static_reset('modulefield_info');
+}
+
+/**
+ * Implements hook_modules_disabled().
+ */
+function modulefield_modules_disabled($modules) {
+  drupal_static_reset('modulefield_info');
+}
+
+/**
+ * Returns TRUE if the field exists.
+ */
+function modulefield_field_exists($field_name) {
+  return (bool) field_info_field($field_name);
+}
+
+/**
+ * Creates the field.
+ */
+function modulefield_create_field($field_name) {
+  drupal_static_reset('modulefield_info');
+  $field = modulefield_info($field_name);
+  unset($field['instance']);
+  field_create_field($field);
+}
+
+/**
+ * Creates the field if it doesn't already exist, and adds it to the requested bundle.
+ */
+function modulefield_create_instance($field_name, $entity_type, $bundle) {
+  if (!modulefield_field_exists($field_name)) {
+    modulefield_create_field($field_name);
+  }
+  field_create_instance(array('field_name' => $field_name, 'entity_type' => $entity_type, 'bundle' => $bundle));
+}
+
+/**
+ * Implements hook_field_create_instance().
+ *
+ * Adds module defined defaults to newly created instances, whether created via
+ * modulefield_create_instance(), the UI, or some other function.
+ */
+function modulefield_field_create_instance($instance) {
+  if ($field = modulefield_info($instance['field_name'])) {
+    $instance = drupal_array_merge_deep($field['instance'], $instance);
+    field_update_instance($instance);
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Places this module's hook_form_alter() (and therefore, implicitly,
+ * hook_form_FORM_ID_alter()) implementations before other modules, so that the
+ * added module defined fields in the Manage Fields form are available for
+ * further altering by other modules. For example, the module defining the field
+ * may wish to remove it from being added to certain bundles.
+ */
+function modulefield_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'form_alter' && isset($implementations['modulefield'])) {
+    $value = $implementations['modulefield'];
+    unset($implementations['modulefield']);
+    $implementations = array_merge(array('modulefield' => $value), $implementations);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function modulefield_form_field_ui_field_overview_form_alter(&$form, &$form_state) {
+  form_load_include($form_state, 'inc', 'modulefield', 'modulefield.field_ui');
+  _modulefield_field_overview_form_alter($form, $form_state);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function modulefield_form_field_ui_display_overview_form_alter(&$form, &$form_state) {
+  form_load_include($form_state, 'inc', 'modulefield', 'modulefield.field_ui');
+  _modulefield_display_overview_form_alter($form, $form_state);
+}
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function modulefield_element_info_alter(&$types) {
+  if (isset($types['field_ui_table'])) {
+    array_unshift($types['field_ui_table']['#pre_render'], 'modulefield_pre_render_field_ui_table');
+  }
+}
+
+/**
+ * Pre-render callback for the field ui table.
+ *
+ * Removes child elements hidden with #access so that
+ * field_ui_table_pre_render() doesn't create empty rows for them.
+ *
+ * @todo Submit a core issue to fix field_ui_table_pre_render().
+ */
+function modulefield_pre_render_field_ui_table($elements) {
+  foreach (element_children($elements) as $key) {
+    if (isset($elements[$key]['#access']) && !$elements[$key]['#access']) {
+      unset($elements[$key]);
+    }
+  }
+  return $elements;
+}

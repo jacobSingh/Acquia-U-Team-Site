@@ -1,0 +1,6 @@
+; $Id:$
+name = Block everything
+description = Suppresses the rendering of various page elements directly into the page template and instead provide them as blocks (e.g. site_name, site_slogan, logo)
+core = 7.x
+files[] = "block_everything.module"
+

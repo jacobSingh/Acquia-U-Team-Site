@@ -1,0 +1,453 @@
+<?php
+
+/**
+ * @file
+ * Tests for server_variables.module
+ */
+
+class ServerVariablesPermissionsTestCase extends DrupalWebTestCase {
+
+  public function setUp(){
+    parent::setUp('server_variables');
+  }
+
+  public static function getInfo(){
+    return array(
+      'name' => 'Analytics variables Permissions Tests',
+      'description' => 'Tests to ensure permissions are respected',
+      'group' => 'Analytics variables',
+    );
+  }
+
+  public function testServerVariablesAccessDenied() {
+    //deliberatly give too few permissions
+    $permission = array('access content');
+    //create a user to test with
+    $account = $this->drupalCreateUser($permission);
+
+    //log that fake user in
+    $this->drupalLogin($account);
+
+    $this->drupalGet('admin/config/system/server-variables');
+    //make sure we have permission denied
+    $this->assertResponse(403);
+  }
+
+  public function testServerVariablesAccessGranted() {
+    $permission = array('access content', 'administer analytics variables');
+    //create a user to test with
+    $account = $this->drupalCreateUser($permission);
+
+    //log that fake user in
+    $this->drupalLogin($account);
+
+    //then make sure we have permission granted
+    $this->drupalGet('admin/config/system/server-variables');
+    $this->assertResponse(200);
+  }
+}
+
+
+class ServerVariablesSiteWideFieldsTestCase extends DrupalWebTestCase {
+  public function setUp(){
+    parent::setUp('server_variables');
+
+    //turn on the site wide vars - make sure they show up everywhere
+    variable_set('server_variables_site_site_name_ind',1);
+    variable_set('server_variables_site_page_title_ind',1);
+
+    //set vars that we will look for
+    variable_set('server_variables_site_site_name_var', 'site-wide-site-name');
+    variable_set('server_variables_site_page_title_var', 'site-wide-page-title');
+
+    //set sites site name
+    variable_set('site_name', 'Test site name');
+
+  }
+
+  public static function getInfo(){
+    return array(
+      'name' => 'Site Wide Variables Tests',
+      'description' => 'Tests to ensure that site wide variables work as expected',
+      'group' => 'Analytics variables',
+    );
+  }
+
+  public function testSiteWideVariables() {
+
+    $this->drupalGet('/');
+    //test to see if we have a sitename variable
+    $this->assertTrue(array_key_exists('site-wide-site-name', $this->drupalSettings['server_variables']), t('Site Name Variable Exists'));
+    //see if we have a page-title variable
+    $this->assertTrue(array_key_exists('site-wide-page-title', $this->drupalSettings['server_variables']), t('Page Title Variable Exists'));
+    //see if site name is right - see setup
+    $this->assertEqual($this->drupalSettings['server_variables']['site-wide-site-name'], variable_get('site_name'));
+
+    //go to another page
+    $this->drupalGet('user');
+    //these two cases should still pass even on a new page
+    $this->assertTrue(array_key_exists('site-wide-site-name', $this->drupalSettings['server_variables']), t('Site Name Variable Exists'));
+    //see if we have a page-title variable
+    $this->assertTrue(array_key_exists('site-wide-page-title', $this->drupalSettings['server_variables']), t('Page Title Variable Exists'));
+    //see if site name is still right
+    $this->assertEqual($this->drupalSettings['server_variables']['site-wide-site-name'], variable_get('site_name'));
+
+    //see if page title is right
+    $this->assertEqual($this->drupalSettings['server_variables']['site-wide-page-title'], t('User account'));
+
+  }
+
+
+}
+
+
+class ServerVariablesActionTestCase extends DrupalWebTestCase {
+  
+  protected $privileged_user;
+
+    
+  public function setUp() {
+    parent::setUp('server_variables', 'server_variables_test');
+    
+    // log in
+    $this->privileged_user = $this->drupalCreateUser(array(
+      'create page content',
+      'edit any page content',
+      'administer nodes',
+      'bypass node access',
+      'administer analytics variables',
+      ));
+    $this->drupalLogin($this->privileged_user);
+
+
+    //enable the entity 'action' field - thus enabling the variable
+    variable_set('server_variables_action_op_ind', 1);
+    //set a variable we will check for
+    variable_set('server_variables_action_op_var', 'entity_action');
+    //the client may well have called in posting_something_action or whatever they like
+    //the value of the server variable returned is either insert, update or delete
+
+    //set the other fields
+    variable_set('server_variables_action_subtype_ind', 1);
+    variable_set('server_variables_action_subtype_var', 'entity_subtype');
+
+    variable_set('server_variables_action_taxonomy_ind', 1);
+    variable_set('server_variables_action_taxonomy_var', 'entity_taxonomy');
+
+    variable_set('server_variables_action_title_ind', 1);
+    variable_set('server_variables_action_title_var', 'entity_title');
+
+    variable_set('server_variables_action_type_ind', 1);
+    variable_set('server_variables_action_type_var', 'entity_type');
+
+    variable_set('server_variables_action_update_date_ind', 1);
+    variable_set('server_variables_action_update_date_var', 'update_date');
+
+    variable_set('server_variables_action_create_date_ind', 1);
+    variable_set('server_variables_action_create_date_var', 'create_date');
+
+    variable_set('server_variables_action_id_ind', 1);
+    variable_set('server_variables_action_id_var', 'entity_id');
+
+  }
+  
+  public static function getInfo(){
+    return array(
+      'name' => 'Acting on Entity Tests',
+      'description' => 'Tests to ensure that when acting on an entity the information about the action is sent to Drupal.settings',
+      'group' => 'Analytics variables',
+    );
+  }
+
+  /**
+   * Test for node update being overwritten by taxonomy insert
+   */
+  public function testEntityTaxonomy() {
+    // add a node
+    $langcode = LANGUAGE_NONE;
+    $title = $this->randomName(8);
+    $tag = $this->randomName(8);
+    $edit = array();
+    $edit['title'] = $title;
+    $edit["body[und][0][value]"] = $this->randomName(16);
+    $this->drupalPost('node/add/article', $edit, t('Save'));
+    
+    // edit node and add a tag
+    $id = $this->drupalSettings['server_variables']['entity_id'];
+    $edit = array();
+    $edit["field_tags[$langcode]"] = $tag;
+    $this->drupalPost("node/$id/edit", $edit, t('Save'));
+    
+    // check that op is update, type is node, and taxonomy is found
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_action'], 'update');
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_type'], 'node');
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_taxonomy'][0], $tag);
+
+    // Now tell server_variables_test_field_access() to deny access to the
+    // taxonomy field (for example, simulating what would happen if Field
+    // Permissions module were enabled and set to make this a field that the
+    // current user doesn't have access to). Make sure that the taxonomy data
+    // is now removed from the analytics variables.
+    variable_set('server_variables_test_deny_taxonomy_access', TRUE);
+    $this->drupalPost("node/$id/edit", array(), t('Save'));
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_action'], 'update');
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_type'], 'node');
+    $this->assertFalse(isset($this->drupalSettings['server_variables']['entity_taxonomy']));
+  }
+  
+  
+  public function testEntityActions() {
+    
+    $title = $this->randomName(8);
+    $edit = array();
+    $edit['title'] = $title;
+    $edit["body[und][0][value]"] = $this->randomName(16);
+    $this->drupalPost('node/add/page', $edit, t('Save'));
+    
+    $id = $this->drupalSettings['server_variables']['entity_id'];
+    $this->assert(TRUE, "entity_id is: '$id'");
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_action'], 'insert');
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_title'], $title);
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_type'], 'node');
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_subtype'], 'page');
+    
+    $newtitle = $this->randomName(8);
+    $edit = array();
+    $edit['title'] = $newtitle;
+    $edit["body[und][0][value]"] = $this->randomName(16);
+    $this->drupalPost("node/$id/edit", $edit, t('Save'));
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_action'], 'update');
+    $this->assertEqual($this->drupalSettings['server_variables']['entity_title'], $newtitle);
+    $create = is_integer($this->drupalSettings['server_variables']['create_date']);
+    $update = is_integer($this->drupalSettings['server_variables']['update_date']);
+    $this->verbose("created: $create; updated:$update");
+    $this->assertTrue($update >= $create);  // could be equal if test runs quickly
+  }
+}
+
+class ServerVariablesActOnUserTestCase extends DrupalWebTestCase {
+
+  public function setUp(){
+    parent::setUp('server_variables');
+    //all entity actions (create, update, delete) are handled through a single variable
+    //the entity being acted up will of course be different
+
+    //enable the entity 'action' field - thus enabling the variable
+    variable_set('server_variables_action_op_ind', 1);
+    //set a variable we will check for
+    variable_set('server_variables_action_op_var', 'entity_action');
+    //the client may well have called in posting_something_action or whatever they like
+    //the value of the server variable returned is either insert, update or delete
+
+    //other variables for acted on users
+    //enable them all - and set values that we'll test
+    variable_set('server_variables_actuser_mail_ind', 1);
+    variable_set('server_variables_actuser_mail_var', 'act_user_mail');
+
+    variable_set('server_variables_actuser_uid_ind', 1);
+    variable_set('server_variables_actuser_uid_var', 'act_user_id');
+
+    variable_set('server_variables_actuser_name_ind', 1);
+    variable_set('server_variables_actuser_name_var', 'act_user_name');
+
+    variable_set('server_variables_actuser_roles_ind', 1);
+    variable_set('server_variables_actuser_roles_var', 'act_user_roles');
+
+  }
+
+  public static function getInfo(){
+    return array(
+      'name' => 'Acting on Users Tests',
+      'description' => 'Tests to ensure that when acting on a user the newly created or updated information about the user is sent to Drupal.settings',
+      'group' => 'Analytics variables',
+    );
+  }
+
+  //helper function for repeated tests on acted on user
+  private function doActedOnUserVariablesTests($account, $drupalSettings){
+    $variables = $drupalSettings['server_variables'];
+    $this->assertEqual($account->mail, $variables['act_user_mail']);
+    $this->assertEqual($account->name, $variables['act_user_name']);
+    $this->assertEqual($account->uid, $variables['act_user_id']);
+    //@TODO a better test of role information besides knowing that its an array
+    $this->assertEqual(is_array($account->roles), is_array($variables['act_user_roles']), t('User Roles are both arrays'));
+  }
+
+  public function testUserCreationSuccessVariable(){
+
+    variable_set('user_email_verification', FALSE);
+    // We will create a user by posting this
+    $edit = array();
+    $edit['name']   = $this->randomName();
+    $edit['mail']   = $edit['name'] . '@example.com';
+    $edit['pass[pass1]'] = $new_pass = $this->randomName();
+    $edit['pass[pass2]'] = $new_pass;
+    //post user
+    $this->drupalPost('user/register', $edit, t('Create new account'));
+
+    //after a user is created and we are on a new page
+    $this->assertTrue($this->drupalSettings['server_variables']['entity_action'] == 'insert', t('Entity Action Variable is \'insert\''));
+
+    $accounts = user_load_multiple(array(), array('name' => $edit['name'], 'mail' => $edit['mail']));
+    $account = reset($accounts);
+    //lets make sure that all the other variables related to acted are there too
+    $this->doActedOnUserVariablesTests($account, $this->drupalSettings);
+
+  }
+
+  public function testUserUpdateSuccessVariable(){
+
+    $permission = array('access content');
+    //create the user
+    $account = $this->drupalCreateUser($permission);
+
+    //log that fake user in
+    $this->drupalLogin($account);
+
+    //change something in the user - and save it
+    $edit = array();
+    $edit['mail'] = 'newmail@example.com';
+    $edit['current_pass'] = $account->pass_raw;
+
+    //post the user edit form
+    $this->drupalPost('user/'. $account->uid . '/edit', $edit, t('Save'));
+
+    //after user is edited - check for the proper value in settings
+    $this->assertTrue($this->drupalSettings['server_variables']['entity_action'] == 'update', t('Entity Action Variable is \'update\''));
+
+    //set the value of the account mail to what it was just updated to
+    //since we will test the variables which will include the updated values of the user
+    $account->mail = $edit['mail'];
+
+    //lets make sure that all the other variables related to acted are there too
+    $this->doActedOnUserVariablesTests($account, $this->drupalSettings);
+  }
+
+}
+
+
+class ServerVariablesAuthorizedUserTestCase extends DrupalWebTestCase {
+
+  public function setUp(){
+    parent::setUp('server_variables');
+
+    //variables for the current authenticated user
+    //enable them all - and set values that we'll test
+    variable_set('server_variables_user_mail_ind', 1);
+    variable_set('server_variables_user_mail_var', 'auth_user_mail');
+
+    variable_set('server_variables_user_uid_ind', 1);
+    variable_set('server_variables_user_uid_var', 'auth_user_id');
+
+    variable_set('server_variables_user_name_ind', 1);
+    variable_set('server_variables_user_name_var', 'auth_user_name');
+
+    variable_set('server_variables_user_roles_ind', 1);
+    variable_set('server_variables_user_roles_var', 'auth_user_roles');
+
+  }
+
+
+  public static function getInfo(){
+    return array(
+      'name' => 'Authenticated user Tests',
+      'description' => 'Tests to ensure that information about the currently logged in user is always available',
+      'group' => 'Analytics variables',
+    );
+  }
+
+  public function testAuthorizedUserVariables(){
+    //here we just want to see that information about the currently logged in user is always available
+    //create a user to test editing of user
+    $permission = array('access content');
+    //Update an existing user
+    $account = $this->drupalCreateUser($permission);
+
+    //log that fake user in
+    $this->drupalLogin($account);
+
+    //go somewhere so that vars will show up on the page
+    $this->drupalGet('/');
+    $variables = $this->drupalSettings['server_variables'];
+    $account = $this->loggedInUser;
+
+    $this->assertEqual($account->mail, $variables['auth_user_mail']);
+    $this->assertEqual($account->name, $variables['auth_user_name']);
+    $this->assertEqual($account->uid, $variables['auth_user_id']);
+    //@TODO a better test of role information besides knowing that its an array
+    $this->assertEqual(is_array($account->roles), is_array($variables['auth_user_roles']), t('User Roles are both arrays'));
+
+  }
+
+}
+
+class ServerVariablesFieldAccessTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Analytics variables Field Access Tests',
+      'description' => 'Tests to ensure field access control is respected.',
+      'group' => 'Analytics variables',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('server_variables', 'server_variables_test');
+  }
+
+  function testFieldAccess() {
+    // Create three fields attached to users. These are specially named so that
+    // server_variables_test_field_access() will deny view and/or edit access
+    // to them as appropriate.
+    $field_names = array('field_no_view', 'field_no_edit', 'field_no_view_or_edit');
+    foreach ($field_names as $field_name) {
+      $field = array(
+        'field_name' => $field_name,
+        'type' => 'text',
+      );
+      field_create_field($field);
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'user',
+        'bundle' => 'user',
+      );
+      field_create_instance($instance);
+    }
+
+    // For each field, set it to appear in the analytics variables for the user
+    // account itself and for user actions.
+    foreach ($field_names as $field_name) {
+      variable_set("server_variables_user_{$field_name}_ind", 1);
+      variable_set("server_variables_user_{$field_name}_var", "user_{$field_name}");
+      variable_set("server_variables_actuser_{$field_name}_ind", 1);
+      variable_set("server_variables_actuser_{$field_name}_var", "actuser_{$field_name}");
+    }
+
+    // Create a new user account and save dummy values for the three fields
+    // above.
+    $account = $this->drupalCreateUser();
+    $full_account = user_load($account->uid);
+    $edit = array();
+    foreach ($field_names as $field_name) {
+      $edit[$field_name][LANGUAGE_NONE][0]['value'] = 'test';
+    }
+    user_save($full_account, $edit);
+
+    // Log in as the user and check that only those variables which the user
+    // has access to view or edit appear in the analytics variables in the page's
+    // HTML.
+    $this->drupalLogin($account);
+    $this->drupalGet('');
+    $server_variables = $this->drupalSettings['server_variables'];
+    $this->assertTrue(isset($server_variables['user_field_no_view']));
+    $this->assertTrue(isset($server_variables['user_field_no_edit']));
+    $this->assertFalse(isset($server_variables['user_field_no_view_or_edit']));
+
+    // Perform an action on the user and do the same checks for the user action
+    // variables.
+    $this->drupalPost('user/'. $account->uid . '/edit', array(), t('Save'));
+    $server_variables = $this->drupalSettings['server_variables'];
+    $this->assertTrue(isset($server_variables['actuser_field_no_view']));
+    $this->assertTrue(isset($server_variables['actuser_field_no_edit']));
+    $this->assertFalse(isset($server_variables['actuser_field_no_view_or_edit']));
+  }
+}

@@ -1,0 +1,16 @@
+/**
+ * Stylesheet to target IE, version 8 and older
+ * This allows IE9 to employ CSS3 declarations from the default sheets
+ * with specific fixes for the previous versions that don't support
+ * the newest CSS features.
+ */
+ 
+/* @group Media Gallery inflections */
+
+.gardens-features-video-indicator {
+  background-image: url("../../images/small_strip.png");
+  height: 13px; /* Declared as a percentage in gardens_features.css */
+  width: 12px; /* Declared as a percentage in gardens_features.css */
+}
+
+/* @end */

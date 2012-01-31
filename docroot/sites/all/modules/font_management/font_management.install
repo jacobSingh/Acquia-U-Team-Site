@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the font_management module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function font_management_install() {
+  // Migration path from the typekit module.
+  $variables = db_query("SELECT name, value FROM variable WHERE name LIKE :pattern", array(":pattern" => db_like('typekit_') . '%'));
+  // Make a copy of typekit_ variables for this module to manage.
+  foreach ($variables as $variable) {
+    $name = str_replace('typekit_', 'font_management_typekit_', $variable->name);
+    variable_set($name, $variable->value);
+    // Leave the typekit_ variable in place for the typekit module to delete.
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function font_management_uninstall() {
+  // Get module variables.
+  $variables = db_query("SELECT name FROM variable WHERE name LIKE :pattern", array(":pattern" => db_like('font_management_') . '%'))->fetchCol();
+  // Remove variables.
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}

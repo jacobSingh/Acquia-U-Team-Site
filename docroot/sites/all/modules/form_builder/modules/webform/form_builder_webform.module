@@ -1,0 +1,437 @@
+<?php
+
+/**
+ * @file
+ *   Form Builder integration for the Webform module.
+ */
+
+/**
+ * Implements hook_menu_alter().
+ */
+function form_builder_webform_menu_alter(&$items) {
+  $items['node/%webform_menu/webform']['page callback'] = 'form_builder_webform_components_page';
+  $items['node/%webform_menu/webform/components']['page callback'] = 'form_builder_webform_components_page';
+}
+
+/**
+ * Menu callback; display a form builder interface to edit webform components.
+ */
+function form_builder_webform_components_page($node) {
+  module_load_include('inc', 'form_builder', 'includes/form_builder.admin');
+
+  $build = array();
+  $build[] = form_builder_interface('webform', $node->nid);
+  $build[] = drupal_get_form('form_builder_webform_save_form', $node->nid);
+
+  return $build;
+}
+
+/**
+ * Form to save the Form Builder interface.
+ *
+ * The actual Form Builder interface is displayed as part of the
+ * form_builder_webform_components_page() function.
+ */
+function form_builder_webform_save_form($form, &$form_state, $nid) {
+  $form['nid'] = array(
+    '#type' => 'value',
+    '#value' => $nid,
+  );
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#submit' => array('form_builder_webform_cancel'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler; save the current Form Builder interface changes.
+ */
+function form_builder_webform_save_form_submit($form, &$form_state) {
+  $node = node_load($form_state['values']['nid']);
+  form_builder_webform_save_node($node);
+  drupal_set_message(t('Changes to the form have been saved.'));
+}
+
+/**
+ * Save the current Form Builder interface changes for a webform node.
+ */
+function form_builder_webform_save_node($node) {
+  $form_cache = form_builder_cache_load('webform', $node->nid);
+  $element_ids = form_builder_preview_prepare($form_cache, 'webform', $node->nid);
+
+  // Save modified or created components.
+  foreach ($element_ids as $id) {
+    form_builder_webform_save_component($node, $id, $form_cache);
+  }
+
+  // Delete components that have been removed.
+  foreach ($node->webform['components'] as $component) {
+    $element_id = 'cid_' . $component['cid'];
+    if (!in_array($element_id, $element_ids)) {
+      webform_component_delete($node, $component);
+    }
+  }
+
+  // Reset the node cache, since $node->webform['components'] has changed.
+  // @todo: Decide if this belongs in the above Webform API functions instead?
+  entity_get_controller('node')->resetCache(array($node->nid));
+
+  // Remove the cached form_builder form.
+  form_builder_cache_delete('webform', $node->nid);
+}
+
+/**
+ * Save the contents of a form component into Webform's database tables.
+ */
+function form_builder_webform_save_component($node, $element_id, $form) {
+  $element = form_builder_get_element($form, $element_id);
+  $type = isset($element['#webform']['type']) ? $element['#webform']['type'] : $element['#form_builder']['element_type'];
+
+  // Check for existing components.
+  $cid = substr($element_id, 4);
+  if (isset($node->webform['components'][$cid])) {
+    $component = $node->webform['components'][$cid];
+  }
+  // Populate a new default component.
+  elseif (isset($element['#webform']['is_new'])) {
+    if ($component = webform_component_invoke($type, 'defaults')) {
+      $component['type'] = $type;
+    }
+  }
+
+  // If the component type isn't found, don't try to save anything.
+  if (!isset($component)) {
+    return;
+  }
+
+  // Set typical component settings.
+  $component['name'] = $element['#title'];
+  $component['weight'] = $element['#weight'];
+  $component['form_key'] = $element['#key'];
+  $component['mandatory'] = isset($element['#required']) ? $element['#required'] : 0;
+  $component['email'] = 0;
+  $component['nid'] = $node->nid;
+
+  // Set the parent ID to default to the form base.
+  $component['pid'] = 0;
+
+  // Set the parent ID for the component if it is nested inside another component.
+  // This must be done this way so that children of newly added components get a
+  // proper pid when the cid of the new component has just been generated.
+  $parent = form_builder_get_element($form, $element['#form_builder']['parent_id']);
+  if ($parent) {
+    // If the parent is new, the database must be queried for the cid of the parent.
+    if (isset($parent['#webform']['is_new']) && $parent['#webform']['is_new']) {
+      $results = db_query('SELECT cid, form_key FROM {webform_component} WHERE form_key = :key AND nid = :nid', array(':key' => $element['#form_builder']['parent_id'], ':nid' => $node->nid));
+      foreach($results as $result) {
+        $component['pid'] = $result->cid;
+      }
+    }
+    // If the parent is already stored in the webform, grab its cid value.
+    elseif (isset($parent['#webform_component']['cid'])) {
+      $component['pid'] = $parent['#webform_component']['cid'];
+    }
+  }
+
+  // Set the component's value. If the form element doesn't have a default,
+  // then new components should not be modified (they should use whatever the
+  // component default is), but existing components should have their stored
+  // value removed.
+  if (isset($element['#default_value'])) {
+    $component['value'] = is_array($element['#default_value']) ? implode(',', $element['#default_value']) : $element['#default_value'];
+  }
+  elseif (empty($element['#webform']['is_new'])) {
+    $component['value'] = NULL;
+  }
+
+  // Save any specific settings.
+  if ($saved_component = form_builder_webform_component_invoke($type, 'form_builder_save', $component, $element)) {
+    $component = $saved_component;
+  }
+
+  if (!isset($component['cid'])) {
+    webform_component_insert($component);
+  }
+  elseif ($component != $node->webform['components'][$component['cid']]) {
+    webform_component_update($component);
+  }
+}
+
+/**
+ * Submit handler for the "Cancel" button.
+ */
+function form_builder_webform_cancel(&$form, &$form_state) {
+  drupal_set_message(t('Changes to the form have been discarded.'));
+  form_builder_cache_delete('webform', $form_state['values']['nid']);
+}
+
+/**
+ * Implements hook_form_builder_types().
+ *
+ * Define the fields within webforms that are editable.
+ */
+function form_builder_webform_form_builder_types() {
+  $fields = array();
+
+  $components = webform_components();
+  foreach ($components as $type => $component) {
+    if ($additional_fields = form_builder_webform_component_invoke($type, 'form_builder_types')) {
+      $fields = array_merge($fields, $additional_fields);
+    }
+  }
+
+  return array('webform' => $fields);
+}
+
+/**
+ * Implements hook_form_builder_properties().
+ */
+function form_builder_webform_form_builder_properties($form_type) {
+  $properties = array();
+
+  if ($form_type == 'webform') {
+    $components = webform_components();
+    foreach ($components as $type => $component) {
+      if ($additional_properties = form_builder_webform_component_invoke($type, 'form_builder_properties')) {
+        $properties = array_merge($properties, $additional_properties);
+      }
+    }
+  }
+
+  return $properties;
+}
+
+/**
+ * Implements hook_form_builder_load().
+ *
+ * Load a complete FAPI array based on a form type and ID.
+ */
+function form_builder_webform_form_builder_load($form_builder_type, $form_builder_id) {
+  if ($form_builder_type == 'webform') {
+    // Webform identifies its forms by Node Id.
+    $nid = $form_builder_id;
+    $node = node_load($nid);
+
+    // Since webform_client_form() has special handling for the 'pagebreak'
+    // component that we do not want to occur here (here we want to display the
+    // entire webform on a single page, without page breaks), we temporarily
+    // change the component to 'pagebreak_clone' and then change it back
+    // afterwards. See _webform_render_pagebreak_clone().
+    // @todo: Replace this with something cleaner, if webform eventually allows
+    //   us to do that.
+    $pagebreak_component_keys = array();
+    foreach ($node->webform['components'] as &$component) {
+      if ($component['type'] == 'pagebreak') {
+        $component['type'] = 'pagebreak_clone';
+        $pagebreak_component_keys[] = $component['form_key'];
+      }
+    }
+
+    // Get the unfiltered version of the client form.
+    $form = array();
+    $form_state = array();
+    $form = webform_client_form($form, $form_state, $node, array(), TRUE, FALSE);
+
+    // Change 'pagebreak' components back, as described above.
+    foreach ($pagebreak_component_keys as $key) {
+      $form['submitted'][$key]['#type'] = 'pagebreak';
+    }
+
+    // Perform final processing of the form, and return it.
+    $form += array('submitted' => array());
+    form_builder_webform_load_process($form['submitted'], $node);
+    return $form['submitted'];
+  }
+}
+
+/**
+ * Recursive helper function to populate #form_builder['element_id'] values.
+ */
+function form_builder_webform_load_process(&$form, $node, $pid = 0) {
+  foreach (element_children($form) as $key) {
+    $cid = webform_get_cid($node, $key, $pid);
+    $form[$key]['#form_builder'] = array(
+      'element_id' => 'cid_' . $cid,
+    );
+
+    // Add any component-specific loading. Note that all components are
+    // invoked here because the component type isn't yet known.
+    foreach (webform_components() as $type => $info) {
+      if ($element = form_builder_webform_component_invoke($type, 'form_builder_load', $form[$key])) {
+        $form[$key] = $element;
+      }
+    }
+    form_builder_webform_load_process($form[$key], $node, $cid);
+  }
+}
+
+/**
+ * Implements hook_form_builder_add_element_alter().
+ *
+ * Modify a FAPI element before it is added to the form array.
+ */
+function form_builder_webform_form_builder_add_element_alter(&$element, $form_type, $form_id) {
+  if ($form_type == 'webform') {
+    $element['#webform']['is_new'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_form_builder_preview_alter().
+ *
+ * The most common use of the preview altering is filtering field descriptions
+ * via filter_xss() or other functions. Webform has its own filtering function
+ * for this purpose.
+ */
+function form_builder_webform_form_builder_preview_alter(&$element, $form_type, $form_id) {
+  if ($form_type == 'webform') {
+    // Filter all descriptions for all components.
+    if (isset($element['#description'])) {
+      $element['#description'] = _webform_filter_descriptions($element['#description']);
+    }
+
+    if (isset($element['#default_value']) && is_string($element['#default_value'])) {
+      $element['#value'] = _webform_filter_values($element['#default_value'], NULL, NULL, NULL, FALSE);
+    }
+
+    // Add info to the #webform_component array so that theme_webform_element will
+    // work properly.
+    $element['#webform_component']['type'] = $element['#form_builder']['element_type'];
+
+    // Let components do any extra filtering if needed.
+    $type = isset($element['#webform']['type']) ? $element['#webform']['type'] : $element['#form_builder']['element_type'];
+    if ($new_element = form_builder_webform_component_invoke($type, 'form_builder_preview_alter', $element)) {
+      $element = $new_element;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This form_alter is a workaround for an unfortunate interaction that ends up
+ * duplicating titles and descriptions for radios and checkboxes. By default,
+ * system.module defines a pre_render function for radios and checkboxes
+ * (form_pre_render_conditional_form_element). This pre_render adds the
+ * form_element theme_wrapper if there is a title or a description.
+ * Unfortunately, webform is already adding webform_element, which is nearly
+ * a copy of form_element, and if you have both, you get two titles and
+ * descriptions.
+ *
+ * We can't use the normal mechanism for component alters, because that happens
+ * in a pre_render (so removing the other pre_render isn't going to help).
+ */
+function form_builder_webform_form_form_builder_preview_alter(&$form, $form_state) {
+  if ($form['#form_builder']['form_type'] != 'webform') {
+    return;
+  }
+  $form['#attached']['css'][] = drupal_get_path('module', 'webform') .'/css/webform.css';
+  _form_builder_remove_conditional_form_element_pre_render($form);
+}
+
+/**
+ * Helper function to remove a system.module pre-render function from a form.
+ *
+ * @see form_builder_webform_form_form_builder_preview_alter()
+ */
+function _form_builder_remove_conditional_form_element_pre_render(&$form) {
+  foreach (element_children($form) as $key) {
+    $form_element = &$form[$key];
+    if (isset($form_element['#pre_render'])) {
+      // Remove system_module's pre_render function, if it exists.
+      $k = array_search('form_pre_render_conditional_form_element', $form_element['#pre_render']);
+      if ($k !== FALSE) {
+        unset($form_element['#pre_render'][$k]);
+      }
+    }
+    // Recurse through the child elements (for example, to handle cases where
+    // a set of radios or checkboxes with the above pre-render function is
+    // contained within a fieldset).
+    _form_builder_remove_conditional_form_element_pre_render($form_element);
+  }
+}
+
+/**
+ * Invoke a form builder callback for a webform component.
+ *
+ * If the webform component implements the callback itself, this function
+ * returns the result obtained from that. Otherwise, if this module has a
+ * default implementation of the callback on behalf of the component, the
+ * result obtained from that is returned.
+ *
+ * @param $type
+ *   The component type as a string.
+ * @param $callback
+ *   The callback to execute.
+ * @param ...
+ *   Any additional parameters required by the $callback.
+ */
+function form_builder_webform_component_invoke($type, $callback) {
+  $args = func_get_args();
+
+  // First try invoking the callback in the webform component itself.
+  $result = call_user_func_array('webform_component_invoke', $args);
+  if (isset($result)) {
+    return $result;
+  }
+
+  // Otherwise look for a default implementation provided by this module.
+  $type = array_shift($args);
+  $callback = array_shift($args);
+  $function = '_form_builder_webform_' . $callback . '_' . $type;
+  module_load_include('inc', 'form_builder_webform', 'form_builder_webform.components');
+  if (function_exists($function)) {
+    return call_user_func_array($function, $args);
+  }
+}
+
+/**
+ * Implements _webform_render_component().
+ *
+ * This "component" is only used as a temporary replacement for the standard
+ * pagebreak component when the form builder version of the webform is being
+ * rendered; this occurs when form_builder_webform_form_builder_load() calls
+ * webform_client_form(). Therefore, we do not need to register it as a regular
+ * webform component anywhere else (and don't want to, since we don't want it
+ * to be available elsewhere in the webform UI).
+ */
+function _webform_render_pagebreak_clone($component, $value = NULL, $filter = TRUE) {
+  return webform_component_invoke('pagebreak', 'render', $component, $value, $filter);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Customizations to the field configuration form to better integrate with webforms.
+ */
+function form_builder_webform_form_form_builder_field_configure_alter(&$form, &$form_state, $form_id) {
+  // When editing the title display property for a webform, change the list of
+  // options from the default Drupal values to the acceptable webform values.
+  // Only include "inline" if the webform component being edited actually
+  // allows inline titles.
+  if ($form['#_edit_form_type'] == 'webform' && isset($form['title_display'])) {
+    $type = $form['#_edit_element']['#form_builder']['element_type'];
+    module_load_include('inc', 'webform', 'includes/webform.components');
+    if (webform_component_feature($type, 'title_inline')) {
+      $form['title_display']['#options'] = array(
+        'before' => t('Above'),
+        'inline' => t('Inline'),
+        'none' => t('Hidden'),
+      );
+    }
+    else {
+      $form['title_display']['#options'] = array(
+        'before' => t('Above'),
+        'none' => t('Hidden'),
+      );
+    }
+    $form['title_display']['#default_value'] = isset($form['title_display']['#default_value']) ? $form['title_display']['#default_value'] : 'before';
+  }
+}

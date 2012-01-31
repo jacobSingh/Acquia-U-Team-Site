@@ -1,0 +1,318 @@
+<?php
+// $Id:$
+
+/**
+ * @file
+ * Module that creates blocks for common page template elements so they can be
+ * moved around in the admin interface.
+ *
+ * @todo: This needs an alteration to the default site information form for
+ * configuration outside of the theme's info file.
+ */
+
+/**
+ * Implements hook_theme()
+ */
+function block_everything_theme() {
+  return array(
+    'block__block_everything' => array(
+      'render element' => 'elements',
+    ),
+    'block_everything_site_name' => array(
+      'render element' => 'element',
+    ),
+    'block_everything_site_slogan' => array(
+      'render element' => 'element',
+    ),
+    'block_everything_logo' => array(
+      'render element' => 'element',
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info()
+ */
+function block_everything_block_info() {
+  $blocks = array();
+  global $user;
+  $theme = !empty($user->theme) ? $user->theme : variable_get('theme_default');
+  $settings = theme_get_setting('block_everything', $theme);
+
+  // Only display the blocks if the default theme supports them
+  if (isset($settings['site_name'])) {
+    $blocks['site_name'] = array(
+      'info' => 'Site name',
+      'cache' => DRUPAL_CACHE_GLOBAL,
+      'status' => 1,
+      'region' => $settings['site_name'],
+    );
+  }
+
+  if (isset($settings['site_slogan'])) {
+    $blocks['site_slogan'] = array(
+      'info' => 'Site slogan',
+      'cache' => DRUPAL_CACHE_GLOBAL,
+      'status' => 1,
+      'region' => $settings['site_slogan'],
+    );
+  }
+
+  if (isset($settings['logo'])) {
+    $blocks['logo'] = array(
+      'info' => 'Site logo',
+      'cache' => DRUPAL_CACHE_GLOBAL,
+      'status' => 1,
+      'region' => $settings['logo'],
+    );
+  }
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_themes_enabled()
+ *
+ * The purpose of this is to properly set the default regions when a theme is
+ * updated and enabled.
+ */
+function block_everything_themes_enabled($theme_list) {
+  foreach($theme_list as $theme) {
+    $settings = theme_get_setting('block_everything', $theme);
+    $theme_setting_name = array(
+      'site_name' => 'toggle_name',
+      'site_slogan' => 'toggle_slogan',
+      'logo' => 'default_logo_path',
+    );
+
+    // Get the block_everything blocks for this theme
+    $result = db_query("SELECT * FROM {block} WHERE theme = :theme and module = 'block_everything'", array(':theme' => $theme), array('fetch' => PDO::FETCH_ASSOC));
+    foreach ($result as $block) {
+      // If the block is disabled, check to make sure the theme supports it and
+      // enable it in the default region.  If the theme does not support
+      // block_everything, disable the blocks.
+      if (!$block['status'] || !$settings) {
+        $region = (theme_get_setting($theme_setting_name[$block['delta']], $theme) && isset($settings[$block['delta']])) ? $settings[$block['delta']] : BLOCK_REGION_NONE;
+        $status = isset($settings[$block['delta']]) ? 1 : 0;
+
+        db_update('block')
+          ->fields(array(
+            'region' => $region,
+            'status' => $status,
+          ))
+          ->condition('theme', $theme)
+          ->condition('delta', $block['delta'])
+          ->condition('module', 'block_everything')
+          ->execute();
+
+        // Invoke a hook to inform other modules that the block was just
+        // modified.
+        module_invoke_all('block_everything_modified_block', $block);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_block_configure()
+ */
+function block_everything_block_configure($delta = '') {
+  $form = array();
+
+  switch ($delta) {
+    case 'site_name':
+      $form['block_everything'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Site name'),
+        '#default_value' => variable_get('site_name', 'Drupal'),
+      );
+      break;
+    case 'site_slogan':
+      $form['block_everything'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Site slogan'),
+        '#default_value' => variable_get('site_slogan', ''),
+      );
+      break;
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_block_save().
+ */
+function block_everything_block_save($delta = '', $edit = array()) {
+  global $user;
+  $theme = !empty($user->theme) ? $user->theme : variable_get('theme_default');
+  $settings = variable_get('theme_settings', array());
+
+  switch ($delta) {
+    case 'site_name':
+      variable_set('site_name', $edit['block_everything']);
+      $settings['toggle_name'] = $edit['regions'][$theme] == BLOCK_REGION_NONE ? 0 : 1;
+      break;
+    case 'site_slogan':
+      variable_set('site_slogan', $edit['block_everything']);
+      $settings['toggle_slogan'] = $edit['regions'][$theme] == BLOCK_REGION_NONE ? 0 : 1;
+      break;
+  }
+  variable_set('theme_settings', $settings);
+}
+
+/**
+ * Implements hook_block_view()
+ */
+function block_everything_block_view($delta = '') {
+  $block = array();
+  global $theme;
+
+  switch ($delta) {
+    case 'site_name':
+      $block['content'] = filter_xss_admin(variable_get('site_name', 'Drupal'));
+      break;
+    case 'site_slogan':
+      $block['content'] = filter_xss_admin(variable_get('site_slogan', ''));
+      break;
+    case 'logo':
+      $path = theme_get_setting('default_logo_path', $theme) ? drupal_get_path('theme', $theme) . '/' . theme_get_setting('default_logo_path', $theme) : '';
+      $block['content'] = $path;
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Alters the block configuration form to hide the title
+ */
+function block_everything_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
+  if ($form['module']['#value'] == 'block_everything') {
+    $form['settings']['title']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Alters the main block admin page to add a submit handler for block_everything
+ */
+function block_everything_form_block_admin_display_form_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'block_everything_admin_display_form_submit';
+}
+
+/**
+ * Updates the theme settings depending on the region for block_everything blocks.
+ */
+function block_everything_admin_display_form_submit($form, &$form_state) {
+  foreach ($form_state['values']['blocks'] as $block) {
+    if ($block['module'] == 'block_everything') {
+      $delta = $block['delta'];
+      $settings = variable_get('theme_settings', array());
+      switch ($delta) {
+        case 'site_name':
+          $settings['toggle_name'] = $block['region'] == BLOCK_REGION_NONE ? 0 : 1;
+          break;
+        case 'site_slogan':
+          $settings['toggle_slogan'] = $block['region'] == BLOCK_REGION_NONE ? 0 : 1;
+          break;
+      }
+      variable_set('theme_settings', $settings);
+    }
+  }
+}
+
+/**
+ * Implements hook_process_page()
+ *
+ * Unsets the items that would otherwise be printed to the page
+ */
+function block_everything_process_page(&$vars) {
+  global $theme;
+  $settings = theme_get_setting('block_everything', $theme);
+
+  if ($settings) {
+    foreach($settings as $key => $region) {
+      $vars[$key] = NULL;
+    }
+  }
+}
+
+/**
+ * Outputs the theming for the blocks.
+ */
+function theme_block__block_everything($vars) {
+  global $theme;
+  if (!theme_get_setting('block_everything', $theme) || $vars['content'] == '') {
+    return '';
+  }
+
+  // Add necessary CSS.
+  drupal_add_css(drupal_get_path('module', 'block_everything') . '/block_everything.css');
+
+  // Create a new class array
+  $classes = array('page-element', strtr($vars['block']->delta, '_', '-') . '-wrapper');
+
+  // Iterate through the old class array and add classes that do not include
+  // block in their name.  e.g. block and block-block-everything
+  foreach($vars['classes_array'] as $key => $class) {
+    if (strpos($class, 'block') === FALSE) {
+      $classes[] = $vars['classes_array'][$key];
+    }
+  }
+
+  $output = '<div class="' . implode(' ', $classes) . '">';
+  $output .= render($vars['title_prefix']);
+  $output .= render($vars['title_suffix']);
+
+  $output .= theme('block_everything_' . $vars['block']->delta, $vars);
+
+  $output .= '</div>';
+
+  return $output;
+}
+
+/**
+ * Returns markup for the site name.
+ *
+ * The site name is within either a <h1> or a <p> tag dependent on $is_front for
+ * SEO purposes.
+ */
+function theme_block_everything_site_name($vars) {
+  $name = $vars['content'];
+  $is_front = $vars['is_front'];
+
+  $output = $is_front ? '<h1' : '<p';
+  $output .= ' id="site-name"';
+  $output .= ' class="site-name ' . ($is_front ? 'site-name-front' : '') . '">';
+  $output .= l('<span>' . $name . '</span>', '', array('attributes' => array('title' => t('Home'), 'rel' => 'home'), 'html' => TRUE));
+  $output .= $is_front ? '</h1>' : '</p>';
+
+  return $output;
+}
+
+/**
+ * Returns markup for the site's slogan
+ */
+function theme_block_everything_site_slogan($vars) {
+  $slogan = $vars['content'];
+
+  $output = '<p id="site-slogan" class="site-slogan">' . $slogan . '</p>';
+
+  return $output;
+}
+
+/**
+ * Returns markup for the site's logo
+ */
+function theme_block_everything_logo($vars) {
+  $logo_path = $vars['content'];
+  $home = t('Home');
+  $image_vars = array(
+    'path' => $logo_path,
+    'alt' => $home,
+    'title' => $home,
+  );
+
+  $image = theme('image', $image_vars);
+  $output = l($image, '', array('attributes' => array('rel' => 'home', 'id' => 'logo', 'class' => 'logo'), 'html' => TRUE));
+
+  return $output;
+}

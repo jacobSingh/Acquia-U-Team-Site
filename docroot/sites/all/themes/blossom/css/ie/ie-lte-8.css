@@ -1,0 +1,29 @@
+input.form-submit, 
+a.button,
+input.form-submit:active, 
+a.button:active {
+  filter: progid:DXImageTransform.Microsoft.gradient(
+    GradientType='0',
+    startColorstr=#f6f6f6, 
+    endColorstr=#d6d6d4
+  );
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(
+    GradientType='0',
+    startColorstr=#f6f6f6, 
+    endColorstr=#d6d6d4
+  );
+}
+
+input.form-submit:hover, 
+a.button:hover {
+  filter: progid:DXImageTransform.Microsoft.gradient(
+    GradientType='0',
+    startColorstr=#f8f8f8, 
+    endColorstr=#CACACA
+  );
+  -ms-filter: progid:DXImageTransform.Microsoft.gradient(
+    GradientType='0',
+    startColorstr=#f8f8f8, 
+    endColorstr=#CACACA
+  );
+}

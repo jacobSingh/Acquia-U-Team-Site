@@ -1,0 +1,243 @@
+
+body {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.form-submit {
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+.site-slogan {
+  color: #666666;
+}
+
+.wrapper-footer {
+  border-color: #333333;
+}
+
+.stack-preheader {
+  border-color: #333333;
+}
+
+.stack-content-inner {
+  border-color: #333333;
+}
+
+.stack-copyright .inner {
+  border-color: #333333;
+}
+
+.menu li li {
+}
+
+.stack-navigation .menu li a {
+  color: #ffffff;
+}
+
+table {
+}
+
+thead th {
+  border-bottom-color: #ffffff;
+}
+
+tfoot td {
+}
+
+td {
+}
+
+.node .meta {
+}
+
+.menu-dropdown .menu .menu a {
+  border-color: #ffffff;
+}
+
+#block-feedback-feedback a {
+  background-color: #ff7800;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.rotating-banner .rb-slides {
+  border-color: #dddddd;
+}
+
+.stack-navigation .menu {
+  background-color: #333333;
+}
+
+.controls.buttons a.activeSlide {
+  background-color: #ff7800;
+}
+
+#block-feedback-feedback a:hover {
+  background-color: #666666;
+}
+
+.form-submit + input {
+  background-color: #ffffff;
+}
+
+.menu-dropdown .menu .menu {
+}
+
+a {
+  color: #ff7800;
+}
+
+li a.active {
+  color: #ff7800;
+}
+
+.site-name a {
+  color: #ff7800;
+}
+
+.page-forum h1 {
+  color: #ff7800;
+}
+
+.messages {
+  color: #000000;
+}
+
+.messages ul {
+  color: #000000;
+}
+
+.messages ul li {
+  color: #000000;
+}
+
+.wrapper-header .active-trail a {
+  color: #000000;
+}
+
+.messages a {
+  color: #333333;
+}
+
+h1 {
+  color: #333333;
+}
+
+h2 {
+  color: #333333;
+}
+
+h3 {
+  color: #333333;
+}
+
+h4 {
+  color: #333333;
+}
+
+h5 {
+  color: #333333;
+}
+
+h6 {
+  color: #333333;
+}
+
+.forum a {
+  color: #333333;
+}
+
+#forum table thead tr th {
+  color: #333333;
+}
+
+#forum table thead tr th a {
+  color: #333333;
+}
+
+.rotating-banner {
+  color: #333333;
+}
+
+.rotating-banner a {
+  color: #333333;
+}
+
+h2 a {
+  color: #666666;
+}
+
+a:hover {
+  color: #666666;
+}
+
+h2 a:hover {
+  color: #999999;
+}
+
+.forum .description {
+  color: #999999;
+}
+
+.menu-dropdown .menu .expanded:hover > a {
+  background-color: #666666;
+}
+
+.menu-dropdown .menu .active-trail:hover > a {
+  background-color: #666666;
+}
+
+.stack-navigation .menu li a:hover {
+  background-color: #666666;
+}
+
+.stack-navigation .menu .active-trail > a {
+}
+
+.sidebar .block,.block-aggregator ul li + li {
+  border-color: #eeeeee;
+}
+
+.comment {
+  border-top-color: #999999;
+}
+
+.comment-wrapper h2 {
+  border-top-color: #999999;
+}
+
+.sidebar.left {
+  border-right-color: #999999;
+}
+
+.sidebar.right {
+  border-left-color: #999999;
+}
+
+.breadcrumb a {
+}
+
+th {
+}
+
+.forum thead th {
+}
+
+th.active {
+}
+
+tr.even td {
+  background-color: #f9f9f9;
+}
+
+table tbody tr.even td.active {
+  background-color: #000000;
+}
+
+table tbody tr.odd td.active {
+  background-color: #000000;
+}
+
+

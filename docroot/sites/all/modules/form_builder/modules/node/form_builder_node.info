@@ -1,0 +1,11 @@
+name = Form builder Node UI
+description = Form builder enhancements for node module.
+core = 6.x
+dependencies[] = form_builder
+
+; Information added by drupal.org packaging script on 2011-05-06
+version = "7.x-0.9"
+core = "7.x"
+project = "form_builder"
+datestamp = "1304663518"
+

@@ -1,0 +1,16 @@
+; $Id: typekit.info,v 1.5 2010/05/17 14:42:45 jpamental Exp $
+name = "Typekit"
+description = "Makes it easy to include Typekit in your site."
+core = 7.x
+package = User interface
+configure = admin/config/user-interface/typekit
+
+files[] = typekit.install
+files[] = typekit.module
+files[] = includes/typekit.admin.inc
+; Information added by drupal.org packaging script on 2010-10-31
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "typekit"
+datestamp = "1288557647"
+

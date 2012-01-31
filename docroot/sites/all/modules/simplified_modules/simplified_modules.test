@@ -1,0 +1,184 @@
+<?php
+
+/**
+ * Tests for auto-enabling and disabling hidden submodules and dependencies.
+ */
+class SimplifiedModulesTestCase extends DrupalWebTestCase {
+  protected $admin_user;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Enable/disable hidden submodules and dependencies',
+      'description' => 'Test that hidden submodules and dependencies are automatically enabled and disabled when appropriate.',
+      'group' => 'Simplified modules',
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('simplified_modules', 'simplified_modules_test'));
+    $this->admin_user = $this->drupalCreateUser(array('access administration pages', 'administer modules'));
+    $this->drupalLogin($this->admin_user);
+  }
+
+  /**
+   * Test enabling and disabling a hidden submodules in various combinations.
+   */
+  function testEnableDisableHiddenSubModule() {
+    // Trigger the submodules we want to be hidden for this test.
+    variable_set('simplified_modules_test_submodules', TRUE);
+
+    // Make sure that the two modules which the submodule depends on are both
+    // disabled at the beginning. The submodule should also start off as
+    // disabled.
+    $this->setModuleStatus(array(
+      'forum' => FALSE,
+      'poll' => FALSE,
+    ));
+    $this->assertFalse(module_exists('simplified_modules_test_submodule'), t('The submodule starts off as disabled.'));
+
+    // Enable both modules at the same time. The submodule should automatically
+    // be enabled.
+    $this->setModuleStatus(array(
+      'forum' => TRUE,
+      'poll' => TRUE,
+    ));
+    $this->assertTrue(module_exists('simplified_modules_test_submodule'), t('The submodule was automatically enabled.'));
+
+    // Disable one of the them. The submodule should be automatically disabled.
+    $this->setModuleStatus(array(
+      'forum' => FALSE,
+    ));
+    $this->assertFalse(module_exists('simplified_modules_test_submodule'), t('The submodule was automatically disabled.'));
+
+    // Disable the other while enabling the first. The submodule should remain
+    // disabled.
+    $this->setModuleStatus(array(
+      'forum' => TRUE,
+      'poll' => FALSE,
+    ));
+    $this->assertFalse(module_exists('simplified_modules_test_submodule'), t('The submodule remained disabled since its dependencies were not both enabled.'));
+
+    // Enabling the second module should now result in the submodule being
+    // enabled again.
+    $this->setModuleStatus(array(
+      'poll' => TRUE,
+    ));
+    $this->assertTrue(module_exists('simplified_modules_test_submodule'), t('The submodule was automatically enabled.'));
+  }
+
+  /**
+   * Test disabling Simplified Modules at the same time as the submodule.
+   */
+  function testDisableSimplifiedModules() {
+    // Trigger the submodules we want to be hidden for this test.
+    variable_set('simplified_modules_test_submodules', TRUE);
+
+    // First enable both modules and make sure the submodule is automatically
+    // enabled.
+    $this->setModuleStatus(array(
+      'forum' => TRUE,
+      'poll' => TRUE,
+    ));
+    $this->assertTrue(module_exists('simplified_modules_test_submodule'), t('The submodule was automatically enabled.'));
+
+    // Disable Simplified Modules and one of the submodule's dependencies, and
+    // make sure that the submodule is correctly disabled (even though the
+    // Simplified Modules module which controls this is itself in the process
+    // of being disabled).
+    $this->setModuleStatus(array(
+      'forum' => FALSE,
+      'simplified_modules' => FALSE,
+    ));
+    $this->assertFalse(module_exists('simplified_modules_test_submodule'), t('The submodule was automatically disabled even while the Simplified Modules module was also being disabled.'));
+  }
+
+  /**
+   * Test that hidden dependencies are auto-enabled properly.
+   */
+  function testAutoEnableHiddenDependencies() {
+    // Trigger the dependencies we want to be hidden for this test.
+    $this->setModuleStatus(array(
+      'forum' => FALSE,
+      'poll' => FALSE,
+    ));
+    variable_set('simplified_modules_test_dependencies', TRUE);
+
+    // Enable the module that has the hidden dependencies, and make sure the
+    // dependencies were auto-enabled.
+    $this->setModuleStatus(array(
+      'simplified_modules_test_submodule' => TRUE,
+    ));
+    $this->assertTrue(module_exists('forum') && module_exists('poll'), t('The hidden dependencies were automatically enabled.'));
+
+    // Disable the module that has the hidden dependencies, and make sure the
+    // dependencies were auto-disabled.
+    $this->setModuleStatus(array(
+      'simplified_modules_test_submodule' => FALSE,
+    ));
+    $this->assertTrue(!module_exists('forum') && !module_exists('poll'), t('The hidden dependencies were automatically disabled.'));
+  }
+
+  /**
+   * Test that a combined set of hidden submodules and dependencies works.
+   */
+  function testCombinedSubModulesAndDependencies() {
+    // Trigger the dependencies and submodules we want to be hidden for this
+    // test.
+    $this->setModuleStatus(array(
+      'blog' => FALSE,
+      'forum' => FALSE,
+      'poll' => FALSE,
+    ));
+    // This sets up a situation where 'simplified_modules_test_submodule' and
+    // 'blog' both depend on 'forum', 'simplified_modules_test_submodule' also
+    // depends on 'poll', and 'blog', 'forum', and 'poll' are all hidden.
+    variable_set('simplified_modules_test_both', TRUE);
+
+    // Enable the module that has the hidden dependencies, and make sure the
+    // dependencies (and their hidden submodules) were auto-enabled.
+    $this->setModuleStatus(array(
+      'simplified_modules_test_submodule' => TRUE,
+    ));
+    $this->assertTrue(module_exists('forum') && module_exists('poll') && module_exists('blog'), t('The hidden dependencies and their hidden submodules were automatically enabled.'));
+
+    // Disable the module that has the hidden dependencies, and make sure the
+    // dependencies (and their hidden submodules) were auto-disabled.
+    $this->setModuleStatus(array(
+      'simplified_modules_test_submodule' => FALSE,
+    ));
+    $this->assertTrue(!module_exists('forum') && !module_exists('poll') && !module_exists('blog'), t('The hidden dependencies and their hidden submodules were automatically disabled.'));
+  }
+
+  /**
+   * Helper function to enable or disable a set of modules via the UI.
+   *
+   * @param $module_info
+   *   An array whose keys are the names of modules and whose values are either
+   *   TRUE (to enable the corresponding module) or FALSE (to disable it).
+   */
+  function setModuleStatus($module_info) {
+    $edit = array();
+    foreach ($module_info as $module => $status) {
+      // Find out what group this module lives in on the modules page by
+      // getting the package information from its .info file. We can't use
+      // system_get_info() here since that only works for enabled modules, so
+      // we have to query the database directly.
+      $info = unserialize(db_query('SELECT info FROM {system} WHERE name = :name', array(':name' => $module))->fetchField());
+      $group = $info['package'];
+      $edit["modules[{$group}][{$module}][enable]"] = $status;
+    }
+    $this->drupalPost('admin/modules', $edit, t('Save configuration'));
+
+    // Fix a cache clearing issue in the thread running the tests.
+    module_list(TRUE);
+
+    foreach ($module_info as $module => $status) {
+      if ($status) {
+        $this->assertTrue(module_exists($module), t('The @module module is enabled.', array('@module' => $module)));
+      }
+      else {
+        $this->assertFalse(module_exists($module), t('The @module module is disabled.', array('@module' => $module)));
+      }
+    }
+  }
+}

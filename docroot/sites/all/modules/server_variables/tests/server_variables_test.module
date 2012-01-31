@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Support module for testing server variables.
+ */
+
+/**
+ * Implements hook_field_access().
+ */
+function server_variables_test_field_access($op, $field, $entity_type, $entity, $account) {
+  // Deny view and/or edit access to special fields created during
+  // ServerVariablesFieldAccessTestCase.
+  if ($op == 'view' && $field['field_name'] == 'field_no_view') {
+    return FALSE;
+  }
+  elseif ($op == 'edit' && $field['field_name'] == 'field_no_edit') {
+    return FALSE;
+  }
+  elseif ($field['field_name'] == 'field_no_view_or_edit') {
+    return FALSE;
+  }
+
+  // Deny access to the taxonomy tags field when ServerVariablesActionTestCase
+  // requests it.
+  if (variable_get('server_variables_test_deny_taxonomy_access', FALSE) && $field['field_name'] == 'field_tags') {
+    return FALSE;
+  }
+}

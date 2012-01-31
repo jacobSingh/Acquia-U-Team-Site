@@ -1,0 +1,196 @@
+<?php
+/**
+ * Implement hook_menu().
+ */
+function dialog_user_menu() {
+  $items['user/login/%dialog_js'] = array(
+    'page callback' => 'dialog_user_ajax_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['user/register/%dialog_js'] = array(
+    'page callback' => 'dialog_user_ajax_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['user/password/%dialog_js'] = array(
+    'page callback' => 'dialog_user_ajax_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+* Menu callback for our ajax links.
+*/
+function dialog_user_ajax_callback($type, $js) {
+  switch ($type) {
+    case 'login':
+      $title = t('Login');
+      $form_id = 'user_login';
+      $path = 'user/login';
+      break;
+    case 'register':
+      $title = t('Register');
+      $form_id = 'user_register_form';
+      $path = 'user/register';
+      break;
+    case 'password':
+      module_load_include('inc', 'user', 'user.pages');
+      $title = t('Request new password');
+      $form_id = 'user_pass';
+      $path = 'user/password';
+      break;
+  }
+  if ($js) {
+    // Check if the user is already logged in.  There is an edge case
+    // where a user can log into one tab of a browser and have another tab open
+    // that shows a non logged in page.  Avoid spilling errors if the user clicks
+    // on login or register links.
+    if (!user_is_anonymous()) {
+      $output[] = dialog_command_reload();
+    }
+    else {
+      // Set dialog display to be true initially.  If this is the first time
+      // the form is being rendered inside of the dialog we want dialog_display to be
+      // true.
+      dialog_display(TRUE);
+      $content = drupal_get_form($form_id);
+      // If the form has been submitted from within the dialog and it has passed
+      // validation and has been submitted, the dialog_display() function will
+      // have been updated to return false (see dialog_user_ajax_form_submit()).
+      // This is desired because if form submission completed without error, we
+      // want to dismiss the dialog and refresh the page. If dialog_display()
+      // returns true, we're either showing the form for the first time or
+      // redrawing the form after a validation error.
+      if (dialog_display()) {
+        $output[] = dialog_command_display($content, array('title' => $title, 'draggable' => false, 'resizable' => false, ));
+      }
+      elseif ($destination = $_GET['destination']) {
+        $output[] = dialog_command_redirect($destination);
+      }
+      else{
+        $output[] = dialog_command_reload();
+      }
+    }
+    ajax_deliver(array('#type' => 'ajax', '#commands' => $output));
+  }
+  else {
+    drupal_goto($path);
+  }
+}
+
+/**
+ * Implement hook_form_alter().
+ */
+function dialog_user_form_alter(&$form, &$form_state, $form_id) {
+  $forms = array('user_register_form', 'user_pass', 'user_login');
+  if (in_array($form_id, $forms)) {
+    if (dialog_display() || isset($form_state['values']['dialog_display'])) {
+      $form['dialog_display'] = array('#type' => 'value', '#value' => TRUE);
+      $form['#prefix'] = '<div id="dialog-form-wrapper">';
+      $form['#suffix'] = '</div>';
+
+      // Submit form via AJAX from within dialog. Do this instead of adding
+      // #ajax to the submit button, so that the ajax call is made to the
+      // callback handler we defined rather than system/ajax.
+      $form['actions']['submit']['#attributes'] = array (
+        'class' => array('use-ajax-submit')
+      );
+
+      $form['#submit'][] = 'dialog_user_ajax_form_submit';
+      $form['#process'][] = 'dialog_process_ajax_form';
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function dialog_user_form_user_login_block_alter(&$form, &$form_state) {
+  // Make the user login block links dialog friendly.
+  $items = array();
+  if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
+    $items[] = l(t('Create new account'), 'user/register/nojs', array('attributes' => array('title' => t('Create a new user account.'), 'class' => array('use-ajax', 'use-dialog'))));
+  }
+  $items[] = l(t('Request new password'), 'user/password/nojs', array('attributes' => array('title' => t('Request new password via e-mail.'), 'class' => array('use-ajax', 'use-dialog'))));
+  $form['links']['#markup'] = theme('item_list', array('items' => $items));
+  $form['links']['#attached']['library'] = array(
+    array('dialog', 'dialog'),
+  );
+}
+
+/**
+ * Ajax submit handler for forms inside dialogs.
+ */
+function dialog_user_ajax_form_submit(&$form, &$form_state) {
+  // Unset dialog_display static variable.  It was set and is useful when the
+  // form is first generated inside the dialog window.  But at this stage we no
+  // longer want to display a dialog.  In fact we want to eventually dismiss it.
+  drupal_static_reset('dialog_display');
+  // We also don't want to redirect the form needlessly.  The redirected page
+  // would have loaded in the dialog.  We'll be dismissing that dialog. If a
+  // destination was specified we will handle that with a dialog_command.
+  $form_state['no_redirect'] = true;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dialog_user_theme($existing, $type, $theme, $path){
+  return array(
+    'comment_post_forbidden' => array(
+      'variables' => array('node' => null),
+      'function' => 'dialog_user_comment_post_forbidden',
+    ),
+  );
+}
+
+/**
+ * Override the links provided to link to login/register to post comments to make use of dialog.
+ */
+function dialog_user_comment_post_forbidden($variables) {
+  $node = $variables['node'];
+  global $user;
+
+  // Since this is expensive to compute, we cache it so that a page with many
+  // comments only has to query the database once for all the links.
+  $authenticated_post_comments = &drupal_static(__FUNCTION__, NULL);
+
+  if (!$user->uid) {
+    if (!isset($authenticated_post_comments)) {
+      // We only output a link if we are certain that users will get permission
+      // to post comments by logging in.
+      $comment_roles = user_roles(TRUE, 'post comments');
+      $authenticated_post_comments = isset($comment_roles[DRUPAL_AUTHENTICATED_RID]);
+    }
+
+    if ($authenticated_post_comments) {
+      // Ensure that dialog_library is available.
+      drupal_add_library('dialog','dialog');
+      // We cannot use drupal_get_destination() because these links sometimes
+      // appear on /node and taxonomy listing pages.
+      if (variable_get('comment_form_location_' . $node->type, COMMENT_FORM_BELOW) == COMMENT_FORM_SEPARATE_PAGE) {
+        $destination = array('destination' => "comment/reply/$node->nid#comment-form");
+      }
+      else {
+        $destination = array('destination' => "node/$node->nid#comment-form");
+      }
+
+      $login_link = l(t('Log in'), 'user/login/nojs', array('attributes' => array('class' => array('use-ajax', 'use-dialog')), 'query' => $destination));
+      if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
+        // Users can register themselves.
+        $register_link = l(t('register'), 'user/register/nojs', array('attributes' => array('class' => array('use-ajax', 'use-dialog')),'query' => $destination));
+        return t('!login or !register to post comments', array('!login' => $login_link, '!register' => $register_link));
+      }
+      else {
+        // Only admins can add new users, no public registration.
+        return t('!login to post comments', array('!login' => $login_link));
+      }
+    }
+  }
+}

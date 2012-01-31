@@ -1,0 +1,172 @@
+<?php
+/**
+ * @file
+ * Gardens moderation feature additions extending on the built-in views.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function gardens_moderation_menu() {
+  $items['admin/config/content/moderation'] = array(
+    'title' => 'Content and comment moderation',
+    'description' => 'Review and configure what gets moderated.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('gardens_moderation_configure_form'),
+    'access arguments' => array('administer content types'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * Remove built-in comment moderation subtabs.
+ */
+function gardens_moderation_menu_alter(&$items) {
+  unset($items['admin/content/comment/new']);
+  unset($items['admin/content/comment/approval']);
+}
+
+/**
+ * Implements hook_init().
+ */
+function gardens_moderation_init() {
+  if (arg(0) == 'admin' && arg(1) == 'content') {
+    $arg2 = arg(2);
+    if (empty($arg2) || $arg2 == 'comment') {
+      drupal_add_css(drupal_get_path('module', 'gardens_moderation') . '/gardens_moderation.css');
+    }
+  }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function gardens_moderation_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'gardens_moderation') . '/views',
+  );
+}
+
+/**
+ * Form callback for moderation configuration.
+ *
+ * Replicates relevant configuration from content type forms.
+ */
+function gardens_moderation_configure_form($form, &$form_state) {
+  $form = array();
+
+  $role_names = user_roles();
+  $role_permissions = user_role_permissions($role_names);
+
+  // CONTENT moderation
+
+  $form['nodes'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Content moderation'),
+  );
+  $form['nodes']['node_published'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Content types published by default'),
+    '#options' => array(),
+    '#default_value' => array(),
+    '#description' => t('This list is a reproduction of the global default publication settings from <a href="@url">the content type configuration screens</a>.', array('@url' => url('admin/structure/types'))),
+  );
+  $node_pro_roles = array();
+  foreach (node_type_get_types() as $type) {
+    $form['nodes']['node_published']['#options'][$type->type] = $type->name;
+
+    $node_options = variable_get('node_options_' . $type->type, array('status', 'promote'));
+    if (in_array('status', $node_options)) {
+      $form['nodes']['node_published']['#default_value'][] = $type->type;
+    }
+
+    foreach ($role_permissions as $rid => $permissions) {
+      if ($rid != DRUPAL_ANONYMOUS_RID) {
+        $permissions += $role_permissions[DRUPAL_AUTHENTICATED_RID];
+      }
+      if (isset($permissions['administer nodes'])) {
+        $node_pro_roles[$rid][t('All content types')] = TRUE;
+      }
+      elseif (!in_array('status', $node_options) && isset($permissions['view own unpublished content']) && isset($permissions['save draft'])) {
+        if (isset($permissions['edit own ' . $type->type . ' content']) || isset($permissions['edit all ' . $type->type . ' content'])) {
+          $node_pro_roles[$rid][$type->name] = TRUE;
+        }
+      }
+    }
+  }
+
+  $form['nodes']['pro_roles'] = array(
+    '#type' => 'markup',
+  );
+  $node_moderation_help = '';
+  if (count($node_pro_roles)) {
+    $node_moderation_help = t('<p>The following roles can publish content directly without moderation or edit posts in moderation:</p>');
+    $node_pro_roles_display = array();
+    foreach ($node_pro_roles as $rid => $types) {
+      $role = user_role_load($rid);
+      $node_pro_roles_display[] = $role->name . ': '. join(', ', array_keys($types));
+    }
+    $node_moderation_help .= theme('item_list', array('items' => $node_pro_roles_display));
+  }
+  else {
+    $node_moderation_help = t('<p>No roles are configured to allow posting content without moderation.</p>');
+  }
+  $node_moderation_help .= t('<p>Grant or revoke the <em>Save content as draft</em>, <em>Edit own -type- content</em>, <em>Edit all -type- content</em>, <em>View own unpublished content</em> and <em>Administer content</em> permissions <a href="@url">on the permissions settings page</a>.</p>', array('@url' => url('admin/people/permissions')));
+  $form['nodes']['pro_roles']['#markup'] = $node_moderation_help;
+
+  // COMMENT moderation
+
+  $form['comments'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Comment moderation'),
+  );
+  $comment_pro_roles = array();
+  foreach ($role_permissions as $rid => $permissions) {
+    if (isset($permissions['skip comment approval'])) {
+      $role = user_role_load($rid);
+      $comment_pro_roles[] = check_plain($role->name);
+    }
+  }
+  $comment_moderation_help = '';
+  if (count($comment_pro_roles)) {
+    $comment_moderation_help = t('<p>The following roles can post comments without moderation:</p>');
+    $comment_moderation_help .= theme('item_list', array('items' => $comment_pro_roles));
+  }
+  else {
+    $comment_moderation_help = t('<p>No roles are configured to allow posting comments without moderation.</p>');
+  }
+  $comment_moderation_help .= t('<p>Grant or revoke the <em>Skip comment approval</em> permission <a href="@url">on the permissions settings page</a>.</p>', array('@url' => url('admin/people/permissions')));
+  $form['comments']['pro_roles'] = array(
+    '#type' => 'markup',
+    '#markup' => $comment_moderation_help,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form callback for moderation configuration.
+ *
+ * Replicates relevant configuration from content type forms.
+ */
+function gardens_moderation_configure_form_submit($form, &$form_state) {
+  foreach ($form_state['values']['node_published'] as $type_name => $value) {
+    $node_options = variable_get('node_options_' . $type_name, array('status', 'promote'));
+    if ($value && !in_array('status', $node_options)) {
+      $node_options = array_merge($node_options, array('status'));
+    }
+    elseif (!$value && in_array('status', $node_options)) {
+      $node_options = array_diff($node_options, array('status'));
+    }
+    variable_set('node_options_' . $type_name, $node_options);
+  }
+}

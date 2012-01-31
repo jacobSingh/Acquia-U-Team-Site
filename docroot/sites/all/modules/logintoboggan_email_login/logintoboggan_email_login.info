@@ -1,0 +1,5 @@
+name = Email Login
+description = Allows users to log in using their email address.
+core = 7.x
+package = "Login Toboggan"
+files[] = logintoboggan_email_login.module

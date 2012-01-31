@@ -1,0 +1,33 @@
+/**
+ * Admin interface styling
+ */
+
+.javascript-libraries th.checkbox {
+  width: 50px;
+}
+
+.javascript-libraries th.name {
+  width: 50%;
+}
+
+#javascript-libraries-custom tr.region-title td {
+  font-weight: bold;
+}
+#javascript-libraries-custom tr.region-message {
+  font-weight: normal;
+  color: #999;
+}
+#javascript-libraries-custom tr.region-populated {
+  display: none;
+}
+.library-region {
+  background-color: #ff6;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding: 3px;
+}
+
+/* This rule hides the weight column when there are no custom libraries */
+#javascript-libraries-custom.empty .library-weight {
+  display: none;
+}

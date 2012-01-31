@@ -1,0 +1,280 @@
+<?php
+
+/**
+ * @file
+ * Simplifies the modules page by allowing related modules to be grouped under a single checkbox.
+ */
+
+/**
+ * Implements hook_system_info_alter().
+ */
+function simplified_modules_system_info_alter(&$info, $file, $type) {
+  // Hide submodules and dependencies that need to be hidden.
+  $hidden_modules = array_merge(simplified_modules_hidden_submodules(), simplified_modules_hidden_dependencies());
+  if (in_array($file->name, $hidden_modules)) {
+    $info['hidden'] = TRUE;
+  }
+
+  // Sites using this module are expected to have grouped enough modules
+  // together on the admin/modules page that the normal Drupal organization
+  // into "packages" isn't very useful. "Core" and "Other" is sufficient.
+  if ($type == 'module' && !in_array($info['package'], array('Core', 'Other'))) {
+    $info['package'] = 'Other';
+  }
+}
+
+/**
+ * Implements hook_update_projects_alter().
+ */
+function simplified_modules_update_projects_alter(&$projects) {
+  // In simplified_modules_system_info_alter() we marked some modules as hidden
+  // because we don't want them to appear in the UI on the Modules page and
+  // elsewhere. However, we do still want Update Manager to check them, because
+  // they may be in use on the site. Normally, however, update_get_projects()
+  // skips hidden modules. So in this function, we basically repeat what
+  // update_get_projects() does, only making sure to "unhide" these modules
+  // before running them through the process of building up their project info.
+  $projects = array();
+  $module_data = system_rebuild_module_data();
+  $hidden_modules = array_merge(simplified_modules_hidden_submodules(), simplified_modules_hidden_dependencies());
+  foreach ($module_data as &$file) {
+    // Unhide modules that we previously hid.
+    if (!empty($file->info['hidden']) && in_array($file->name, $hidden_modules)) {
+      $file->info['hidden'] = FALSE;
+    }
+  }
+  $theme_data = system_rebuild_theme_data();
+  _update_process_info_list($projects, $module_data, 'module', TRUE);
+  _update_process_info_list($projects, $theme_data, 'theme', TRUE);
+  if (variable_get('update_check_disabled', FALSE)) {
+    _update_process_info_list($projects, $module_data, 'module', FALSE);
+    _update_process_info_list($projects, $theme_data, 'theme', FALSE);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function simplified_modules_form_system_modules_alter(&$form, &$form_state) {
+  // Our submit handler must run first, since we want to modify
+  // $form_state['values'] before the main submit handler has a chance to
+  // process it.
+  $form['#submit'] = array_merge(array('simplified_modules_system_modules_submit'), $form['#submit']);
+}
+
+/**
+ * Custom submit handler for the system_modules() admin page.
+ */
+function simplified_modules_system_modules_submit($form, &$form_state) {
+  // We only act on the initial form submission; if we are coming from the
+  // secondary confirmation form, there is nothing to do here because we have
+  // already added our modules to the list on the first pass through.
+  if (isset($form_state['storage']['modules'])) {
+    return;
+  }
+
+  // Define preliminary variables.
+  $hidden_submodules = simplified_modules_hidden_submodules();
+  $hidden_dependencies = simplified_modules_hidden_dependencies();
+  $module_dependencies = _simplified_modules_module_build_dependencies();
+  $modules = &$form_state['values']['modules'];
+
+  // Initialize the status (enabled or disabled) we expect each module to have
+  // when the form submission is processed.
+  $submitted_module_status = array();
+  foreach ($modules as $group) {
+    // If the module appears on the form, use the status that was submitted.
+    foreach ($group as $module => $data) {
+      $submitted_module_status[$module] = $data['enable'];
+    }
+  }
+  foreach (array_keys($module_dependencies) as $module) {
+    // Otherwise, use the module's current status.
+    if (!isset($submitted_module_status[$module])) {
+      $submitted_module_status[$module] = module_exists($module);
+    }
+  }
+
+  // Initialize the final status we expect each module to have after the form
+  // submission is finished.
+  $final_module_status = _simplified_modules_expected_final_module_status($submitted_module_status, $module_dependencies);
+
+  // Enable any of our hidden submodules when the form submission will result
+  // in all the modules it requires being enabled too.
+  foreach ($hidden_submodules as $submodule) {
+    if (!empty($module_dependencies[$submodule]->requires) && empty($submitted_module_status[$submodule])) {
+      $required_by_this_submodule_but_will_be_disabled = array_diff_key($module_dependencies[$submodule]->requires, array_filter($final_module_status));
+      if (empty($required_by_this_submodule_but_will_be_disabled)) {
+        $final_module_status = _simplified_modules_set_expected_status($submodule, TRUE, $submitted_module_status, $modules, $module_dependencies);
+      }
+    }
+  }
+
+  // Enable any of our hidden dependencies whenever the form submission will
+  // result in at least one module that requires it being enabled too.
+  foreach ($hidden_dependencies as $dependency) {
+    if (isset($submitted_module_status[$dependency]) && !$submitted_module_status[$dependency]) {
+      $requires_this_module_and_will_be_enabled = array_intersect_key($module_dependencies[$dependency]->required_by, array_filter($final_module_status));
+      if (!empty($requires_this_module_and_will_be_enabled)) {
+        $final_module_status = _simplified_modules_set_expected_status($dependency, TRUE, $submitted_module_status, $modules, $module_dependencies);
+      }
+    }
+  }
+
+  do {
+    $changed = FALSE;
+    // For any module that is scheduled to be disabled, disable its hidden
+    // dependents or dependencies as appropriate.
+    foreach ($submitted_module_status as $module => $status) {
+      if (!$status) {
+        // Any hidden submodules that depend on this module must be disabled
+        // along with it.
+        $hidden_submodules_to_disable = array_intersect($hidden_submodules, array_keys($module_dependencies[$module]->required_by));
+        foreach ($hidden_submodules_to_disable as $submodule) {
+          if (!empty($submitted_module_status[$submodule])) {
+            $final_module_status = _simplified_modules_set_expected_status($submodule, FALSE, $submitted_module_status, $modules, $module_dependencies);
+            $changed = TRUE;
+          }
+        }
+        // Any hidden dependencies of this module should be disabled if this
+        // was the last module that depended on it, or if the only remaining
+        // modules that depend on it are hidden submodules. (In the latter
+        // case, we mark the hidden dependency as disabled here, and the hidden
+        // submodule will eventually be marked as disabled via the code above.)
+        foreach (array_keys($module_dependencies[$module]->requires) as $dependency) {
+          if (!empty($submitted_module_status[$dependency]) && in_array($dependency, $hidden_dependencies)) {
+            $enabled_submodules_of_dependency = array_intersect_key($module_dependencies[$dependency]->required_by, array_filter($final_module_status));
+            if (empty($enabled_submodules_of_dependency) || !array_diff(array_keys($enabled_submodules_of_dependency), $hidden_submodules)) {
+              $final_module_status = _simplified_modules_set_expected_status($dependency, FALSE, $submitted_module_status, $modules, $module_dependencies);
+              $changed = TRUE;
+            }
+          }
+        }
+      }
+    }
+  // We just looped through all disabled modules in $submitted_module_status,
+  // so if that list was changed in any way above, we need to go through the
+  // loop again to process the new ones.
+  } while($changed);
+}
+
+/**
+ * Returns modules that are auto-enabled when all their dependencies are met.
+ *
+ * These modules are typically part of a package that contains many submodules,
+ * but on certain sites we just want to have one choice, with the submodules
+ * turned on automatically whenever they are able to be.
+ *
+ * @return
+ *   An array of module names.
+ */
+function simplified_modules_hidden_submodules() {
+  $modules = module_invoke_all('simplified_modules_hidden_submodules');
+  drupal_alter('simplified_modules_hidden_submodules', $modules);
+  return $modules;
+}
+
+/**
+ * Returns modules that are auto-enabled whenever any dependents are enabled.
+ *
+ * These are typically modules which are required for a major feature to work
+ * correctly,  but which we do not want to expose on the modules page, nor
+ * leave on all the time and waste resources. So instead, we enable them
+ * whenever a module that requires them is enabled.
+ *
+ * @return
+ *   An array of module names.
+ */
+function simplified_modules_hidden_dependencies() {
+  $modules = module_invoke_all('simplified_modules_hidden_dependencies');
+  drupal_alter('simplified_modules_hidden_dependencies', $modules);
+  return $modules;
+}
+
+/**
+ * Helper function to calculate module dependencies without a full rebuild.
+ *
+ * This avoids some load by not doing a full system_rebuild_module_data() when
+ * there is no need to. It also leaves out the install profile, whose
+ * "dependencies" aren't real dependencies and which can cause problems for our
+ * purposes.
+ */
+function _simplified_modules_module_build_dependencies() {
+  $modules = db_query('SELECT name, info FROM {system} WHERE type = :type', array(':type' => 'module'))->fetchAllAssoc('name');
+  foreach ($modules as &$module) {
+    $module->info = unserialize($module->info);
+  }
+  $modules = _module_build_dependencies($modules);
+  $profile = drupal_get_profile();
+  unset($modules[$profile]);
+  return $modules;
+}
+
+/**
+ * Returns the expected status of each module after the modules page is submitted.
+ *
+ * This function takes into account the fact that system_modules_submit() will
+ * give the user a confirmation form and force all module dependencies to be
+ * enabled after the modules page form is submitted. It therefore predicts what
+ * the final status of each module (enabled or disabled) will be after the user
+ * has completely gone through the submission process, including any
+ * confirmation forms.
+ *
+ * @param $submitted_module_status
+ *   An array mapping module names to their submitted status (TRUE for enabled,
+ *   FALSE for disabled) before the system_modules_submit() function will
+ *   process them.
+ * @param $module_dependencies
+ *   Module dependencies returned by _simplified_modules_module_build_dependencies().
+ *
+ * @return
+ *   An array with the same format as $submitted_module_status, representing
+ *   the expected status of each module after system_modules_submit() has
+ *   finished processing it.
+ */
+function _simplified_modules_expected_final_module_status($submitted_module_status, $module_dependencies) {
+  $final_module_status = $submitted_module_status;
+  foreach ($submitted_module_status as $module => $status) {
+    // Force all dependencies of the enabled modules to be enabled themselves.
+    if ($status) {
+      foreach (array_keys($module_dependencies[$module]->requires) as $dependency) {
+        $final_module_status[$dependency] = TRUE;
+      }
+    }
+  }
+  return $final_module_status;
+}
+
+/**
+ * Sets the expected status of a module in all relevant arrays.
+ *
+ * @param $module
+ *   The module whose status will be set.
+ * @param $status
+ *   The status to set (TRUE for enabled, FALSE for disabled).
+ * @param $submitted_module_status
+ *   An array mapping module names to their submitted status (TRUE for enabled,
+ *   FALSE for disabled) before the system_modules_submit() function will
+ *   process them. This will be modified in place to add the new module status.
+ * @param $module_values
+ *   An array of submitted form values representing the modules, corresponding
+ *   to the $form_state['values']['modules'] array that system_modules_submit()
+ *   will eventually receive. This will be modified in place to add the new
+ *   module status.
+ * @param $module_dependencies
+ *   Module dependencies returned by _simplified_modules_module_build_dependencies().
+ *
+ * @return
+ *   An array with the same format as $submitted_module_status, representing
+ *   the expected status of each module after system_modules_submit() has
+ *   finished processing it, and taking into account the new module status that
+ *   was set by this function.
+ *
+ * @see _simplified_modules_expected_final_module_status()
+ */
+function _simplified_modules_set_expected_status($module, $status, &$submitted_module_status, &$module_values, $module_dependencies) {
+  $group = $module_dependencies[$module]->info['package'];
+  $module_values[$group][$module]['enable'] = $status;
+  $submitted_module_status[$module] = $status;
+  return _simplified_modules_expected_final_module_status($submitted_module_status, $module_dependencies);
+}

@@ -1,0 +1,6 @@
+name = COPPA Lite
+description = Provides basic COPPA compliance
+core = 7.x
+dependencies[] = date
+files[] = coppa_lite.module
+files[] = coppa_lite.test

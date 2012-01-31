@@ -1,0 +1,8 @@
+; $Id: simpleviews.info,v 1.3.2.1 2009/09/17 22:03:44 eaton Exp $
+name = SimpleViews
+description = An easy-to-use tool for bulding content listing pages.
+core = 7.x
+files[] = simpleviews.module
+files[] = simpleviews.install
+files[] = simpleviews.pages.inc
+files[] = simpleviews.views_default.inc

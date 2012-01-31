@@ -1,0 +1,41 @@
+/*
+ * @file
+ *  Default styling for feedback link
+ */
+
+#block-feedback-feedback {
+  display: block;
+  font-size: 16px;
+  padding: 0;
+  position: fixed;
+  -webkit-transform: rotate(-90deg);
+  -webkit-transform-origin: 17px 50%;
+  -moz-transform: rotate(-90deg);
+  -moz-transform-origin: 17px 50%;
+  -o-transform: rotate(-90deg);
+  -o-transform-origin: 17px 50%;
+  rotation: -90deg;
+  rotation-point: 17px 50%;
+  top: 51%;
+  z-index: 10;
+}
+
+#gardens_ie #block-feedback-feedback {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+  left: -1px;
+  top: 45%;
+  padding-top: 5px;
+  padding-bottom: 20px;
+}
+
+#block-feedback-feedback a {
+  -moz-border-radius: 0 0 8px 8px;
+  -webkit-border-bottom-left-radius: 8px;
+  -webkit-border-bottom-right-radius: 8px;
+  -o-border-radius: 0 0 8px 8px;
+  border-radius:0 0 8px 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 0.6em;
+  text-decoration: none;
+}

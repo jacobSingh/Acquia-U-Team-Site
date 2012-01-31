@@ -1,0 +1,104 @@
+body,
+input.form-submit,
+a.button {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* @group Lists */
+
+.inline li + li {
+  margin-left: 1.3333em; /* LTR */
+}
+
+ul.action-links {
+  padding-left: 0;
+}
+
+/* @end */
+
+/* @group Buttons */
+
+/* @group Primary */
+
+input.form-submit {
+  background-color: #F3F3F3;
+  background-image: none;
+  background-image: -moz-linear-gradient(-90deg, #F6F6F6 0px, #F3F3F3 60%, #E6E6E6 60.1%, #D6D6D4 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, rgba(246, 246, 246, 1.0)), color-stop(0.6667, rgba(243, 243, 243, 1.0)), color-stop(0.67, rgba(230, 230, 230, 1.0)), color-stop(1.0, rgba(214, 214, 212, 1.0)));
+  background-image: -webkit-linear-gradient(-90deg, #F6F6F6 0px, #F3F3F3 60%, #E6E6E6 60.1%, #D6D6D4 100%);
+  background-image: linear-gradient(-90deg, #F6F6F6 0px, #F3F3F3 60%, #E6E6E6 60.1%, #D6D6D4 100%);
+  border-color: #d9d9d9 #D0D0D0 #A9A9A9;
+  border-style: solid;
+  border-width: 1px;
+  font-size: 15px;
+  letter-spacing: 0.25pt;
+  padding: 5px 16px;
+  text-shadow: 1px 1px 0 #FFFFFF;
+}
+
+input.form-submit:hover {
+  background-color: #F0F0F0;
+  background-image: -moz-linear-gradient(-90deg, #F8F8F8 0px, #F0F0F0 60%, #E0E0E0 60.1%, #CACACA 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, rgba(248, 248, 248, 1.0)), color-stop(0.6667, rgba(240, 240, 240, 1.0)), color-stop(0.67, rgba(224, 224, 224, 1.0)), color-stop(1.0, rgba(202, 202, 202, 1.0)));
+  background-image: -webkit-linear-gradient(-90deg, #F8F8F8 0px, #F0F0F0 60%, #E0E0E0 60.1%, #CACACA 100%);
+  background-image: linear-gradient(-90deg, #F8F8F8 0px, #F0F0F0 60%, #E0E0E0 60.1%, #CACACA 100%);
+  color: #212121;
+  text-shadow: 1px 1px 0 #FFFFFF;
+}
+
+input.form-submit:active {
+  background-color: #E0E0E0;
+  background-image: -moz-linear-gradient(-90deg, #F8F8F8 0px, #F0F0F0 60%, #E0E0E0 60.1%, #CACACA 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0.0, rgba(248, 248, 248, 1.0)), color-stop(0.6667, rgba(240, 240, 240, 1.0)), color-stop(0.67, rgba(224, 224, 224, 1.0)), color-stop(1.0, rgba(202, 202, 202, 1.0)));
+  background-image: -webkit-linear-gradient(-90deg, #F8F8F8 0px, #F0F0F0 60%, #E0E0E0 60.1%, #CACACA 100%);
+  background-image: linear-gradient(-90deg, #F8F8F8 0px, #F0F0F0 60%, #E0E0E0 60.1%, #CACACA 100%);
+  border-color: #505050;
+  color: #000000;
+  text-shadow: 1px 1px 0 #FFFFFF;
+}
+
+/* @end */
+
+/* @group Secondary */
+
+ul.secondary li a {
+  color: #0678be;
+  letter-spacing: 0.25pt;
+}
+
+ul.secondary li a,
+ul.secondary li a:hover,
+ul.secondary li.active a,
+ul.secondary li.active a.active {
+  padding: 4px 12px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Overlay */
+
+/* Override the "display: none" that Seven normally uses inside the overlay */
+.overlay-login #branding h1.page-title {
+  display: block;
+}
+
+/* @end */
+
+/* @group Webform */
+
+.webform-response tr > td {
+  width: 75%;
+}
+
+/* @end */
+
+/* @group TreeTable */
+
+.token-tree .expander {
+  color: #0074BD;
+  font-weight: bold;
+}
+
+/* @end */

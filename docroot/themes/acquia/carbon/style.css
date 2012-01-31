@@ -1,0 +1,571 @@
+/** 
+* @file
+* Initial style definition by Acquia.
+*
+* The font size of all elements is set to 13px in default.css.  
+* All subsequent measurements such as line height, margins and padding are calculated from this 13px font size.
+* The line height is augmented from 18px to 19px for this theme
+*
+* @see default.css
+*/
+
+/* @group HTML Elements */
+
+/* @group Block  */
+
+body {
+  background-attachment: scroll;
+  background-image: url("images/bg_top.png");
+  background-position: left top;
+  background-repeat: repeat-x;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.5em;
+}
+
+fieldset {
+  padding: 0.5em 0.9em 0.5em 1em;
+}
+
+/* @end */
+
+/* @group Headings */
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: bold;
+}
+
+/* @end */
+
+/* @group Typography */
+
+.site-name {
+  font-size: 3.0769em;
+  font-weight: bold;
+  letter-spacing: -0.6px;
+  line-height: 1.2em;
+  padding-bottom: 0.3em;
+}
+
+.wrapper-footer h2 {
+  font-size: 1.8462em;
+  font-weight: bold;
+  letter-spacing: -0.2px;
+  line-height: 1.25em;
+}
+
+/* @end */
+
+/* @group Inline */
+
+a:hover {
+  text-decoration: none;
+}
+
+.wrapper a[href*="add"] {
+  background-attachment: scroll;
+  background-color: transparent;
+  background-image: url("images/new-plus.png");
+  background-position: left center;
+  background-repeat: no-repeat;
+  padding-left: 16px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Stacks */
+
+.lining {
+  padding-top: 18px;
+}
+
+.wrapper-header .box {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.wrapper-content {
+  margin-top: 7px;
+}
+
+.wrapper-content .stack-banner {
+  padding-top: 0;
+}
+
+.stack-navigation {
+  font-size: 1.0769em;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+.stack-copyright {
+  background-attachment: scroll;
+  background-image: url("images/bg_bottom.png");
+  background-position: left top;
+  background-repeat: repeat-x;
+  padding-top: 90px;
+}
+
+.wrapper-content .box {
+  padding-left: 27px;
+  padding-right: 27px;
+}
+
+.stack-banner .box {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* @end */
+
+/* @group Regions */
+
+.stack-content-inner .col-c {
+  padding-bottom: 14px;
+}
+
+.sidebar {
+  padding-bottom: 14px;
+  width: 25%;
+}
+
+.sidebar.left {
+  border-style: dotted;
+  border-width: 0 1px 0 0; /* LTR */
+  margin-right: 28px; /* LTR */
+  padding-right: 14px; /* LTR */
+}
+
+.sidebar.right {
+  border-style: dotted;
+  border-width: 0 0 0 1px; /* LTR */
+  margin-left: 28px; /* LTR */
+  padding-left: 14px; /* LTR */
+}
+
+.sidebar h2 {
+  font-size: 1.5385em;
+  line-height: 2em;
+  padding-bottom: 3px;
+}
+
+.sidebar ul {
+  list-style-type: square;
+}
+
+/* @end */
+
+/* @group Inflections */
+
+/* @group Breadcrumb */
+
+.breadcrumb {
+  padidng-top: 14px;
+}
+
+/* @end */
+
+/* @group Comment */
+
+.comment-wrapper h2 {
+  border-top-style: solid;
+  border-top-width: 1px;
+  padding-bottom: 0.3333em;
+  padding-top: 0.6667em;
+}
+
+.comment {
+  border-top-style: solid;
+  border-top-width: 1px;
+}
+
+.comment h3 {
+  font-weight: normal;
+}
+
+.comment .links {
+  border-top-style: solid;
+  border-top-width: 1px;
+}
+
+.comment-new-form {
+  border-top-style: solid;
+  border-top-width: 1px;
+  margin-top: 0.6923em;
+}
+
+/* @end */
+
+/* @group Dropdown */
+
+.menu-dropdown .menu .expanded + li {
+  margin-left: 7px;
+}
+
+.menu-dropdown .menu .expanded a {
+  padding-right: 14px; /* LTR */
+}
+
+.menu-dropdown .menu .menu {
+  -moz-box-shadow: -2px -2px 8px rgba(0, 0, 0, 0.3); /* LTR */
+  -webkit-box-shadow: -2px -2px 8px rgba(0, 0, 0, 0.3); /* LTR */
+  box-shadow: -2px -2px 8px rgba(0, 0, 0, 0.3); /* LTR */
+  padding-top: 8px;
+  top: 100%;
+}
+
+.menu-dropdown .menu .menu .menu {
+  top: -8px;
+}
+
+.menu-dropdown .menu .menu a {
+  font-size: 0.9286em;
+  line-height: 1.1538em;
+  padding: 8px 0.8462em; /* LTR */
+}
+
+.menu-dropdown .menu .menu .last > a {
+  padding-bottom: 16px;
+}
+
+.menu-dropdown .menu li > a > .more-indicator {
+  height: 5px;
+  top: 0.5454em;
+  width: 9px;
+}
+
+.menu-dropdown .menu .menu li > a > .more-indicator {
+  height: 9px;
+  top: 11px;
+  width: 5px;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Components */
+
+.action-links {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ul.links li + li {
+  margin-left: 0.6924em;
+  padding-left: 0.6924em;
+}
+
+.form-submit {
+  background-color: #666666;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  border-width: 0;
+  color: #FFFFFF;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.9231em;
+  font-weight: bold;
+  margin-left: 4px;
+  padding: 6px 9px;
+}
+
+.block-search input[type="text"] {
+  padding-bottom: 3px;
+  padding-top: 3px;
+  width: 63%;
+}
+
+.node .meta {
+  margin-top: 8px;
+}
+
+.node .username {
+  font-weight: bold;
+}
+
+.node .date {
+  font-family: Georgia,"New Century Schoolbook","Nimbus Roman No9 L",serif;
+  font-style: italic;
+}
+
+.forum th {
+  border-bottom-style: dotted;
+  border-bottom-width: 1px;
+  font-size: 1.0769em;
+  font-weight: bold;
+}
+
+.forum th + th {
+  border-left-style: dotted;
+  border-left-width: 1px;
+}
+
+.forum .name {
+  font-weight: bold;
+}
+
+.node-faq-item .faq-item-inline-question-title {
+  margin-top: 1px;
+}
+
+/* @group Webform */
+
+.webform-client-form input {
+  /* Chosen so it fits on a page with a three column layout */
+  max-width: 27em;
+}
+
+.webform-client-form .webform-container-inline input {
+  /* Chosen as above, but also taking into account the inline label width */
+  max-width: 17em;
+}
+
+.webform-client-form fieldset input {
+  /* Chosen so it fits within a fieldset on a page with a three column layout */
+  max-width: 25em;
+}
+
+.webform-client-form fieldset .webform-container-inline input {
+  /* Chosen as above, but also taking into account the inline label width */
+  max-width: 16em;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Palette */
+
+/**
+* Colors
+* white    #FFFFFF - White
+* black    #333333 - Black
+* a        #1d1d2a - Dark Gray
+* b        #545454 - Medium Gray
+* c        #ff8400 - Orange
+* d        #ffc34a - Light Orange
+* e        #cdcdcd - Light Gray
+*/
+
+body {
+  background-color: #333333;
+}
+
+.wrapper-content {
+  background-color: #ffffff;
+}
+
+.menu-dropdown .menu .menu {
+  background-color: #484848;
+}
+
+a:link {
+  color: #1d1d2a;
+}
+
+a:visited {
+  color: #1d1d2a;
+}
+
+p {
+  color: #545454;
+}
+
+ul {
+  color: #545454;
+}
+
+ol {
+  color: #545454;
+}
+
+dl {
+  color: #545454;
+}
+
+.wrapper-header a {
+  color: #cdcdcd;
+}
+
+.wrapper-footer {
+  color: #cdcdcd;
+}
+
+.wrapper-footer a {
+  color: #ffffff;
+}
+
+.site-name a {
+  color: #ffffff;
+}
+
+a:hover {
+  color: #ff8400;
+}
+
+.wrapper-header a:hover {
+  color: #ffc34a;
+}
+
+.wrapper-footer a:hover {
+  color: #ffc34a;
+}
+
+li a.active {
+  color: #ffc34a;
+}
+
+.site-name a:hover {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .active-trail > a {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .expanded:hover > a {
+  color: #FFC34A;
+}
+
+.menu-dropdown .menu .active-trail:hover > a {
+  color: #FFC34A;
+}
+
+.menu-dropdown .menu .menu li:hover > a {
+  color: #FFC34A;
+}
+
+.menu-dropdown .menu .menu a.active {
+  color: #ffffff;
+}
+
+.menu-dropdown .menu .menu .active-trail > a {
+  color: #ffffff;
+}
+
+#block-feedback-feedback a {
+  color: #ffffff;
+}
+
+.messages {
+  color: #000000;
+}
+
+.messages ul {
+  color: #000000;
+}
+
+.messages ul li {
+  color: #000000;
+}
+
+/* @group Non-palette colors */
+
+#block-feedback-feedback a {
+  background-color: #666666;
+}
+
+#block-feedback-feedback a:hover {
+  background-color: #333333;
+}
+
+body {
+  color: #333333;
+}
+
+.site-slogan {
+  color: #bcbcbc;
+}
+
+h1 {
+  color: #333333;
+}
+
+h2 {
+  color: #333333;
+}
+
+h3 {
+  color: #333333;
+}
+
+.comment h3 {
+  color: #707969;
+}
+
+h4 {
+  color: #333333;
+}
+
+h5 {
+  color: #333333;
+}
+
+h6 {
+  color: #333333;
+}
+
+.rotating-banner {
+  color: #333333;
+}
+
+.wrapper-footer h2 {
+  color: #989898;
+}
+
+.sidebar.left {
+  border-right-color: #999999;
+}
+
+.sidebar.right {
+  border-left-color: #999999;
+}
+
+.comment-wrapper h2 {
+  border-top-color: #999999;
+}
+
+.comment {
+  border-top-color: #999999;
+}
+
+.comment .links {
+  border-top-color: #999999;
+}
+
+.comment-new-form {
+  border-top-color: #999999;
+}
+
+.forum th {
+  border-bottom-color: #cccccc;
+}
+
+.forum th + th {
+  border-left-color: #cccccc;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group IE */
+
+/* @group IE7 */
+
+
+#gardens_ie7 tr.even td,
+#gardens_ie7 tr.odd td {
+  border-bottom-color: transparent;
+}
+
+/* @end */
+
+/* @end */
+

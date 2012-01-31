@@ -1,0 +1,14 @@
+name = "Simplified modules test submodule"
+description = "Support module for testing the Simplified modules functionality."
+package = Testing
+core = 7.x
+dependencies[] = forum
+dependencies[] = poll
+hidden = TRUE
+
+; Information added by drupal.org packaging script on 2011-07-13
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "simplified_modules"
+datestamp = "1310587919"
+

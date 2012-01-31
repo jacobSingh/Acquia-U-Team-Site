@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * Support module for testing the Simplified modules functionality.
+ */
+
+/**
+ * Implements hook_simplified_modules_hidden_submodules().
+ */
+function simplified_modules_test_simplified_modules_hidden_submodules() {
+  // Return a list of hidden submodules for each test that needs them.
+  if (variable_get('simplified_modules_test_submodules')) {
+    return array('simplified_modules_test_submodule');
+  }
+  elseif (variable_get('simplified_modules_test_both')) {
+    return array('blog');
+  }
+}
+
+/**
+ * Implements hook_simplified_modules_hidden_dependencies().
+ */
+function simplified_modules_test_simplified_modules_hidden_dependencies() {
+  // Return a list of hidden dependencies for each test that needs them.
+  if (variable_get('simplified_modules_test_dependencies') || variable_get('simplified_modules_test_both')) {
+    return array('forum', 'poll');
+  }
+}
+
+/**
+ * Implements hook_system_info_alter().
+ */
+function simplified_modules_test_system_info_alter(&$info, $file, $type) {
+  // Allow the testing submodule to appear on the modules page during test runs
+  // that need it to.
+  if ((variable_get('simplified_modules_test_dependencies') || variable_get('simplified_modules_test_both')) && $file->name == 'simplified_modules_test_submodule') {
+    $info['hidden'] = FALSE;
+  }
+  // Add dependencies that are needed for certain tests.
+  if (variable_get('simplified_modules_test_both') && $file->name == 'blog') {
+    $info['dependencies'][] = 'forum';
+  }
+}

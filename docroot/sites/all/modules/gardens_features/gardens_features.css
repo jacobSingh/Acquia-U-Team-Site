@@ -1,0 +1,88 @@
+/* $Id$ */
+
+a.follow-link-this-site {
+  background-image: url(images/icon-feed.png);
+}
+
+/* @group Video */
+
+.gardens-features-video-indicator {
+  background-attachment: scroll;
+  background-color: transparent;
+  background-image: url(images/med_strip.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+  -moz-background-size: 100%;
+  -o-background-size: 100%;
+  -webkit-background-size: 100%;
+  background-size: 100%;
+  bottom: 2%;
+  display: block;
+  height: 13%;
+  left: 2%;
+  max-height: 52px;
+  max-width: 48px;
+  min-height: 13px;
+  min-width: 12px;
+  opacity: 0.75;
+  position: absolute;
+  width: 10%;
+  /* This will only affect IE7 which needs the extra space */
+  *bottom: 2%;
+}
+
+.styles-container-media_youtube {
+  position: relative;
+}
+
+.media-thumbnail-frame {
+  position: relative;
+}
+
+.media-edit-form .media-thumbnail-frame,
+.media-multiedit-form .media-thumbnail-frame {
+  line-height: 1ex;
+  padding: 3px;
+}
+
+.media-edit-form .media-thumbnail-frame,
+.media-multiedit-form .media-thumbnail-frame {
+  border: 1px solid #CCC; 
+}
+
+.media-edit-form .media-thumbnail-frame img,
+.media-multiedit-form .media-thumbnail-frame img {
+  height: auto;
+  max-width: 100%;
+}
+
+.media-thumbnail-frame:hover .gardens-features-video-indicator {
+  opacity: 0.3333;
+}
+
+.media-thumbnail-frame .gardens-features-video-indicator {
+  bottom: 6px;
+  left: 6px;
+}
+
+/* @end */
+
+/* @group Contextual links */
+.contextual-links-region-proxy {
+  position: absolute;
+  z-index: 500;
+}
+
+/* @end */
+
+.gardens-features-checkbox-indent {
+  margin-left: 1.5em; /* LTR */
+}
+
+.gardens-features-toggle-disabled-wrapper {
+  text-align: right; /* LTR */
+}
+
+.lightbox-stack .oembed-content {
+  display: block;
+}

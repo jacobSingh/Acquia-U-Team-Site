@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function dialog_comment_menu() {
+  $items['comment/%comment/%dialog_js/delete'] = array(
+    'title' => 'Delete comment',
+    'page callback' => 'dialog_comment_delete',
+    'page arguments' => array(1, 2),
+    'access arguments' => array('administer comments'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implement hook_comment_view().
+ */
+function dialog_comment_comment_view(&$comment, $build_mode) {
+  // Modify the comment links.
+  $links = isset($comment->content['links']['comment']['#links']) ? $comment->content['links']['comment']['#links'] : array();
+  if (isset($links['comment_delete'])) {
+    // State that we'll be using the dialog.
+    $links['comment_delete']['attributes']['class'][] = 'use-dialog use-ajax';
+    $links['comment_delete']['href'] = str_replace('/delete', '/nojs/delete', $links['comment_delete']['href']);
+    $links['comment_delete']['#attached']['library'][] = array('dialog', 'dialog');
+  }
+  // Set the links back in their place.
+  if (isset($comment->content['links']['comment']['#links'])) {
+    $comment->content['links']['comment']['#links'] = $links;
+  }
+}
+
+/**
+ * Menu callback; Delete a comment.
+ */
+function dialog_comment_delete($comment, $ajax = FALSE) {
+  module_load_include('inc', 'comment', 'comment.admin');
+  if (!$ajax) {
+    return drupal_get_form('comment_confirm_delete', $comment);
+  }
+
+  $content = drupal_get_form('comment_confirm_delete', $comment);
+  $output[] = dialog_command_display($content, array(
+    'title' => t('Are you sure you want to delete the comment %title?', array('%title' => $comment->subject)),
+    'width' => '350px',
+    'height' => '200px',
+  ));
+  ajax_render($output);
+}

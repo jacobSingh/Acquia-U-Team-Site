@@ -1,0 +1,10 @@
+name = Unified SEO UI
+description = Glues together various SEO modules in a unified interface.
+files[] = seo_ui.module
+
+; Information added by drupal.org packaging script on 2012-01-04
+version = "7.x-1.0"
+core = "7.x"
+project = "seo_ui"
+datestamp = "1325709343"
+

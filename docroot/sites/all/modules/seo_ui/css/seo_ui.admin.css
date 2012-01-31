@@ -1,0 +1,25 @@
+/* Overrides for default vertical tab styling */
+.vertical-tabs ul li.vertical-tab-button .summary {
+  line-height: 1.3333;
+}
+
+.vertical-tabs .vertical-tabs-panes .seo-settings fieldset.collapsible legend {
+  display: block;
+}
+
+.vertical-tabs .vertical-tabs-panes .seo-settings fieldset.collapsible legend .summary {
+  display: none;
+}
+
+.vertical-tabs .vertical-tabs-panes .seo-settings fieldset {
+  border: 1px solid #CCC;
+  padding: 2.5em 0 0 0;
+  position: relative;
+  margin: 1em 0;
+}
+
+.vertical-tabs .vertical-tabs-panes .seo-settings caption,
+.redirect-list > caption {
+  font-size: 1em;
+  text-align: left;
+}

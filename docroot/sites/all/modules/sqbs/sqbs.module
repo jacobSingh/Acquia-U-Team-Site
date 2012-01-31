@@ -1,0 +1,488 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Simple query builder for simpleviews.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function sqbs_init() {
+  // Allow sqbs to clear all caches on a page request.
+  if (variable_get('sqbs_flush_all_caches', FALSE)) {
+    // Use locking to prevent multiple clearing.
+    if (lock_acquire('sqbs_flush_all_caches')) {
+      variable_del('sqbs_flush_all_caches');
+      drupal_flush_all_caches();
+      lock_release('sqbs_flush_all_caches');
+    }
+    else {
+      // Give the flush time to finish.
+      lock_wait('sqbs_flush_all_caches');
+    }
+  }
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * Simpleviews rebuilds the menu each time there is a change in a simpleview,
+ * so our data will get updated in Drupal's menu system at that point.
+ */
+function sqbs_menu() {
+  $items = array();
+  // Pick all simpleviews, where the path is not empty.
+  $results = db_query("SELECT s.*, sb.* FROM {simpleviews} s INNER JOIN {simpleviews_sqbs} sb ON sb.svid = s.svid WHERE s.path != ''");
+  foreach ($results as $simpleview) {
+    sqbs_unpack($simpleview);
+    $path = strtolower($simpleview->path);
+    $items[$path] = array(
+      'page callback' => 'sqbs_generate_page',
+      'page arguments' => array($simpleview),
+      'access arguments' => array('access content'),
+      'type' => MENU_CALLBACK,
+    );
+    if ($simpleview->rss) {
+      $items[$path . '/feed'] = array(
+        'page callback' => 'sqbs_generate_feed',
+        'page arguments' => array($simpleview),
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+      );
+    }
+  }
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function sqbs_block_info() {
+  $blocks = array();
+  // Pick all simpleviews, which should have blocks and expose them.
+  $results = db_query("SELECT * FROM {simpleviews} WHERE block = 1");
+  foreach ($results as $simpleview) {
+    $blocks[$simpleview->svid] = array(
+      'info' => $simpleview->title,
+    );
+  }
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function sqbs_block_view($delta) {
+  $simpleview = sqbs_simpleviews_load($delta);
+  if (!empty($simpleview->block)) {
+    $page_node = menu_get_object();
+    $nid = isset($page_node->nid) ? $page_node->nid : NULL;
+    // Only show block if the configuration still says it should be shown.
+    return array(
+      'subject' => $simpleview->title,
+      'content' => sqbs_generate_styled_node_list($simpleview, $simpleview->block_items, $simpleview->block_style, FALSE, $nid),
+    );
+  }
+}
+
+/**
+ * Generic page callback to build a page based on a $simpleview.
+ */
+function sqbs_generate_page($simpleview) {
+  if ($build = sqbs_generate_styled_node_list($simpleview, $simpleview->page_items, $simpleview->style, TRUE)) {
+    // Add pager. Will only be displayed if required (we have more items than
+    // displayed on the page).
+    $build[]['pager'] = array(
+      '#theme' => 'pager',
+    );
+
+    // Add RSS reference if this simpleview is to provide a feed.
+    if ($simpleview->rss) {
+      $feed_url = url($simpleview->path . '/feed', array('absolute' => TRUE));
+      drupal_add_feed($feed_url, $simpleview->title . ' ' . t('RSS'));
+    }
+
+    drupal_set_title($simpleview->title);
+
+    return $build;
+  }
+  return MENU_NOT_FOUND;
+}
+
+/**
+ * Generate node listing markup based on $style.
+ *
+ * @param $simpleview
+ *   An sqbs extended simpleview object.
+ * @param $items
+ *   Number of items to show in view. Will usually be the value of either
+ *   $simpleview->page_items or $simpleview->block_items, depending on the
+ *   target of the output.
+ * @param $style
+ *   One of 'teasers', 'full', 'titles', 'title_reveals_full' or 'table'.
+ *   Will usually be the value of either $simpleview->style or
+ *   $simpleview->block_style, depending on the target of the output.
+ * @param $page
+ *   Set to TRUE when the simpleview is being displayed as the main item on a
+ *   page, FALSE otherwise.
+ * @param $skipnid
+ *   Skip the node with this nid. Used to temporarily work around the core bug
+ *   in http://drupal.org/node/721754 while everybody takes their time to figure
+ *   out the best solution there.
+ */
+function sqbs_generate_styled_node_list($simpleview, $items, $style, $page, $skipnid = NULL) {
+
+  // Do not keep the nid to skip if we are dealing with a list type, where it is
+  // not a problem.
+  $skipnid = in_array($style, array('titles', 'table')) ? NULL : $skipnid;
+
+  // Get one more than we actually need to see if there are more.
+  $build = array();
+  if ($style == 'titles') {
+    $nids = sqbs_get_nids($simpleview, $items + 1, $skipnid, $page);
+
+    // Check if there are any more results.  Get rid of that extra one.
+    $more = (count($nids) > $items);
+    if ($more) {
+      array_pop($nids);
+    }
+  }
+  else {
+    $nids = sqbs_get_nids($simpleview, $items, $skipnid, $page);
+  }
+
+  if (!empty($nids)) {
+    $nodes = node_load_multiple($nids);
+
+    switch ($style) {
+      case 'teasers':
+      case 'full':
+      case 'title_reveals_full':
+        $view_modes = array(
+          'teasers' => 'teaser',
+          'full' => 'full',
+          'title_reveals_full' => 'full',
+        );
+        $build[] = node_view_multiple($nodes, $view_modes[$style]);
+        if ($style == 'title_reveals_full') {
+          // Attach Javascript to make clicking on the title reveal the full
+          // node.
+          $build['#attached']['js'][] = drupal_get_path('module', 'sqbs') . '/sqbs-reveal.js';
+        }
+        break;
+      case 'titles':
+        $build[] = node_title_list($nodes);
+        // Note that !title is escaped in more_link, so we can pass it on here as-is.
+        if ($more) {
+          $build[]['#markup'] = theme('more_link', array('url' => $simpleview->path, 'title' => t('Go to !title', array('!title' => $simpleview->title))));
+        }
+        break;
+      case 'table':
+        // This is just a custom type we added, so might not be views
+        // compatible. Views requires you to specify the columns you want to
+        // see, and given our simple purpose, we have no UI for that.
+        $header = array(t('Title'), t('Author'), t('Submitted'));
+        $data = array();
+        foreach ($nodes as $node) {
+          // Node title code from node_title_list().
+          $data[] = array(check_plain($node->title), check_plain($node->name), format_date($node->created));
+        }
+        $build[] = array('#markup' => theme('table', array('header' => $header, 'rows' => $data)));
+        break;
+    }
+  }
+
+  // Quick and dirty theming; wrap the simpleview in a div based on its style.
+  $build['#prefix'] = '<div class="simpleview ' . drupal_html_class("simpleview-$style") . '">';
+  $build['#suffix'] = '</div>';
+
+  return $build;
+}
+
+/**
+ * Feed callback for the given simpleview.
+ */
+function sqbs_generate_feed($simpleview) {
+  node_feed(
+    sqbs_get_nids($simpleview),
+    array('title' => $simpleview->title, 'link' => url($simpleview->path, array('absolute' => TRUE)))
+  );
+}
+
+/**
+ * API function to retrieve the list of nids related to a simpleview.
+ */
+function sqbs_get_nids($simpleview, $limit = 10, $skipnid = NULL, $use_pager = FALSE) {
+  // Default query parameters.
+  $select = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('n.status', 1)
+    ->orderBy('n.sticky', 'DESC')
+    ->addTag('node_access');
+
+  // We only do a pager query if specifically requested (for example, if this
+  // is going to be displayed as the main content on a page). There is no point
+  // doing it if the simpleview will be displayed in a block, for example, and
+  // doing it only risks interfering with other pagers that might be displayed
+  // on the same page.
+  if ($use_pager) {
+    $select = $select->extend('PagerDefault');
+    $select->limit($limit);
+  }
+  else {
+    $select->range(0, $limit);
+  }
+
+  if (isset($skipnid)) {
+    // @see sqbs_generate_styled_node_list() docs.
+    $select->condition('n.nid', $skipnid, '!=');
+  }
+
+  // Add user data for use in listings.
+  $select->join('users', 'u', 'n.uid = u.uid');
+  $select->fields('u', array('name'));
+
+  // Add filter for node type.
+  if ($simpleview->filter != 'all') {
+    list(, $node_type) = explode(':', $simpleview->filter);
+    $select->condition('type', $node_type);
+  }
+
+  // If we have tags to filter for.
+  if (!empty($simpleview->tags)) {
+    $select->join('taxonomy_index', 'ti', 'n.nid = ti.nid');
+    $select->condition('tid', $simpleview->tags, 'IN');
+  }
+
+  // Add sort criteria based on configuration.
+  switch ($simpleview->sort) {
+    case 'newest':
+      $select->orderBy('n.created', 'DESC');
+      break;
+    case 'oldest':
+      $select->orderBy('n.created', 'ASC');
+      break;
+    case 'a-z':
+      $select->orderBy('title', 'ASC');
+      break;
+    case 'popular':
+      // This option only available when statistics module is turned on.
+      // We can assume node_counter exists, but entries might not.
+      $select->leftJoin('node_counter', 'nc', 'n.nid = nc.nid');
+      $select->orderBy('nc.totalcount', 'DESC');
+      break;
+    case 'votingapi':
+      // @todo: not implemented;
+      break;
+  }
+
+  // We only need the nids, the rest is done later.
+  return $select->execute()->fetchCol();
+}
+
+/**
+ * Minimal form altering of the simpleviews form.
+ */
+function sqbs_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'simpleviews_form') {
+    $simpleview = !empty($form['simpleview']['svid']['#value']) ? sqbs_simpleviews_load($form['simpleview']['svid']['#value']) : NULL;
+
+    // Add our JavaScript to the form's attached JavaScripts.
+    $form['#attached']['js'][] = drupal_get_path('module', 'sqbs') . '/sqbs.js';
+
+    $form['simpleview']['argument']['#access'] = FALSE;
+    $form['simpleview']['block']['#title'] = t('Expose a block');
+    $form['simpleview']['block']['#weight'] = 10;
+    $form['simpleview']['rss']['#weight'] = 5;
+
+    $form['simpleview']['style']['#options']['title_reveals_full'] = t('List of titles (clicking reveals full post)');
+    $form['simpleview']['style']['#options']['table'] = t('Table with overview data');
+
+    $options = array();
+    foreach (array(1, 3, 5, 7, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60) as $option) {
+      $options[$option] = format_plural($option, '1 item on page', '@count items on page');
+    }
+    $form['simpleview']['page_items'] = array(
+      '#title' => t('Show'),
+      '#type' => 'select',
+      '#default_value' => !empty($simpleview->page_items) ? $simpleview->page_items : 10,
+      '#options' => $options,
+      '#weight' => 3,
+    );
+    $options = array();
+    foreach (array(1, 3, 5, 7, 10, 15, 20, 25) as $option) {
+      $options[$option] = format_plural($option, '1 item in block', '@count items in block');
+    }
+    $form['simpleview']['block_items'] = array(
+      '#title' => t('Show'),
+      '#type' => 'select',
+      '#default_value' => !empty($simpleview->block_items) ? $simpleview->block_items : 5,
+      '#options' => $options,
+      '#weight' => 12,
+    );
+
+    // Based on code from taxonomy_autocomplete_elements_process().
+    $typed_tags = '';
+    if (!empty($simpleview->tags)) {
+      $tags = array();
+      foreach ($simpleview->tags as $tag) {
+        $tags[$tag] = taxonomy_term_load($tag);
+      }
+      $typed_tags = taxonomy_implode_tags($tags);
+    }
+
+    $form['simpleview']['taxonomy_tags'] = array(
+      '#title' => t('Limit to tags'),
+      '#type' => 'textfield',
+      '#default_value' => !empty($simpleview->tags) ? $simpleview->tags : '',
+      // Tie to field_tags field, which is a generic tagging field.
+      '#autocomplete_path' => 'taxonomy/autocomplete/field_tags',
+      '#weight' => 2,
+      '#element_validate' => array('sqbs_autocomplete_tags_validate'),
+      '#default_value' => $typed_tags,
+    );
+
+    // Copy style values to be possible options for block_style.
+    $form['simpleview']['block_style'] = $form['simpleview']['style'];
+    $form['simpleview']['block_style']['#default_value'] = isset($simpleview->block_style) ? $simpleview->block_style : 'titles';
+    $form['simpleview']['block_style']['#weight'] = 13;
+
+    $form['#submit'][] = 'sqbs_simpleviews_form_submit';
+    $form['#validate'][] = 'sqbs_simpleviews_form_validate';
+  }
+
+  elseif ($form_id == 'simpleviews_delete_confirm') {
+    $form['#submit'][] = 'sqbs_simpleviews_delete_confirm_submit';
+  }
+}
+
+/**
+ * Validate autocomplete field input.
+ *
+ * Less field jugling compared to taxonomy_autocomplete_validate(), so we don't
+ * need to pretend like the whole form is field based. That code has todo
+ * comments all around to fix it to not tie itself as much to fields.
+ */
+function sqbs_autocomplete_tags_validate(&$element, &$form_state) {
+  $field_key = 'field_tags';
+  $field = field_info_field($field_key);
+
+  if ($tags = $form_state['values']['taxonomy_tags']) {
+    if (empty($field)) {
+      form_set_error("simpleview']['taxonomy_tags", t('Tag field not found, simpleview cannot be limited to tags.'));
+      return;
+    }
+    $vocabularies = array();
+    foreach ($field['settings']['allowed_values'] as $tree) {
+      if ($vocabulary = taxonomy_vocabulary_machine_name_load($tree['vocabulary'])) {
+        $vocabularies[$vocabulary->vid] = $vocabulary;
+      }
+    }
+
+    $typed_terms = drupal_explode_tags($tags);
+    $values = array();
+
+    foreach ($typed_terms as $typed_term) {
+      // See if the term exists in the chosen vocabulary and return the tid;
+      // otherwise, add a new record.
+      $possibilities = taxonomy_term_load_multiple(array(), array('name' => trim($typed_term), 'vid' => array_keys($vocabularies)));
+      $typed_term_tid = NULL;
+
+      // tid match, if any.
+      foreach ($possibilities as $possibility) {
+        $typed_term_tid = $possibility->tid;
+        break;
+      }
+      if (!$typed_term_tid) {
+        $vocabulary = reset($vocabularies);
+        $edit = array(
+          'vid' => $vocabulary->vid,
+          'name' => $typed_term,
+          'vocabulary_machine_name' => $vocabulary->machine_name,
+        );
+        $term = (object) $edit;
+        if ($status = taxonomy_term_save($term)) {
+          $typed_term_tid = $term->tid;
+        }
+      }
+      $values[$typed_term_tid] = $typed_term_tid;
+    }
+    $results = options_array_transpose(array('taxonomy_tags' => $values));
+    form_set_value($element, $results, $form_state);
+  }
+}
+
+/**
+ * Simpleviews delete form submission.
+ */
+function sqbs_simpleviews_delete_confirm_submit($form, &$form_state) {
+  if ($form_state['values']['confirm']) {
+    // Delete our associated data.
+    sqbs_simpleviews_delete($form_state['values']['svid']);
+  }
+}
+
+/**
+ * Delete our attached data for a simpleviews by $svid.
+ */
+function sqbs_simpleviews_delete($svid) {
+  db_query('DELETE FROM {simpleviews_sqbs} WHERE svid = :svid', array(':svid' => $svid));
+}
+
+/**
+ * Simpleviews save form validation.
+ */
+function sqbs_simpleviews_form_validate($form, &$form_state) {
+  // Validate path, since we use that as a unique key.
+  if ($svid = db_query("SELECT svid FROM {simpleviews} WHERE path = :path", array(':path' => $form_state['values']['path']))->fetchField()) {
+    if (!isset($form_state['values']['svid']) || ($svid != $form_state['values']['svid'])) {
+      // Set an error if this is a new simpleview and one exists with this path
+      // or if we try to edit it to use a path of another simpleview.
+      form_set_error('path', t('A simple view with this path already exists. Choose a different path.'));
+    }
+  }
+}
+
+
+/**
+ * Simpleviews save form submission.
+ */
+function sqbs_simpleviews_form_submit($form, &$form_state) {
+  sqbs_simpleviews_save($form_state['values']);
+}
+
+/**
+ * Save attached data for a simpleview.
+ */
+function sqbs_simpleviews_save($item) {
+  $tags = serialize(!empty($item['taxonomy_tags']) ? array_keys($item['taxonomy_tags']) : array());
+  if (isset($item['svid'])) {
+    db_query('UPDATE {simpleviews_sqbs} SET page_items = :page_items, block_items = :block_items, tags = :tags, block_style = :style WHERE svid = :svid', array(':svid' => $item['svid'], ':block_items' => (int) $item['block_items'], ':page_items' => (int) $item['page_items'], ':tags' => $tags, ':style' => $item['block_style']));
+  }
+  else {
+    // Newly saved simpleview. The data was already stored before this submit
+    // function was invoked, so we can look up the svid from the database.
+    $item['svid'] = db_query("SELECT svid FROM {simpleviews} WHERE path = :path", array(':path' => $item['path']))->fetchField();
+    db_query('INSERT INTO {simpleviews_sqbs} (svid, page_items, block_items, tags, block_style) VALUES (:svid, :page_items, :block_items, :tags, :style)', array(':svid' => $item['svid'], ':page_items' => (int) $item['page_items'], ':block_items' => (int) $item['block_items'], ':tags' => $tags, ':style' => $item['block_style']));
+  }
+  menu_rebuild();
+  return $item['svid'];
+}
+
+/**
+ * Load a simpleviews with our attached data by $svid.
+ */
+function sqbs_simpleviews_load($svid) {
+  $simpleview = db_query("SELECT s.*, sb.* FROM {simpleviews} s INNER JOIN {simpleviews_sqbs} sb ON sb.svid = s.svid WHERE s.svid = :svid", array(':svid' => $svid))->fetch();
+  sqbs_unpack($simpleview);
+  return $simpleview;
+}
+
+/**
+ * Set up tags array, unserialize if available.
+ */
+function sqbs_unpack(&$simpleview) {
+  $simpleview->tags = !empty($simpleview->tags) ? unserialize($simpleview->tags) : array();
+}

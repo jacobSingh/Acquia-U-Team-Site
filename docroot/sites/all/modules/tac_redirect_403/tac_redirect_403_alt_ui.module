@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file
+ * Simplifies the UI for Taxonomy Access Redirect 403 when using Taxonomy Access
+ * Alt UI.
+ */
+
+/**
+ * Implements hook_modulefield_info_alter().
+ *
+ * Removes the tac_redirect_403 field from the Manage Fields and Manage Display
+ * pages, because:
+ * - The field can be added to / removed from a vocabulary via a checkbox on the
+ *   vocabulary edit page (as a dependant of TAC Alt UI's checkbox on that page)
+ *   rather than via the Manage Fields page.
+ * - There is no need to reorder the field's weight, because with TAC Alt UI
+ *   enabled, the field belongs inside the "Content Access Control" fieldset,
+ *   rather than mixed with other term fields.
+ * - We assume there's no need for the field's settings to be configurable. If
+ *   this turns out to not be true in the future, we'll need to figure out how
+ *   to best expose that.
+ * - We assume there's no need to configure display settings for the field,
+ *   since the field is intended for assigning a redirect URL, not for
+ *   displaying a link.
+ */
+function tac_redirect_403_alt_ui_modulefield_info_alter(&$fields) {
+  if (tac_alt_ui_enabled()) {
+    $fields['tac_redirect_403']['no_ui'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds a checkbox to the vocabulary edit page for adding/removing the
+ * tac_redirect_403 field to the corresponding term bundle.
+ */
+function tac_redirect_403_alt_ui_form_taxonomy_form_vocabulary_alter(&$form, &$form_state) {
+  if (isset($form['tac_enable'])) {
+    $form['tac_redirect_403_enable'] = array(
+      '#type' => 'checkbox',
+      '#states' => array(
+        'visible' => array(
+          ':input[name="tac_enable"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#title' => t('Allow terms to specify a redirect URL for denied content.'),
+      '#default_value' => (bool) field_info_instance('taxonomy_term', 'tac_redirect_403', $form_state['vocabulary']->machine_name),
+    );
+    $form['#submit'][] = 'tac_redirect_403_alt_ui_form_taxonomy_form_vocabulary_submit';
+  }
+}
+
+/**
+ * Form submit callback for the taxonomy vocabulary form.
+ */
+function tac_redirect_403_alt_ui_form_taxonomy_form_vocabulary_submit(&$form, &$form_state) {
+  if ($form_state['values']['tac_redirect_403_enable']) {
+    tac_redirect_403_enable_vocabulary($form_state['values']['machine_name']);
+  }
+  else {
+    tac_redirect_403_disable_vocabulary($form_state['values']['machine_name']);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * On the term edit page, moves the tac_redirect_403 field inside the
+ * "Content Access Control" fieldset.
+ */
+function tac_redirect_403_alt_ui_form_taxonomy_form_term_alter(&$form, &$form_state) {
+  if (isset($form['tac_redirect_403']) && isset($form['taxonomy_access_fieldset'])) {
+    $form['taxonomy_access_fieldset']['tac_redirect_403'] = $form['tac_redirect_403'];
+    unset($form['tac_redirect_403']);
+  }
+}

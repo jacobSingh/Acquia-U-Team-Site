@@ -1,0 +1,4 @@
+name = Pathauto Live Preview
+description = Displays the up-to-date Pathauto alias as content is being edited.
+dependencies[] = pathauto
+core = 7.x

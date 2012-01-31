@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file
+ *   Placeholder Form Builder implementations for core.
+ */
+
+
+/**
+ * Implementation of hook_menu().
+ *
+ * Note: This would be merged into node_menu().
+ */
+function form_builder_node_menu() {
+  $items = array();
+
+  foreach (node_type_get_types('types') as $type) {
+    $type_url_str = str_replace('_', '-', $type->type);
+    $items['admin/build/node-type/'. $type_url_str .'/fields'] = array(
+      'title' => 'Fields',
+      'page callback' => 'node_form_edit',
+      'page arguments' => array($type),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_LOCAL_TASK,
+    );
+    $items['admin/build/node-type/'. $type_url_str .'/fields/confirm'] = array(
+      'title' => 'Confirm field changes',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('node_form_builder_save_form', $type, TRUE),
+      'access arguments' => array('administer content types'),
+      'type' => MENU_CALLBACK,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_init().
+ *
+ * @todo Each one of these .inc files should be merged into their respective
+ * modules.
+ */
+function form_builder_node_init() {
+  // Pull in all the module include files.
+  $files = file_scan_directory(drupal_get_path('module', 'form_builder') . '/modules', '!^.*\.inc$!');
+  foreach ($files as $path => $file) {
+    include_once($path);
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ * Call the node-specific hook_form_alter() in each .inc file.
+ */
+function form_builder_node_form_alter(&$form, &$form_state, $form_id) {
+  foreach (module_implements('node_form_alter') as $module) {
+    // Prevent this function from calling itself recursively.
+    if ($module !== 'form_builder' && $module !== 'node') {
+      $function = $module . '_node_form_alter';
+      $function($form, $form_state, $form_id);
+    }
+  }
+
+  // Node must go last to set any necessary weights.
+  if (function_exists('node_node_form_alter')) {
+    node_node_form_alter($form, $form_state, $form_id);
+  }
+}

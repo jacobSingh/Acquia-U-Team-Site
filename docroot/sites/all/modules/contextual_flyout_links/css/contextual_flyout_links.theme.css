@@ -1,0 +1,87 @@
+/**
+ * Contextual links proxy.
+ */
+
+.contextual-links-region-proxy-outline {
+  border-color: #999;
+}
+
+/**
+ * Contextual links.
+ */
+
+.contextual-links-region-proxy .contextual-links-trigger {
+  background-attachment: scroll;
+  background-color: transparent;
+  background-image: url("../images/gears.png");
+  background-position: right top; /* LTR */
+  background-repeat: no-repeat;
+  height: 20px;
+  text-indent: -9999px;
+  width: 24px;
+}
+
+.contextual-links-region-proxy .contextual-links-wrapper:hover .contextual-links-trigger,
+.contextual-links-region-proxy .contextual-links-trigger:hover {
+  background-position: right top; /* LTR */
+}
+
+.contextual-links-region-proxy .contextual-links {
+  background-color: #666666;
+  border-color: #cccccc #999999 #999999 #cccccc; /* LTR */
+  -moz-border-radius: 10px 0 0 10px; /* LTR */
+  -o-border-top-left-radius: 10px; /* LTR */
+  -o-border-top-right-radius: 0; /* LTR */
+  -o-border-bottom-right-radius: 0; /* LTR */
+  -o-border-bottom-left-radius: 10px; /* LTR */
+  -webkit-border-top-left-radius: 10px; /* LTR */
+  -webkit-border-top-right-radius: 0; /* LTR */
+  -webkit-border-bottom-right-radius: 0; /* LTR */
+  -webkit-border-bottom-left-radius: 10px; /* LTR */
+  border-radius: 10px 0 0 10px; /* LTR */
+  border-style: solid;
+  border-width: 1px;
+  -moz-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.333); /* LTR */
+  -o-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.333); /* LTR */
+  -webkit-box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.333); /* LTR */
+  box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.333); /* LTR */
+  padding: 6px 0;
+}
+
+.contextual-links-region-proxy .contextual-links.edge-collision {
+  -moz-border-radius: 0 10px 10px 10px;
+  -o-border-top-left-radius: 0; /* LTR */
+  -o-border-top-right-radius: 10px; /* LTR */
+  -o-border-bottom-right-radius: 10px; /* LTR */
+  -o-border-bottom-left-radius: 10px; /* LTR */
+  -webkit-border-top-left-radius: 0; /* LTR */
+  -webkit-border-top-right-radius: 10px; /* LTR */
+  -webkit-border-bottom-right-radius: 10px; /* LTR */
+  -webkit-border-bottom-left-radius: 10px; /* LTR */
+  border-radius: 0 10px 10px 10px;
+}
+
+.contextual-links-region-proxy .contextual-links li span,
+.contextual-links-region-proxy .contextual-links li a {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.contextual-links-region-proxy .contextual-links li span {
+  color: #b8b8b8;
+  padding: 6px 9px;
+}
+
+.contextual-links-region-proxy .contextual-links li:first-child span {
+  padding-top: 0;
+}
+
+.contextual-links-region-proxy .contextual-links li a {
+  color: white !important; /* This important overrides an !important in core. sigh. */
+  padding: 6px 9px;
+  text-decoration: underline;
+}
+
+.contextual-links-region-proxy .contextual-links li a:hover {
+  text-decoration: underline;
+}

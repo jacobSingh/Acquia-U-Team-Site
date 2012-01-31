@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * @file
+ * Provides a demonstration of using the Dialog API.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function dialog_example_menu() {
+  // Normal menu callback.
+  $items['dialog/example'] = array(
+    'title' => 'Dialog example',
+    'description' => 'A demonstration of the Dialog module.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dialog_example_page'),
+    'access arguments' => array('access content'),
+  );
+  // Dialog menu callback.
+  $items['dialog/%dialog_js/example'] = array(
+    'title' => 'Dialog example',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'dialog_example_ajax_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Menu callback for our dialog example page.
+ */
+function dialog_example_page() {
+  // Add the required Dialog JavaScript and CSS.
+  $examples['#attached']['library'] = array(
+    array('dialog', 'dialog'),
+  );
+
+  // Modules may add the 'use-dialog' class to a link to have its content
+  // open in a dialog.
+  $examples['links']['#theme'] = 'item_list';
+  $examples['links']['#items'] = array(
+    l('Simple test', 'dialog/nojs/example', array('attributes' => array('class' => array('use-dialog', 'use-ajax')))),
+  );
+  if (module_exists('dialog_user')) {
+    $examples['links']['#items'][] = l('User login', 'user/login/nojs/', array('attributes' => array('class' => array('use-dialog', 'use-ajax'))));
+    $examples['links']['#items'][] = l('User register', 'user/register/nojs/', array('attributes' => array('class' => array('use-dialog', 'use-ajax'))));
+    $examples['links']['#items'][] = l('Request new password', 'user/password/nojs/', array('attributes' => array('class' => array('use-dialog', 'use-ajax'))));
+  }
+
+  return $examples;
+}
+
+/**
+ * Menu callback for our AJAX
+ */
+function dialog_example_ajax_callback($ajax) {
+  // If we're using JavaScript, display the content within the dialog.
+  if ($ajax) {
+    // Construct the dialog's content.
+    $content = dialog_example_page();
+    // Options that are passed to the jQuery UI dialog. See the jQuery UI
+    // website for more available options: http://jqueryui.com/demos/dialog/
+    $options = array(
+      'height' => rand(25, 75) . '%',
+      'width' => rand(25, 75) . '%',
+      'position' => 'center',
+      'title' => t('Dialog example'),
+    );
+
+    $commands = array();
+    $commands[] = dialog_command_display($content, $options);
+    ajax_deliver(array('#type' => 'ajax', '#commands' => $commands));
+  }
+  else {
+    // If the user isn't using JavaScript, just show the normal page.
+    return dialog_example_page();
+  }
+}

@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * @file
+ *   Add the node_settings_table to Drupal.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function form_builder_node_schema() {
+  $schema = array();
+
+  $schema['node_form_settings'] = array(
+    'fields' => array(
+      'type' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+      ),
+      'field' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'settings' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('type', 'field'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function form_builder_node_install() {
+  db_update('system')
+    ->fields(array('weight' => 101))
+    ->condition('name', 'form_builder_node')
+    ->execute();
+}

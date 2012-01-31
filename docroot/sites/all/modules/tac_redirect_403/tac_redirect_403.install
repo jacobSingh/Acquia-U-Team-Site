@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the TAC Redirect 403 module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function tac_redirect_403_uninstall() {
+  if (field_info_field('tac_redirect_403')) {
+    field_delete_field('tac_redirect_403');
+  }
+}

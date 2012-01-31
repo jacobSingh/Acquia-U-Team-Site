@@ -1,0 +1,32 @@
+/* $Id$ */
+
+/* Main settings page */
+.page-admin-config-search-xmlsitemap-settings .vertical-tabs {
+  margin-top: 0;
+}
+
+/**
+ * The next two repeat what the module does, but are necessary because we moved
+ * the engines settings to the main settings form.
+ */
+#xmlsitemap-settings-form .form-item-xmlsitemap-engines-engines {
+  margin-bottom: 0;
+}
+#xmlsitemap-settings-form .form-item-xmlsitemap-engines-custom-urls {
+  padding-top: 0;
+}
+
+/* Vertical tabs on the main settings page */
+.xmlsitemap-bundle-configuration .form-item {
+  display: inline;
+}
+.xmlsitemap-bundle-configuration .form-item label {
+  display: inline;
+  font-weight: normal;
+}
+.xmlsitemap-bundle-configuration .form-select {
+  padding: 0;
+}
+.xmlsitemap-bundle-configuration h3 {
+  margin-top: 25px;
+}

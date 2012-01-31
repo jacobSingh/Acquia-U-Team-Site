@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * @file
+ * Enhances the Blog module with behavior for site-wide and multi-user blogs.
+ */
+
+/**
+ * Option to not link from blog entries to a blog page.
+ */
+define('FLEXIBLE_BLOGS_NODE_LINK_NONE', 'none');
+
+/**
+ * Option to link from blog entries to the author's blog page.
+ */
+define('FLEXIBLE_BLOGS_NODE_LINK_AUTHOR', 'author');
+
+/**
+ * Option to link from blog entries to the site-wide blog page.
+ */
+define('FLEXIBLE_BLOGS_NODE_LINK_SITE', 'site');
+
+/**
+ * Implements hook_menu().
+ */
+function flexible_blogs_menu() {
+  $items['admin/config/content/blog'] = array(
+    'title' => 'Blog settings',
+    'description' => 'Configure settings that control the appearance of blog entries.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('flexible_blogs_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'flexible_blogs.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function flexible_blogs_menu_alter(&$items) {
+  if ($items['blog']['page callback'] === 'blog_page_last') {
+    unset($items['blog']['title']);
+    $items['blog']['title callback'] = 'flexible_blogs_blog_page_title';
+    $items['blog']['page callback'] = 'flexible_blogs_blog_page_last';
+  }
+}
+
+/**
+ * Replacement title callback for the main blog page.
+ */
+function flexible_blogs_blog_page_title() {
+  return flexible_blogs_blog_has_multiple_authors() ? t('Blogs') : t('Blog');
+}
+
+/**
+ * Replacement page callback for the main blog page.
+ */
+function flexible_blogs_blog_page_last() {
+  // Blog sites often display their blog on the front page; in that case, we do
+  // not want to give it a title.
+  if (drupal_is_front_page()) {
+    drupal_set_title('');
+  }
+  // Return the normal content for this page.
+  return blog_page_last();
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function flexible_blogs_node_view($node, $view_mode) {
+  // When the site only has one blog author, do not link to both the main site
+  // blog and author's blog in the breadcrumbs, since they are redundant.
+  if ($node->type == 'blog' && node_is_page($node) && !flexible_blogs_blog_has_multiple_authors()) {
+    $breadcrumbs = array(
+      l(t('Home'), NULL),
+      l(t('Blog'), 'blog'),
+    );
+    drupal_set_breadcrumb($breadcrumbs);
+  }
+}
+
+/**
+ * Implements hook_node_view_alter().
+ */
+function flexible_blogs_node_view_alter(&$build) {
+  // When appropriate, remove or replace the link which the Blog module adds to
+  // blog entries.
+  if ($build['#node']->type == 'blog' && $build['#view_mode'] != 'rss') {
+    $link_type = variable_get('flexible_blogs_node_link_type', FLEXIBLE_BLOGS_NODE_LINK_SITE);
+    if ($link_type != FLEXIBLE_BLOGS_NODE_LINK_AUTHOR) {
+      // Remove the link that the blog module may have provided.
+      unset($build['links']['blog']['#links']['blog_usernames_blog']);
+      // When requested (and when not already on the blog page), display a link
+      // there instead.
+      if ($link_type == FLEXIBLE_BLOGS_NODE_LINK_SITE && (arg(0) != 'blog' || is_numeric(arg(1)))) {
+        // If no blog links exist yet at all (for example, if we are on a page
+        // where the blog module did not add any), prepare them.
+        if (empty($build['links']['blog'])) {
+          $build['links']['blog'] = array(
+            '#theme' => 'links__node__blog',
+            '#attributes' => array('class' => array('links', 'inline')),
+          );
+        }
+        // Now add our link.
+        $build['links']['blog']['#links']['blog_sitenames_blog'] = array(
+          // Using !site because l() will escape this text later.
+          'title' => t('!site blog', array('!site' => variable_get('site_name', 'Drupal'))),
+          'href' => 'blog',
+          'attributes' => array('title' => t('Read the latest !site blog entries.', array('!site' => variable_get('site_name', 'Drupal')))),
+        );
+      }
+      // If there are no links left, remove the element entirely.
+      if (empty($build['links']['blog']['#links'])) {
+        unset($build['links']['blog']);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function flexible_blogs_node_insert($node) {
+  if ($node->type == 'blog') {
+    // The number of unique blog authors may have changed.
+    drupal_static_reset('flexible_blogs_blog_has_multiple_authors');
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function flexible_blogs_node_update($node) {
+  if ($node->type == 'blog') {
+    // The number of unique blog authors may have changed.
+    drupal_static_reset('flexible_blogs_blog_has_multiple_authors');
+  }
+}
+
+/**
+ * Returns TRUE if more than one user on the site has published blog entries.
+ */
+function flexible_blogs_blog_has_multiple_authors() {
+  $multiple_blogs = &drupal_static(__FUNCTION__);
+  if (!isset($multiple_blogs)) {
+    $query = db_select('node', 'n')
+      ->fields('n', array('uid'))
+      ->condition('type', 'blog')
+      ->condition('status', 1)
+      ->distinct()
+      ->addTag('node_access');
+    $multiple_blogs = $query->countQuery()->execute()->fetchField() > 1;
+  }
+  return $multiple_blogs;
+}

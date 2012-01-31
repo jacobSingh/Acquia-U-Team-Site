@@ -1,0 +1,8 @@
+name = Taxonomy Access Alt UI
+description = Provides a simplified administrative UI 
+
+core = 7.x
+
+dependencies[] = taxonomy_access
+
+files[] = tac_alt_ui.test

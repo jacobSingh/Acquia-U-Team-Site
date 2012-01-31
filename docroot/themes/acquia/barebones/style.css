@@ -1,0 +1,85 @@
+/** 
+* @file
+* Initial style definition by Acquia.
+*
+* The font size of all elements is set to 13px in default.css.  
+* All subsequent measurements such as line height, margins and padding are calculated from this 13px font size.
+* The line height is augmented from 18px to 19px for this theme
+*
+* @see default.css
+*/
+
+/* @group Palette */
+
+/**
+* Colors
+* white    #FFFFFF - White
+* black    #000000 - Black
+* a        #333333 - Dark Gray
+* b        #551a8b - HTML Purple
+* c        #666666 - Medium Gray
+* d        #0000ee - HTML Blue
+* e        #999999 - Gray
+*/
+
+body {
+  color: #000000;
+}
+
+a {
+  color: #0000ee;
+}
+
+li a.active {
+  color: #0000ee;
+}
+
+.site-name a {
+  color: #0000ee;
+}
+
+a:hover {
+  color: #551a8b;
+}
+
+.messages {
+  color: #000000;
+}
+
+.messages ul {
+color: #000000;
+}
+
+.messages ul li {
+  color: #000000;
+}
+
+h1 {
+  color: #333333;
+}
+
+h2 {
+  color: #333333;
+}
+
+h3 {
+  color: #333333;
+}
+
+h4 {
+  color: #333333;
+}
+
+h5 {
+  color: #333333;
+}
+
+h6 {
+  color: #333333;
+}
+
+.rotating-banner {
+  color: #333333;
+}
+
+/* @end */

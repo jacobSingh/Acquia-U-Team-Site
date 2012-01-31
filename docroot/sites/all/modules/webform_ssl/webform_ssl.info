@@ -1,0 +1,13 @@
+name = Webform SSL
+description = Forces all of a site's webforms to be redirected to a secure (SSL) version. Do not use this module unless your server supports SSL.
+dependencies[] = securepages
+core = 7.x
+package = Webform
+files[] = webform_ssl.test
+
+; Information added by drupal.org packaging script on 2011-12-27
+version = "7.x-1.0-beta1"
+core = "7.x"
+project = "webform_ssl"
+datestamp = "1325016044"
+

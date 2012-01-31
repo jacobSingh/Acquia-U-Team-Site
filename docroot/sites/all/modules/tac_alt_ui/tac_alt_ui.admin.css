@@ -1,0 +1,7 @@
+/**
+ * Do not display the hide/show descriptions link above the permissions matrix.
+ */
+#taxonomy-form-term .compact-link {
+  display: none;
+}
+

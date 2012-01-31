@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function tac_alt_ui_enable() {
+  // Enable access control for all roles.
+  $roles = user_roles(FALSE);
+  foreach (array_keys($roles) as $rid) {
+    taxonomy_access_enable_role($rid);
+  }
+}
+
+/**
+ * Implements hook_disable().
+ */
+function tac_alt_ui_disable() {
+  // There is no data that this module manages, so uninstalling is
+  // non-destructive. Automatically uninstall when disabled, so that
+  // tac_alt_ui_requirements('install') is called when the administrator
+  // attempts to reenable this module.
+  // @todo Submit or find a core issue to add an 'enable' phase to
+  //   hook_requirements().
+  drupal_uninstall_modules(array('tac_alt_ui'), FALSE);
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function tac_alt_ui_requirements($phase) {
+  $t = get_t();
+  $requirements = array();
+
+  if (in_array($phase, array('install', 'runtime')) && db_table_exists('taxonomy_access_default') && db_table_exists('taxonomy_vocabulary')) {
+    drupal_load('module', 'tac_alt_ui');
+    if (!tac_alt_ui_enabled()) {
+      $requirements['tac_alt_ui_vocabularies'] = array(
+        'title' => $t('Taxonomy Access Alt UI'),
+        'value' => '',
+      );
+      if ($phase == 'install') {
+        $requirements['tac_alt_ui_vocabularies'] += array(
+          'description' => $t('Taxonomy Access Alt UI cannot be installed while there are content types capable of containing multiple access control terms.'),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+      else {
+        $requirements['tac_alt_ui_vocabularies'] += array(
+          'description' => $t('Taxonomy access is currently configured with some content types capable of containing multiple access control terms. The simplified UI is suppressed until that is changed.'),
+          'severity' => REQUIREMENT_WARNING,
+        );
+      }
+    }
+  }
+
+  return $requirements;
+}

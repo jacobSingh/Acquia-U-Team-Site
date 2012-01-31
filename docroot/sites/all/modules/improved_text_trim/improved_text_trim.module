@@ -1,0 +1,278 @@
+<?php
+
+/**
+ * @file
+ * Alters the text_trimmed and text_summary_or_trimmed field formatters to use a
+ * trimming function that doesn't count HTML markup characters against the trim
+ * length.
+ */
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function improved_text_trim_field_formatter_info_alter(&$info) {
+  $info['text_trimmed']['module'] = 'improved_text_trim';
+  $info['text_summary_or_trimmed']['module'] = 'improved_text_trim';
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ *
+ * Must be implemented, because we redefined the 'module' of some text
+ * formatters; however, can simply route to the Text module implementation.
+ */
+function improved_text_trim_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  return text_field_formatter_settings_form($field, $instance, $view_mode, $form, $form_state);
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ *
+ * Must be implemented, because we redefined the 'module' of some text
+ * formatters; however, can simply route to the Text module implementation.
+ */
+function improved_text_trim_field_formatter_settings_summary($field, $instance, $view_mode) {
+  return text_field_formatter_settings_summary($field, $instance, $view_mode);
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function improved_text_trim_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  foreach ($items as $delta => $item) {
+    if ($display['type'] == 'text_summary_or_trimmed' && !empty($item['summary'])) {
+      $output = _text_sanitize($instance, $langcode, $item, 'summary');
+    }
+    else {
+      $output = _text_sanitize($instance, $langcode, $item, 'value');
+      $output = improved_text_trim_summary($output, $display['settings']['trim_length']);
+    }
+    $element[$delta] = array('#markup' => $output);
+  }
+
+  return $element;
+}
+
+/**
+ * Returns a trimmed version of a text field value.
+ *
+ * If the end of the summary is not indicated using the <!--break--> delimiter
+ * then we generate the summary automatically, trying to end it at a sensible
+ * place such as the end of a paragraph, a line break, a sentence, or at a
+ * whitespace character (in that order of preference).
+ *
+ * @param $text
+ *   The content for which a summary will be generated.
+ * @param $size
+ *   The desired character length of the summary, not counting HTML tags. If
+ *   omitted, the default value will be used. Ignored if the special delimiter
+ *   is present in $text.
+ * @return
+ *   The generated summary.
+ */
+function improved_text_trim_summary($text, $size = NULL) {
+
+  if (!isset($size)) {
+    // What used to be called 'teaser' is now called 'summary', but
+    // the variable 'teaser_length' is preserved for backwards compatibility.
+    $size = variable_get('teaser_length', 600);
+  }
+
+  // Find where the delimiter is in the body.
+  $delimiter = strpos($text, '<!--break-->');
+
+  // If there is no delimiter and the size is either 0 or larger than the text
+  // length, then return the full text.
+  if ($delimiter === FALSE && ($size == 0 || drupal_strlen($text) <= $size)) {
+    return $text;
+  }
+
+  // DOM manipulations needed to ensure valid HTML after trimming text can be
+  // slow, so check the cache first. This function does not apply a filter
+  // format, but it's related enough to the filter system to use its cache bin.
+  $cache_id = 'improved_text_trim:' . $size . ':' . hash('sha256', $text);
+  if ($cached = cache_get($cache_id, 'cache_filter')) {
+    return $cached->data;
+  }
+
+  // If the text contains the <!--break--> delimiter, grab the part before it.
+  if ($delimiter !== FALSE) {
+    $output = substr($text, 0, $delimiter);
+
+    // The delimiter might be within another tag, resulting in $output now
+    // containing an unclosed tag. Fix that, but avoid the expensive DOM
+    // operations if there are no tags at all.
+    if (strpos($output, '<') !== FALSE) {
+      $output = filter_dom_serialize(filter_dom_load($output));
+    }
+  }
+  // Otherwise, use DOM parsing to grab the desired number of text characters,
+  // while preserving the HTML markup up to and including that text.
+  else {
+    // Generate a DOM Document to hold the full body.
+    $body_doc = filter_dom_load($text);
+    $body_node = $body_doc->documentElement;
+
+    // Generate a DOM Document to hold the summary.
+    $summary_doc = new DOMDocument();
+
+    // Recursively copy each child node from $body_node to $summary_doc
+    // until $size limit is reached.
+    _improved_text_trim_summarize($body_node, $size, $summary_doc, $summary_doc);
+
+    // Convert the summary document back to XHTML.
+    $output = filter_dom_serialize($summary_doc);
+  }
+
+  // DOM automatically wraps plain text in a <p> tag, but if the input was plain
+  // text, then the summary should be as well.
+  if ($text === strip_tags($text)) {
+    $output = strip_tags($output);
+  }
+
+  cache_set($cache_id, $output, 'cache_filter');
+  return $output;
+}
+
+/**
+ * Helper function for improved_text_trim_summary().
+ *
+ * Recursively copies elements from $body to $summary, subtracting the length
+ * of the textContent portions from $size until $size reaches zero.
+ *
+ * @param $body
+ *   The source DOMNode.
+ * @param $size
+ *   The maximum number of textContent characters to copy.
+ * @param $summary
+ *   The destination DOMNode.
+ * @param $doc
+ *   The destination DOMDocument. Should be the same as the
+ *   $summary->ownerDocument property.
+ * @param $parents
+ *   An array of tag names of ancestor nodes.
+ *
+ * @return
+ *   The number of additional characters left to copy.
+ */
+function _improved_text_trim_summarize($body, $size, $summary, $doc, $parents = array()) {
+  static $sentence_splitter;
+  static $word_splitter;
+
+  if (!isset($sentence_splitter)) {
+    // Unicode Sentence_Terminal characters.
+    // @see http://unicode.org/review/pr-23.html
+    $stops =
+      "\x21" .         // 'Exclamation mark'.
+      "\x2E" .         // 'Full stop'.
+      "\x3F" .         // 'Question mark'.
+      "\xD6\x89" .     // 'Armenian full stop'.
+      "\xD8\x9F" .     // 'Arabic question mark'.
+      "\xDB\x94" .     // 'Arabic full stop'.
+      "\xDC\x80" .     // 'Syriac end of paragraph'.
+      "\xDC\x81" .     // 'Syriac supralinear full stop'.
+      "\xDC\x82" .     // 'Syriac sublinear full stop'.
+      "\xE0\xA5\xA4" . // 'Devanagari danda'.
+      "\xE1\x81\x8A" . // 'Myanmar sign little section'.
+      "\xE1\x81\x8B" . // 'Myanmar sign section'.
+      "\xE1\x8D\xA2" . // 'Ethiopic full stop'.
+      "\xE1\x8D\xA7" . // 'Ethiopic question mark'.
+      "\xE1\x8D\xA8" . // 'Ethiopic paragraph separator'.
+      "\xE1\x99\xAE" . // 'Canadian syllabics full stop'.
+      "\xE1\xA0\x83" . // 'Mongolian full stop'.
+      "\xE1\xA0\xA9" . // 'Mongolian manchu full stop'.
+      "\xE2\x80\xBC" . // 'Double exclamation mark'.
+      "\xE2\x80\xBD" . // 'Interrobang'.
+      "\xE2\x81\x87" . // 'Double question mark'.
+      "\xE2\x81\x88" . // 'Question exclamation mark'.
+      "\xE2\x81\x89" . // 'Exclamation question mark'.
+      "\xE3\x80\x82" . // 'Ideographic full stop'.
+      "\xEF\xB9\x92" . // 'Small full stop'.
+      "\xEF\xB9\x97" . // 'Small exclamation mark'.
+      "\xEF\xBC\x81" . // 'Fullwidth exclamation mark'.
+      "\xEF\xBC\x8E" . // 'Fullwidth full stop'.
+      "\xEF\xBC\x9E" . // 'Fullwidth question mark'.
+      "\xEF\xBD\xA1";  // 'Halfwidth ideographic full stop'.
+
+    // Split after Sentence_Terminal characters only if preceded by a Letter
+    // character and followed by a Separator character.
+    $sentence_splitter = '/(?<=\p{L}[' . $stops . '])(?=\p{Z})/u';
+
+    // If no suitable sentence break is found, split before any Unicode
+    // Separator character.
+    $word_splitter = '/(?=\p{Z})/u';
+  }
+
+  // Processing text within an HTML fragment.
+  if ($body->nodeType === XML_TEXT_NODE) {
+    $text_length = drupal_strlen($body->textContent);
+
+    // Entire text node fits.
+    if ($text_length <= $size) {
+      $size -= $text_length;
+      $summary->appendChild($doc->createTextNode($body->textContent));
+      return $size;
+    }
+
+    // Avoid an incomplete code block.
+    if (in_array('code', $parents)) {
+      return 0;
+    }
+
+    // Add as many complete sentences as can fit within the length limit.
+    $sentences = preg_split($sentence_splitter, $body->textContent);
+    $text = '';
+    foreach ($sentences as $sentence) {
+      $sentence_length = drupal_strlen($sentence);
+      if ($sentence_length > $size) {
+        break;
+      }
+      $text .= $sentence;
+      $size -= $sentence_length;
+    }
+
+    // If no sentences were found, add as many complete words as can fit within
+    // the length limit.
+    if ($text === '') {
+      $words =  preg_split($word_splitter, $body->textContent);
+      foreach ($words as $word) {
+        $word_length = drupal_strlen($word);
+        if ($word_length > $size) {
+          break;
+        }
+        $text .= $word;
+        $size -= $word_length;
+      }
+    }
+
+    // Append the complete sentences or words, and return 0 to indicate
+    // completion.
+    $summary->appendChild($doc->createTextNode($text));
+    return 0;
+  }
+
+  // Recurse the DOM until the summary reaches the text length limit.
+  if ($body->nodeType === XML_ELEMENT_NODE) {
+    $node = $summary->appendChild($doc->createElement($body->tagName));
+    $parents[] = $body->tagName;
+    if ($body->hasAttributes()) {
+      foreach ($body->attributes as $attributeNode) {
+        $node->setAttribute($attributeNode->nodeName, $attributeNode->value);
+      }
+    }
+    if ($body->hasChildNodes()) {
+      foreach ($body->childNodes as $child) {
+        if ($size > 0) {
+          $size = _improved_text_trim_summarize($child, $size, $node, $doc, $parents);
+        }
+        else {
+          break;
+        }
+      }
+    }
+  }
+
+  return $size;
+}
