@@ -71,9 +71,6 @@ DirectoryIndex index.php index.html index.htm
   # downloaded.
   RewriteRule "(^|/)\." - [F]
 
-  # Support HTTP Auth when PHP is running via CGI.
-  RewriteRule .* - [E=HTTP_AUTH:%{HTTP:Authorization}]
-
   # If your site can be accessed both with and without the 'www.' prefix, you
   # can use one of the following settings to redirect users to your preferred
   # URL, either WITH or WITHOUT the 'www.' prefix. Choose ONLY one option:

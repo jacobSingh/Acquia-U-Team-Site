@@ -1238,10 +1238,6 @@ class DrupalWebTestCase extends DrupalTestCase {
       ->condition('test_id', $this->testId)
       ->execute();
 
-    // Reset all statics and variables to perform tests in a clean environment.
-    $conf = array();
-    drupal_static_reset();
-
     // Clone the current connection and replace the current prefix.
     $connection_info = Database::getConnectionInfo('default');
     Database::renameConnection('default', 'simpletest_original_default');
@@ -1288,6 +1284,10 @@ class DrupalWebTestCase extends DrupalTestCase {
     // Log fatal errors.
     ini_set('log_errors', 1);
     ini_set('error_log', $public_files_directory . '/error.log');
+
+    // Reset all statics and variables to perform tests in a clean environment.
+    $conf = array();
+    drupal_static_reset();
 
     // Set the test information for use in other parts of Drupal.
     $test_info = &$GLOBALS['drupal_test_info'];
@@ -2480,45 +2480,27 @@ class DrupalWebTestCase extends DrupalTestCase {
    *
    * @param $path
    *   A path from the internal browser content.
-   *
    * @return
-   *   If $path is an absolute URL, it will not be changed. Otherwise, it will
-   *   be converted to an absolute URL within the context of the page the
-   *   internal browser is currently pointed at.
+   *   The $path with $base_url prepended, if necessary.
    */
   protected function getAbsoluteUrl($path) {
+    global $base_url, $base_path;
+
     $parts = parse_url($path);
     if (empty($parts['host'])) {
       // Ensure that we have a string (and no xpath object).
       $path = (string) $path;
+      // Strip $base_path, if existent.
+      $length = strlen($base_path);
+      if (substr($path, 0, $length) === $base_path) {
+        $path = substr($path, $length);
+      }
       // Ensure that we have an absolute path.
-      if (strpos($path, $GLOBALS['base_path']) !== 0) {
-        $path = $GLOBALS['base_path'] . $path;
+      if ($path[0] !== '/') {
+        $path = '/' . $path;
       }
-      // If the internal browser is currently pointed at a particular URL,
-      // strip everything off the end of it until we're left with the
-      // equivalent of Drupal's $base_root global variable (for example,
-      // http://example.com). It is important to derive this from the browser's
-      // URL (rather than using the parent site's $base_root directly) because
-      // the internal browser might be pointed to a different location, e.g.
-      // the https:// version of the site.
-      if ($url = $this->getUrl()) {
-        $parts = parse_url($url);
-        $url_part_prefixes = array('fragment' => '#', 'query' => '?', 'path' => '');
-        foreach ($url_part_prefixes as $part => $prefix) {
-          if (isset($parts[$part])) {
-            $url = substr($url, 0, -strlen($prefix . $parts[$part]));
-          }
-        }
-        $base_root = $url;
-      }
-      // If the internal browser hasn't visited a URL yet, fall back on using
-      // the parent site's $base_root instead.
-      else {
-        $base_root = $GLOBALS['base_root'];
-      }
-      // Finally, prepend the base root to the path to form an absolute URL.
-      $path = $base_root . $path;
+      // Finally, prepend the $base_url.
+      $path = $base_url . $path;
     }
     return $path;
   }
@@ -2665,18 +2647,10 @@ class DrupalWebTestCase extends DrupalTestCase {
    * A good example would be when testing drupal_http_request(). After fetching
    * the page the content can be set and page elements can be checked to ensure
    * that the function worked properly.
-   *
-   * @param $content
-   *   A string representing the raw HTML content to set.
-   * @param $url
-   *   (optional) The URL to set as the internal browser URL associated with
-   *   this content. If not provided, the browser URL will not be changed.
    */
-  protected function drupalSetContent($content, $url = NULL) {
+  protected function drupalSetContent($content, $url = 'internal:') {
     $this->content = $content;
-    if (isset($url)) {
-      $this->url = $url;
-    }
+    $this->url = $url;
     $this->plainTextContent = FALSE;
     $this->elements = FALSE;
     $this->drupalSettings = array();

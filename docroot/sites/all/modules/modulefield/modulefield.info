@@ -1,7 +1,0 @@
-name = ModuleField
-description = Helps modules define fields without requiring any instances to exist.
-dependencies[] = field
-core = 7.x
-
-; This module is only useful as a dependency for other modules, so hide it from the admin/modules page.
-hidden = TRUE

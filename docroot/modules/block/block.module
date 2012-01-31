@@ -428,11 +428,10 @@ function _block_rehash($theme = NULL) {
       if (!isset($block['weight'])) {
         $block['weight'] = 0;
       }
-      // Blocks which are assigned to an invalid region inside a valid theme
-      // (for example, if the theme no longer defines the region the block was
-      // previously placed in) should be disabled.
-      if (!empty($block['region']) && $block['region'] != BLOCK_REGION_NONE && !empty($regions) && !isset($regions[$block['region']])) {
+      if (!empty($block['region']) && $block['region'] != BLOCK_REGION_NONE && !isset($regions[$block['region']])) {
         drupal_set_message(t('The block %info was assigned to the invalid region %region and has been disabled.', array('%info' => $block['info'], '%region' => $block['region'])), 'warning');
+        // Disabled modules are moved into the BLOCK_REGION_NONE later so no
+        // need to move the bock to another region.
         $block['status'] = 0;
       }
       // Set region to none if not enabled and make sure status is set.
@@ -577,19 +576,6 @@ function block_form_user_profile_form_alter(&$form, &$form_state) {
       $form['block'] += $blocks;
     }
   }
-}
-
-/**
- * Implements hook_field_extra_fields().
- */
-function block_field_extra_fields() {
-  $extra['user']['user']['form']['block'] = array(
-    'label' => t('Personalize blocks'),
-    'description' => t('Block module form element.'),
-    'weight' => 3,
-  );
-
-  return $extra;
 }
 
 /**

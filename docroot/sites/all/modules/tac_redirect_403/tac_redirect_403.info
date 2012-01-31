@@ -1,6 +1,0 @@
-name = Taxonomy Access Redirect 403
-description = Redirects people visiting node pages denied by a taxonomy access term to an alternate URL specified by the denying term.
-dependencies[] = taxonomy_access
-dependencies[] = link
-dependencies[] = modulefield
-core = 7.x

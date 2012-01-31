@@ -1,6 +1,0 @@
-name = Gardens features
-description = Enables small improvements designed to enhance the default features used in Drupal Gardens.
-core = 7.x
-package = Drupal Gardens
-
-version = 7.x-1.x-dev

@@ -312,21 +312,7 @@ function taxonomy_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'taxonomy.pages.inc',
   );
-  // We append /%menu_tail so the search text may contain slashes.
-  $items['taxonomy/autocomplete/%/%menu_tail'] = array(
-    'title' => 'Autocomplete taxonomy',
-    'page callback' => 'taxonomy_autocomplete',
-    'page arguments' => array(2, 3),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-    'file' => 'taxonomy.pages.inc',
-    // Needed for menu_tail_load().
-    'load arguments' => array('%map', '%index'),
-  );
-  // This matches the vocabulary name without any search text. Even though this
-  // path is never called, its existence is checked by theme_textfield() and
-  // tested in ProfileTestAutocomplete.
-  $items['taxonomy/autocomplete/%'] = array(
+  $items['taxonomy/autocomplete'] = array(
     'title' => 'Autocomplete taxonomy',
     'page callback' => 'taxonomy_autocomplete',
     'access arguments' => array('access content'),
@@ -1425,10 +1411,6 @@ function taxonomy_field_formatter_info() {
       'label' => t('Plain text'),
       'field types' => array('taxonomy_term_reference'),
     ),
-    'taxonomy_term_reference_rss_category' => array(
-      'label' => t('RSS category'),
-      'field types' => array('taxonomy_term_reference'),
-    ),
   );
 }
 
@@ -1468,18 +1450,6 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
         $name = ($item['tid'] != 'autocreate' ? $item['taxonomy_term']->name : $item['name']);
         $element[$delta] = array(
           '#markup' => check_plain($name),
-        );
-      }
-      break;
-
-    case 'taxonomy_term_reference_rss_category':
-      foreach ($items as $delta => $item) {
-        $entity->rss_elements[] = array(
-          'key' => 'category',
-          'value' => $item['tid'] != 'autocreate' ? $item['taxonomy_term']->name : $item['name'],
-          'attributes' => array(
-            'domain' => $item['tid'] != 'autocreate' ? url('taxonomy/term/' . $item['tid'], array('absolute' => TRUE)) : '',
-          ),
         );
       }
       break;

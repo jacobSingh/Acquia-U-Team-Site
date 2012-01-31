@@ -255,16 +255,3 @@ function contact_form_user_admin_settings_alter(&$form, &$form_state) {
     '#default_value' => variable_get('contact_default_status', 1),
   );
 }
-
-/**
- * Implements hook_field_extra_fields().
- */
-function contact_field_extra_fields() {
-  $extra['user']['user']['form']['contact'] = array(
-    'label' => t('Contact'),
-    'description' => t('Contact module form element.'),
-    'weight' => 5,
-  );
-
-  return $extra;
-}

@@ -166,13 +166,8 @@ function image_get_info($filepath, $toolkit = FALSE) {
  * @see image_resize()
  * @see image_crop()
  */
-function image_scale_and_crop(stdClass $image, $width, $height, $upscale = TRUE) {
+function image_scale_and_crop(stdClass $image, $width, $height) {
   $scale = max($width / $image->info['width'], $height / $image->info['height']);
-  if (!$upscale && $scale >= 1.0) {
-    $width = $width / $scale;
-    $height = $height / $scale;
-    $scale = 1.0;
-  }
   $x = ($image->info['width'] * $scale - $width) / 2;
   $y = ($image->info['height'] * $scale - $height) / 2;
 

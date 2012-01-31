@@ -103,19 +103,6 @@ function overlay_form_user_profile_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Implements hook_field_extra_fields().
- */
-function overlay_field_extra_fields() {
-  $extra['user']['user']['form']['overlay_control'] = array(
-    'label' => t('Administrative overlay'),
-    'description' => t('Overlay module form element.'),
-    'weight' => 4,
-  );
-
-  return $extra;
-}
-
-/**
  * Implements hook_user_presave().
  */
 function overlay_user_presave(&$edit, $account, $category) {
@@ -238,9 +225,6 @@ function overlay_library() {
     ),
     'css' => array(
       $module_path . '/overlay-child.css' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery.form'),
     ),
   );
 

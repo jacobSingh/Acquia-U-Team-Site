@@ -230,26 +230,6 @@ function user_field_extra_fields() {
     ),
   );
 
-  if (variable_get('user_pictures', 1) == 1) {
-    $return['user']['user']['form'] += array(
-      'picture' => array(
-        'label' => 'User picture',
-        'description' => t('User module picture form element.'),
-        'weight' => 2,
-      ),
-    );
-  }
-
-  if (variable_get('user_signatures', 1) == 1) {
-    $return['user']['user']['form'] += array(
-      'signature_settings' => array(
-        'label' => 'User signature',
-        'description' => t('User module signature form element.'),
-        'weight' => 1,
-      ),
-    );
-  }
-
   return $return;
 }
 
@@ -3512,7 +3492,7 @@ function _user_mail_notify($op, $account, $language = NULL) {
     $params['account'] = $account;
     $language = $language ? $language : user_preferred_language($account);
     $mail = drupal_mail('user', $op, $account->mail, $language, $params);
-    if ($op == 'register_pending_approval' && variable_get('user_mail_register_pending_approval_admin_notify', TRUE)) {
+    if ($op == 'register_pending_approval') {
       // If a user registered requiring admin approval, notify the admin, too.
       // We use the site default language for this.
       drupal_mail('user', 'register_pending_approval_admin', variable_get('site_mail', ini_get('sendmail_from')), language_default(), $params);

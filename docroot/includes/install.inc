@@ -576,41 +576,16 @@ class DatabaseTaskException extends Exception {
 }
 
 /**
- * Writes a settings.php file with content from default.settings.php.
- *
- * Settings values are replaced by values from the passed-in settings array.
+ * Replace values in settings.php with values in the submitted array.
  *
  * @param $settings
  *   An array of settings that need to be updated.
  */
 function drupal_rewrite_settings($settings = array(), $prefix = '') {
-  $default_settings_file = 'sites/default/default.settings.php';
+  $default_settings = 'sites/default/default.settings.php';
   drupal_static_reset('conf_path');
   $settings_file = conf_path(FALSE) . '/' . $prefix . 'settings.php';
 
-  $buffer = drupal_generate_settings_file_content($default_settings_file, $settings);
-  $fp = fopen(DRUPAL_ROOT . '/' . $settings_file, 'w');
-  if ($fp && fwrite($fp, $buffer) === FALSE) {
-    throw new Exception(st('Failed to modify %settings. Verify the file permissions.', array('%settings' => $settings_file)));
-  }
-}
-
-/**
- * Generates content for a new settings.php file.
- *
- * Base content is taken from another settings.php file and replaced by values
- * from the passed-in settings array.
- *
- * @param $base_file
- *   A path to an existing settings.php file (e.g.,
- *   'sites/default/default.settings.php').
- * @param $settings
- *   An array of settings that need to be updated.
- *
- * @return
- *   A string that can be output to a new settings.php file.
- */
-function drupal_generate_settings_file_content($base_file, $settings = array()) {
   // Build list of setting names and insert the values into the global namespace.
   $keys = array();
   foreach ($settings as $setting => $data) {
@@ -620,7 +595,7 @@ function drupal_generate_settings_file_content($base_file, $settings = array()) 
 
   $buffer = NULL;
   $first = TRUE;
-  if ($fp = fopen(DRUPAL_ROOT . '/' . $base_file, 'r')) {
+  if ($fp = fopen(DRUPAL_ROOT . '/' . $default_settings, 'r')) {
     // Step line by line through settings.php.
     while (!feof($fp)) {
       $line = fgets($fp);
@@ -667,12 +642,15 @@ function drupal_generate_settings_file_content($base_file, $settings = array()) 
         $buffer .= "\$$setting = " . var_export($data['value'], TRUE) . ";\n";
       }
     }
+
+    $fp = fopen(DRUPAL_ROOT . '/' . $settings_file, 'w');
+    if ($fp && fwrite($fp, $buffer) === FALSE) {
+      throw new Exception(st('Failed to modify %settings. Verify the file permissions.', array('%settings' => $settings_file)));
+    }
   }
   else {
-    throw new Exception(st('Failed to open %settings. Verify the file permissions.', array('%settings' => $base_file)));
+    throw new Exception(st('Failed to open %settings. Verify the file permissions.', array('%settings' => $default_settings)));
   }
-
-  return $buffer;
 }
 
 /**

@@ -149,10 +149,6 @@ All arguments are long options.
   --color     Output text format results with color highlighting.
 
   --verbose   Output detailed assertion messages in addition to summary.
-  
-  --exclude   A comma separated list of test classes to not run (i.e. php scripts/run-tests.sh --url http://gardens.trunk --all --exclude XMLSitemapUnitTest).
-
-  --exclude-group A comma separated list of test groups to not run (i.e., php scripts/run-tests.sh --url http://gardens.trunk --all --exclude-group "XML sitemap").
 
   <test1>[,<test2>[,<test3> ...]]
 
@@ -201,8 +197,6 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
-    'exclude' => '',
-    'exclude-group' => '',
   );
 
   // Override with set values.
@@ -238,13 +232,6 @@ function simpletest_script_parse_args() {
     }
   }
 
-  if ($args['exclude']) {
-    $args['exclude'] = explode(',', $args['exclude']);
-  }
-  if ($args['exclude-group']) {
-    $args['exclude-group'] = explode(',', $args['exclude-group']);
-  }
-  
   // Validate the concurrency argument
   if (!is_numeric($args['concurrency']) || $args['concurrency'] <= 0) {
     simpletest_script_print_error("--concurrency must be a strictly positive integer.");
@@ -459,17 +446,6 @@ function simpletest_script_get_test_list() {
             $test_list[] = $class_name;
           }
         }
-      }
-    }
-  }
-
-  if ($args['exclude']) {
-    $test_list = array_diff($test_list, $args['exclude']);
-  }
-  if ($args['exclude-group']) {
-    foreach ($args['exclude-group'] as $group_name) {
-      if (isset($groups[$group_name])) {
-        $test_list = array_diff($test_list, array_keys($groups[$group_name]));
       }
     }
   }

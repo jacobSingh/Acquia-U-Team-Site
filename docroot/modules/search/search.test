@@ -773,7 +773,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
 
     // Search for the comment subject.
     $edit = array(
-      'search_block_form' => '"' . $edit_comment['subject'] . '"',
+      'search_block_form' => "'" . $edit_comment['subject'] . "'",
     );
     $this->drupalPost('', $edit, t('Search'));
     $this->assertText($node->title, t('Node found in search results.'));
@@ -781,7 +781,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
 
     // Search for the comment body.
     $edit = array(
-      'search_block_form' => '"' . $comment_body . '"',
+      'search_block_form' => "'" . $comment_body . "'",
     );
     $this->drupalPost('', $edit, t('Search'));
     $this->assertText($node->title, t('Node found in search results.'));
@@ -885,7 +885,7 @@ class SearchCommentTestCase extends DrupalWebTestCase {
 
     // Search for the comment subject.
     $edit = array(
-      'search_block_form' => '"' . $this->comment_subject . '"',
+      'search_block_form' => "'" . $this->comment_subject . "'",
     );
     $this->drupalPost('', $edit, t('Search'));
     $method = $assume_access ? 'assertText' : 'assertNoText';
@@ -1055,7 +1055,7 @@ class SearchCommentCountToggleTestCase extends DrupalWebTestCase {
   function testSearchCommentCountToggle() {
     // Search for the nodes by string in the node body.
     $edit = array(
-      'search_block_form' => 'SearchCommentToggleTestCase',
+      'search_block_form' => "'SearchCommentToggleTestCase'",
     );
 
     // Test comment count display for nodes with comment status set to Open

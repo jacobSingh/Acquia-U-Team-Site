@@ -2292,9 +2292,6 @@ function menu_get_active_menu_names() {
  */
 function menu_set_active_item($path) {
   $_GET['q'] = $path;
-  // Since the active item has changed, the active menu trail may also be out
-  // of date.
-  drupal_static_reset('menu_set_active_trail');
 }
 
 /**
@@ -2380,7 +2377,7 @@ function menu_set_active_trail($new_trail = NULL) {
     // appending either the preferred link or the menu router item for the
     // current page. Exclude it if we are on the front page.
     $last = end($trail);
-    if ($preferred_link && $last['href'] != $preferred_link['href'] && !drupal_is_front_page()) {
+    if ($last['href'] != $preferred_link['href'] && !drupal_is_front_page()) {
       $trail[] = $preferred_link;
     }
   }

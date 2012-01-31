@@ -1,17 +1,6 @@
 <?php
 
 /**
- * Implements hook_theme().
- */
-function theme_test_theme() {
-  return array(
-    'theme_test_foo' => array(
-      'variables' => array('foo' => NULL),
-    ),
-  );
-}
-
-/**
  * Implements hook_menu().
  */
 function theme_test_menu() {
@@ -105,13 +94,6 @@ function _theme_test_alter() {
  */
 function _theme_test_suggestion() {
   return theme(array('breadcrumb__suggestion', 'breadcrumb'), array());
-}
-
-/**
- * Theme function for testing theme('theme_test_foo').
- */
-function theme_theme_test_foo($variables) {
-  return $variables['foo'];
 }
 
 /**

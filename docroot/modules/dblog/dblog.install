@@ -96,9 +96,6 @@ function dblog_schema() {
  */
 function dblog_uninstall() {
   variable_del('dblog_row_limit');
-  variable_del('dblog_allowed_severity');
-  variable_del('dblog_allowed_types');
-  variable_del('dblog_known_types');
 }
 
 /**

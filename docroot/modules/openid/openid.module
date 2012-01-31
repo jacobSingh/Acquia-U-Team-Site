@@ -337,7 +337,6 @@ function openid_complete($response = array()) {
     if (isset($response['openid.mode'])) {
       if ($response['openid.mode'] == 'cancel') {
         $response['status'] = 'cancel';
-        watchdog('openid', 'OpenID process cancelled by the service provider at @service.', array('@service' => $service['uri']), WATCHDOG_NOTICE);
       }
       else {
         if (openid_verify_assertion($service, $response)) {
@@ -372,7 +371,6 @@ function openid_complete($response = array()) {
                 }
               }
               if (!in_array($service['uri'], $uris)) {
-                watchdog('openid', 'Provider, @provider, not authorized to respond.', array('@provider' => $service['uri']), WATCHDOG_NOTICE);
                 return $response;
               }
             }
@@ -383,19 +381,6 @@ function openid_complete($response = array()) {
           $response['status'] = 'success';
         }
       }
-    }
-    else {
-      watchdog('openid', 'OpenID mode not set in response.', array(), WATCHDOG_NOTICE);
-    }
-  }
-  else {
-    // The OpenID session information is missing. Log if the service URI or
-    // the claimed ID are missing.
-    if (!isset($_SESSION['openid']['service']['uri'])) {
-      watchdog('openid', 'The OpenID service URI is missing.', array(), WATCHDOG_NOTICE);
-    }
-    if (!isset($_SESSION['openid']['claimed_id'])) {
-      watchdog('openid', 'The OpenID claimed ID is missing.', array(), WATCHDOG_NOTICE);
     }
   }
   return $response;
@@ -622,16 +607,13 @@ function openid_association($op_endpoint) {
       'method' => 'POST',
       'data' => $assoc_message,
     );
-    // Contact the OpenID endpoint.
     $assoc_result = drupal_http_request($op_endpoint, $assoc_options);
     if (isset($assoc_result->error)) {
-      watchdog('openid', 'The OpenID endpoint cannot be reached: @error.', array('@error' => $assoc_result->code . ' ' . $assoc_result->error), WATCHDOG_NOTICE);
       return FALSE;
     }
 
     $assoc_response = _openid_parse_message($assoc_result->data);
     if (isset($assoc_response['mode']) && $assoc_response['mode'] == 'error') {
-      watchdog('openid', 'The OpenID endpoint returned an error: @error.', array('@error' => $assoc_response['error']), WATCHDOG_NOTICE);
       return FALSE;
     }
 
@@ -875,12 +857,8 @@ function openid_verify_assertion($service, $response) {
         }
       }
       else {
-        watchdog('openid', 'OpenID direct verification failed. The request is not valid.', array(), WATCHDOG_NOTICE);
         $valid = FALSE;
       }
-    }
-    else {
-      watchdog('openid', 'OpenID direct verification HTTP request failed: @error.', array('@error' => $result->code . ' ' . $result->error), WATCHDOG_NOTICE);
     }
   }
   return $valid;
@@ -920,10 +898,7 @@ function openid_verify_assertion_signature($service, $association, $response) {
 
   $keys_to_sign = explode(',', $response['openid.signed']);
 
-  // Verify that the number of mandatory keys is not greater than the number
-  // of keys to sign.
   if (count(array_diff($mandatory_keys, $keys_to_sign)) > 0) {
-    watchdog('openid', 'Failed to verify the signature of the response. The number of mandatory keys exceeds the number of keys to sign.', array(), WATCHDOG_NOTICE);
     return FALSE;
   }
 
@@ -951,7 +926,7 @@ function openid_verify_assertion_nonce($service, $response) {
     $nonce_timestamp = gmmktime($hour, $minutes, $seconds, $month, $day, $year);
   }
   else {
-    watchdog('openid', 'Nonce from @endpoint rejected because it is not correctly formatted, nonce: @nonce.', array('@endpoint' => $service['uri'], '@nonce' => $response['openid.response_nonce']), WATCHDOG_NOTICE);
+    watchdog('openid', 'Nonce from @endpoint rejected because it is not correctly formatted, nonce: @nonce.', array('@endpoint' => $service['uri'], '@nonce' => $response['openid.response_nonce']), WATCHDOG_WARNING);
     return FALSE;
   }
 
@@ -960,7 +935,7 @@ function openid_verify_assertion_nonce($service, $response) {
   $time = time();
   $expiry = 900;
   if ($nonce_timestamp <= $time - $expiry || $nonce_timestamp >= $time + $expiry) {
-    watchdog('openid', 'Nonce received from @endpoint is out of range (time difference: @intervals). Check possible clock skew.', array('@endpoint' => $service['uri'], '@interval' => $time - $nonce_timestamp), WATCHDOG_NOTICE);
+    watchdog('openid', 'Nonce received from @endpoint is out of range (time difference: @intervals). Check possible clock skew.', array('@endpoint' => $service['uri'], '@interval' => $time - $nonce_timestamp), WATCHDOG_WARNING);
     return FALSE;
   }
 
@@ -1012,10 +987,7 @@ function openid_verify_assertion_return_url($service, $response) {
   $base_url_parts = parse_url($base_url);
   $current_parts = parse_url($base_url_parts['scheme'] .'://'. $base_url_parts['host'] . request_uri());
 
-  // Verify that the return to URL equals the current URL by comparing the
-  // scheme, host and path.
   if ($return_to_parts['scheme'] != $current_parts['scheme'] || $return_to_parts['host'] != $current_parts['host'] || $return_to_parts['path'] != $current_parts['path']) {
-    watchdog('openid', 'Failed to verify that the assertion return URL "@return" equals the current URL "@current".', array('@return' => $return_to_parts['scheme'] . '://' . $return_to_parts['host'] . $return_to_parts['path'], '@current' => $current_parts['scheme'] .'://'. $current_parts['host'] . $current_parts['path']), WATCHDOG_NOTICE);
     return FALSE;
   }
   // Verify that all query parameters in the openid.return_to URL have
@@ -1024,15 +996,6 @@ function openid_verify_assertion_return_url($service, $response) {
   parse_str(isset($return_to_parts['query']) ? $return_to_parts['query'] : '', $return_to_query_parameters);
   foreach ($return_to_query_parameters as $name => $value) {
     if (!isset($_GET[$name]) || $_GET[$name] != $value) {
-      // Log if a return_to query parameter is not present in the request query.
-      if (!isset($_GET[$name])) {
-        watchdog('openid', 'The assertion return URL query parameter "@return_name" is not present among the request url parameters.', array('@return_name' => $name), WATCHDOG_NOTICE);
-      }
-      // Log if a return_to query parameter does not equal the value of the
-      // same parameter in the request query.
-      elseif ($_GET[$name] != $value) {
-        watchdog('openid', 'Failed to assert that the return URL query parameter "@return_name" with the value "@return_value" equals the request url parameter "@name" with the value "@value".', array('@return_name' => $name, '@return_value' => $value, '@name' => $name, '@value' => $_GET[$name]), WATCHDOG_NOTICE);
-      }
       return FALSE;
     }
   }

@@ -1,3 +1,0 @@
-Maintainer
------------
-- jessebeach (Jesse Beach)

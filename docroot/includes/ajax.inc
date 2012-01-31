@@ -540,10 +540,7 @@ function ajax_prepare_response($page_callback_result) {
     $commands[] = ajax_command_insert(NULL, $html);
     // Add the status messages inside the new content's wrapper element, so that
     // on subsequent Ajax requests, it is treated as old content.
-    $status_messages = theme('status_messages');
-    if ($status_messages != '') {
-      $commands[] = ajax_command_prepend(NULL, $status_messages);
-    }
+    $commands[] = ajax_command_prepend(NULL, theme('status_messages'));
   }
 
   return $commands;

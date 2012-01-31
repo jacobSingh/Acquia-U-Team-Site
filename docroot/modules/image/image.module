@@ -212,9 +212,6 @@ function image_theme() {
     'image_scale_summary' => array(
       'variables' => array('data' => NULL),
     ),
-    'image_scale_and_crop_summary' => array(
-      'variables' => array('data' => NULL),
-    ),
     'image_crop_summary' => array(
       'variables' => array('data' => NULL),
     ),

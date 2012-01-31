@@ -1,4 +1,0 @@
-name = Gardens Link module UI overrides
-description = Provides Drupal Gardens UI modifications to the Link module.
-core = 7.x
-dependencies[] = link

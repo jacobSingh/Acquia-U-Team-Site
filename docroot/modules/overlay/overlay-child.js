@@ -115,23 +115,6 @@ Drupal.overlayChild.behaviors.parseForms = function (context, settings) {
     if (action == undefined || (action.indexOf('http') != 0 && action.indexOf('https') != 0)) {
       action += (action.indexOf('?') > -1 ? '&' : '?') + 'render=overlay';
       $(this).attr('action', action);
-      // Special handling for method=get forms, which will break out of the
-      // overlay entirely if we let them submit by themselves.
-      if ($(this).attr('method') === 'get') {
-        $(this).bind('submit.overlay', function (event) {
-          event.preventDefault();
-          var $form = $(event.target);
-          // Determine the URL this form would submit to if left to its own
-          // devices.
-          var newHref = $form.attr('action') + "&" + $form.formSerialize();
-          // Make that URL overlay-ready (i.e. "fragmentize" it).
-          // First, create a native link object for fragmentizeLink() to act on.
-          var link = jQuery('<a href="' + newHref + '"></a>').get(0);
-          var newParentHref = parent.Drupal.overlay.fragmentizeLink(link);
-          // Redirect the parent window to the new overlay-ready URL.
-          parent.Drupal.overlay.redirect(newParentHref);
-        });
-      }
     }
     // Submit external forms into a new window.
     else {

@@ -37,18 +37,14 @@ function syslog_help($path, $arg) {
  */
 function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
   $help = module_exists('help') ? ' ' . l(t('More information'), 'admin/help/syslog') . '.' : NULL;
-  $form['syslog'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Syslog'),
-  );
-  $form['syslog']['syslog_identity'] = array(
+  $form['syslog_identity'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Syslog identity'),
     '#default_value' => variable_get('syslog_identity', 'drupal'),
     '#description'   => t('A string that will be prepended to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.') . $help,
   );
   if (defined('LOG_LOCAL0')) {
-    $form['syslog']['syslog_facility'] = array(
+    $form['syslog_facility'] = array(
       '#type'          => 'select',
       '#title'         => t('Syslog facility'),
       '#default_value' => variable_get('syslog_facility', LOG_LOCAL0),
@@ -56,46 +52,11 @@ function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
       '#description'   => t('Depending on the system configuration, Syslog and other logging tools use this code to identify or filter messages from within the entire system log.') . $help,
      );
   }
-  $form['syslog']['syslog_format'] = array(
+  $form['syslog_format'] = array(
     '#type'          => 'textarea',
     '#title'         => t('Syslog format'),
     '#default_value' => variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'),
     '#description'   => t('Specify the format of the syslog entry. Available variables are: <dl><dt><code>!base_url</code></dt><dd>Base URL of the site.</dd><dt><code>!timestamp</code></dt><dd>Unix timestamp of the log entry.</dd><dt><code>!type</code></dt><dd>The category to which this message belongs.</dd><dt><code>!ip</code></dt><dd>IP address of the user triggering the message.</dd><dt><code>!request_uri</code></dt><dd>The requested URI.</dd><dt><code>!referer</code></dt><dd>HTTP Referer if available.</dd><dt><code>!uid</code></dt><dd>User ID.</dd><dt><code>!link</code></dt><dd>A link to associate with the message.</dd><dt><code>!message</code></dt><dd>The message to store in the log.</dd></dl>'),
-  );
-  // Get $all_types to provide as a default values for types of messages to log.
-  if (module_exists('dblog')) {
-    // If dblog is enabled, get a list of types from the watchdog table.
-    $all_types = array_combine(_dblog_get_message_types(), _dblog_get_message_types());
-  }
-  else {
-    // If dblog is not enabled, provide a few standard core types. New types will get enabled by default
-    // and added to the variable syslog_known_types. Users can disable new types of warnings on the config
-    // page after they've been discovered and recorded in the variable syslog_known_types.
-    $all_types = array(
-      'access denied' => 'access denied',
-      'actions' => 'actions',
-      'content' => 'cron',
-      'file' => 'file',
-      'php' => 'php',
-      'system' => 'system',
-      'theme' => 'theme',
-      'user' => 'user',
-    );
-  }
-  $form['syslog']['syslog_allowed_types'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Allowed message types'),
-    '#default_value' => array_values(variable_get('syslog_allowed_types', $all_types)),
-    '#options' => variable_get('syslog_known_types', $all_types),
-    '#description' => t('The message types which will be logged. Any new message types will be logged unless they are deselected.')
-  );
-  $form['syslog']['syslog_allowed_severity'] = array(
-    '#type' => 'checkboxes',
-    '#multiple' => TRUE,
-    '#title' => t('Allowed message severity'),
-    '#default_value' => variable_get('syslog_allowed_severity', array_keys(watchdog_severity_levels())),
-    '#options' => watchdog_severity_levels(),
-    '#description' => t('Severities that will be logged. Deselect lower level severities to decrease noise in your log.')
   );
   $form['actions']['#weight'] = 1;
 }
@@ -130,38 +91,6 @@ function syslog_watchdog(array $log_entry) {
     $log_init = TRUE;
     $default_facility = defined('LOG_LOCAL0') ? LOG_LOCAL0 : LOG_USER;
     openlog(variable_get('syslog_identity', 'drupal'), LOG_NDELAY, variable_get('syslog_facility', $default_facility));
-  }
-
-  // Check the severity filter to see if this message is allowed. We must load
-  // common.inc before calling functions from it, since hook_watchdog() can be
-  // invoked early in the bootstrap.
-  require_once DRUPAL_ROOT . '/includes/common.inc';
-  $allowed_severity = variable_get('syslog_allowed_severity', array_keys(watchdog_severity_levels()));
-  if (!in_array($log_entry['severity'], $allowed_severity)) {
-    return FALSE;
-  }
-
-  $type = $log_entry['type'];
-
-  // Load up the known types as well as the allowed types
-  $known_types = variable_get('syslog_known_types', array());
-  $allowed_types = variable_get('syslog_allowed_types', array());
-
-  // If this is a new type, we allow it and we add it to the lists
-  if (!in_array($type, $known_types)) {
-
-    // Add to our known types list.
-    $known_types[$type] = $type;
-    variable_set('syslog_known_types', $known_types);
-
-    // New types are allowed by default.
-    $allowed_types[] = $type;
-    variable_set('syslog_allowed_types', $allowed_types);
-  }
-
-  // If this is not an allowed type we don't log it
-  if (!in_array($type, $allowed_types)) {
-    return FALSE;
   }
 
   $message = strtr(variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'), array(

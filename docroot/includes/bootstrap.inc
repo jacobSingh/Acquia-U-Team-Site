@@ -678,22 +678,6 @@ function drupal_environment_initialize() {
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();
 
-  // Ensure that HTTP Auth headers are passed to PHP running as CGI.
-  if (!empty($_SERVER['REDIRECT_HTTP_AUTH'])) {
-    // Split off the authorization type (Basic or Digest).
-    list($type, $content) = explode(' ', $_SERVER['REDIRECT_HTTP_AUTH'], 2);
-    if ($type == 'Basic') {
-      // Basic authentication encodes "user:password" in base64.
-      list($user, $password) = explode(':', base64_decode($content));
-      $_SERVER['PHP_AUTH_USER'] = $user;
-      $_SERVER['PHP_AUTH_PW'] = $password;
-    }
-    elseif ($type == 'Digest') {
-      // The Digest authentication header should be passed as it is.
-      $_SERVER['PHP_AUTH_DIGEST'] = $content;
-    }
-  }
-
   // Enforce E_ALL, but allow users to set levels not part of E_ALL.
   error_reporting(E_ALL | error_reporting());
 

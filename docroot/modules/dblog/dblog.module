@@ -138,47 +138,13 @@ function _dblog_get_message_types() {
  * Note some values may be truncated for database column size restrictions.
  */
 function dblog_watchdog(array $log_entry) {
-
-  // Ensure the type is trimmed to fit in the db column
-  $type = substr($log_entry['type'], 0, 64);
-
-  // Check the severity filter to see if this message is allowed. We must load
-  // common.inc before calling functions from it, since hook_watchdog() can be
-  // invoked early in the bootstrap.
-  require_once DRUPAL_ROOT . '/includes/common.inc';
-  $allowed_severity = variable_get('dblog_allowed_severity', array_keys(watchdog_severity_levels()));
-  if (!in_array($log_entry['severity'], $allowed_severity)) {
-    return FALSE;
-  }
-
-  // Load up the known types as well as the allowed types
-  $known_types = variable_get('dblog_known_types', array());
-  $allowed_types = variable_get('dblog_allowed_types', array());
-
-  // If this is a new type, we allow it and we add it to the lists
-  if (!in_array($type, $known_types)) {
-
-    // Add to our known types list.
-    $known_types[$type] = $type;
-    variable_set('dblog_known_types', $known_types);
-
-    // New types are allowed by default.
-    $allowed_types[] = $type;
-    variable_set('dblog_allowed_types', $allowed_types);
-  }
-
-  // If this is not an allowed type we don't log it
-  if (!in_array($type, $allowed_types)) {
-    return FALSE;
-  }
-
   // The user object may not exist in all conditions, so 0 is substituted if needed.
   $user_uid = isset($log_entry['user']->uid) ? $log_entry['user']->uid : 0;
 
   Database::getConnection('default', 'default')->insert('watchdog')
     ->fields(array(
       'uid' => $user_uid,
-      'type' => $type,
+      'type' => substr($log_entry['type'], 0, 64),
       'message' => $log_entry['message'],
       'variables' => serialize($log_entry['variables']),
       'severity' => $log_entry['severity'],
@@ -195,32 +161,12 @@ function dblog_watchdog(array $log_entry) {
  * Implements hook_form_FORM_ID_alter().
  */
 function dblog_form_system_logging_settings_alter(&$form, $form_state) {
-  $form['dblog'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Database Logging'),
-  );
-  $form['dblog']['dblog_row_limit'] = array(
+  $form['dblog_row_limit'] = array(
     '#type' => 'select',
     '#title' => t('Database log messages to keep'),
     '#default_value' => variable_get('dblog_row_limit', 1000),
     '#options' => array(0 => t('All')) + drupal_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
     '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
-  );
-  $all_types = array_combine(_dblog_get_message_types(), _dblog_get_message_types());
-  $form['dblog']['dblog_allowed_types'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Allowed message types'),
-    '#default_value' => array_values(variable_get('dblog_allowed_types', $all_types)),
-    '#options' => variable_get('dblog_known_types', $all_types),
-    '#description' => t('The message types which will be logged. Any new message types will be logged unless they are deselected.')
-  );
-  $form['dblog']['dblog_allowed_severity'] = array(
-    '#type' => 'checkboxes',
-    '#multiple' => TRUE,
-    '#title' => t('Allowed message severity'),
-    '#default_value' => variable_get('dblog_allowed_severity', array_keys(watchdog_severity_levels())),
-    '#options' => watchdog_severity_levels(),
-    '#description' => t('Severities that will be logged. Deselect lower level severities to decrease database load.')
   );
   $form['actions']['#weight'] = 1;
 }
