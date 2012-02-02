@@ -1,0 +1,4 @@
+#sidebar-wrapper, #sidebar-second, #content-bottom-right 
+{ display: inline; /* IE doubled margin bug */ }
+
+#footer { _zoom: 1; }
