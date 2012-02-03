@@ -11,6 +11,9 @@
 /*
  * Body
  */
+
+
+ 
 body {
   background: #F2F2F2;
   border-top: 5px solid #E95C33;
@@ -59,8 +62,9 @@ a:hover {
  */
 #header {
   background: none repeat scroll 0 0 #383838;
-  height: 300px;
-  margin: 0 0 20px;
+  height: 120px;
+  margin: 0;
+  border-bottom: 400px solid #0AC5F4;
 }
 
 #header .section {
@@ -121,7 +125,7 @@ div#site-name /* The name of the website */ {
   clear: both; /* Clear the logo */
 }
 
-.char7 {
+span .char7 {
   color: #999;
 }
 /*
@@ -264,10 +268,12 @@ ul.links li {
  * Footer
  */
 .region-footer {
+  background: #383838;
 }
 
 /*
  * Page bottom
  */
 .region-bottom /* Wrapper for any blocks placed in the page bottom region */ {
+  background: #383838;
 }
