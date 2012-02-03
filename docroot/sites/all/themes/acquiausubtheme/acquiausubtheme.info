@@ -67,6 +67,7 @@ stylesheets-conditional[lte IE 6][all][]  = css/ie6.css
 
 ;scripts[] = js/script.js
 scripts[] = js/jquery.lettering-0.6.min.js
+scripts[] = js/jquery.lettering-0.6.1.min.js
 
 
 
