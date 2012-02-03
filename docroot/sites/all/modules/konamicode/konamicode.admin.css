@@ -1,0 +1,19 @@
+/**
+ * @file
+ * CSS for the Konami Code administration settings.
+ */
+
+/**
+ * Space out the checkboxes on the administration page.
+ */
+body .form-item-konamicode-actions .form-type-checkbox {
+  float: left;
+  width: 150px;
+}
+
+/**
+ * After spacing out the checkboxes, we want the description to be on a new line.
+ */
+.form-item-konamicode-actions .description {
+  clear: both;
+}

@@ -1,0 +1,15 @@
+<?php
+/**
+ * @file
+ * Provides the uninstall hook for the Konami Code module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function konamicode_uninstall() {
+  // Remove all stored settings.
+  db_delete('variable')
+    ->condition('name', "konamicode_%", 'LIKE')
+    ->execute();
+}

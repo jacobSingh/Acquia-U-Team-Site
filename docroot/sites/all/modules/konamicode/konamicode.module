@@ -1,0 +1,218 @@
+<?php
+/**
+ * @file
+ * The Konami Code Drupal module
+ */
+
+/**
+ * Implements hook_help().
+ */
+function konamicode_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#konamicode':
+      return '<p>' . t('The <a href="@konamicode">Konami Code</a> is a cheat code that appeared in many Konami video games. The Konami Code module makes it so that when users enter the code on your website, it redirects them to a given page. This mimics the effects that exist on many other <a href="@konamicodesites">Konami Code sites</a>.', array('@konamicode' => 'http://en.wikipedia.org/wiki/Konami_code', '@konamicodesites' => 'http://konamicodesites.com')) . '</p>';
+    case 'admin/config/system/konamicode':
+      return '<p>' . t('Set up certain actions to be taken when specific codes are entered. One example is to attack the user with images when the <a href="@konamicode">Konami Code</a> is entered. Select which actions you would like to have occur, what key codes they require, as well as the configuration options for each action.', array('@konamicode' => 'http://en.wikipedia.org/wiki/Konami_code')) . '</p>';
+  }
+}
+
+/**
+ * Implements hook_init().
+ */
+function konamicode_init() {
+  // Invoke all the enabled Konami Code actions.
+  $actions = array_filter(variable_get('konamicode_actions', array('imageattack' => 'imageattack')));
+  $settings = array();
+  foreach ($actions as $action) {
+    // Add the jQuery Konami Code Plugin and the behavior.
+    static $added = FALSE;
+    if ($added == FALSE) {
+      drupal_add_js(drupal_get_path('module', 'konamicode') . '/konamicode.js');
+      $added = TRUE;
+    }
+
+    // Add the Konami Code Trigger setting if it's active.
+    $code = variable_get('konamicode_code_' . $action, '38,38,40,40,37,39,37,39,66,65');
+    if (!empty($code) && $code != '38,38,40,40,37,39,37,39,66,65') {
+      // Pass the sequence through as an integer array.
+      $sequence = array();
+      foreach (explode(',', $code) as $key) {
+        $val = intval($key);
+        $sequence[] = $val == 0 ? ord(strtoupper($key)) : $val;
+      }
+      $settings['konamicode'][$action] = $sequence;
+    }
+    else {
+      // TRUE equates to the default Konami Code sequence. Image Attack is the
+      // default and doesn't need the boolean if it's all alone. This helps
+      // clean up Drupal.settings.
+      if (count($actions) == 1) {
+        if ($action != 'imageattack') {
+          $settings['konamicode'][$action] = TRUE;
+        }
+      }
+      else {
+        $settings['konamicode'][$action] = TRUE;
+      }
+    }
+
+    // Invoke the chosen Konami Code action.
+    module_invoke_all('konamicode_' . $action);
+  }
+
+  // Tell the JavaScript which actions are to be taken.
+  if (!empty($settings)) {
+    drupal_add_js($settings, array('type' => 'setting', 'scope' => JS_DEFAULT));
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function konamicode_permission() {
+  return array(
+    'administer konamicode' => array(
+      'title' => t('Administer Konami Code'),
+      'description' => t('Change which actions are taken when certain codes on the site are entered.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function konamicode_menu() {
+  $items['admin/config/system/konamicode'] = array(
+    'title' => 'Konami Code',
+    'description' => 'Customize the effect that entering the Konami Code has on your site.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('konamicode_admin_settings'),
+    'access arguments' => array('administer konamicode'),
+    'file' => 'konamicode.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_konamicode().
+ */
+function konamicode_konamicode() {
+  return array(
+    'imageattack' => t('Image Attack'),
+    'redirect' => t('Redirect'),
+    'alert' => t('Alert'),
+
+    // http://paulirish.com/2009/flip-text-upside-down-jquery-plugin/
+    'fliptext' => t('Flip Text'),
+
+    // http://www.cornify.com
+    'cornify' => t('Cornify'),
+
+    // http://wonder-tonic.com/geocitiesizer/
+    'geocitiesizer' => t('Geocities-izer'),
+
+    // http://erkie.github.com
+    'asteroids' => t('Asteroids'),
+
+    // https://github.com/lsemel/jquery-placekitten
+    'placekitten' => t('Placekitten'),
+
+    // http://www.zurb.com/playground/jquery-raptorize
+    'raptorize' => t('Raptorize'),
+
+    // http://kathack.com
+    'katamari' => t('Katamari Hack'),
+
+    // https://github.com/loktar00/JQuery-Snowfall
+    'snowfall' => t('Snowfall'),
+  );
+}
+
+/**
+ * Implements hook_konamicode_IMAGEATTACK().
+ */
+function konamicode_konamicode_imageattack() {
+  // Add the image only if it's not the default.
+  $image = variable_get('konamicode_imageattack', 'http://drupal.org/files/druplicon.small_.png');
+  if (!empty($image) && $image != 'http://drupal.org/files/druplicon.small_.png') {
+    drupal_add_js(array('konamicodeImages' => explode("\n", $image)), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  }
+  // Amount of images to display during an attack.
+  $max = variable_get('konamicode_imageattackmax', 500);
+  if (!empty($max) && is_numeric($max)) {
+    $max = (int) $max;
+    if ($max > 0 && $max != 500) {
+      drupal_add_js(array('konamicodeImagesMax' => $max), array('type' => 'setting', 'scope' => JS_DEFAULT));
+    }
+  }
+}
+
+/**
+ * Implements hook_konamicode_REDIRECT().
+ */
+function konamicode_konamicode_redirect() {
+  // Add the destination only if it's not the default.
+  $destination = variable_get('konamicode_destination', 'http://bacolicio.us/http://' . $_SERVER['SERVER_NAME'] . base_path());
+  if (!empty($destination) && $destination != 'http://bacolicio.us/http://' . $_SERVER['SERVER_NAME'] . base_path()) {
+    drupal_add_js(array('konamicodeDestination' => $destination), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  }
+}
+
+/**
+ * Implements hook_konamicode_ALERT().
+ */
+function konamicode_konamicode_alert() {
+  // Add the message only if it's not the default.
+  $message = variable_get('konamicode_alert', t('Konami Code is geek!'));
+  if (!empty($message) && $message != t('Konami Code is geek!')) {
+    drupal_add_js(array('konamicodeAlert' => $message), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  }
+}
+
+/**
+ * Implements hook_konamicode_FLIPTEXT().
+ */
+function konamicode_konamicode_fliptext() {
+  drupal_add_js(drupal_get_path('module', 'konamicode') . '/konamicode-fliptext.js');
+}
+
+/**
+ * Implements hook_konamicode_GEOCITIESIZER().
+ */
+function konamicode_konamicode_geocitiesizer() {
+  $theme = variable_get('konamicode_geocitiesizer_theme', 0);
+  if ($theme != 0) {
+    drupal_add_js(array('konamicodeGeo' => $theme), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  }
+}
+
+/**
+ * Implements hook_konamicode_RAPTORIZE().
+ */
+function konamicode_konamicode_raptorize() {
+  $settings = array(
+    'konamicodeR' => base_path() . drupal_get_path('module', 'konamicode'),
+  );
+  drupal_add_js($settings, array('type' => 'setting', 'scope' => JS_DEFAULT));
+}
+
+/**
+ * Implements hook_konamicode_SNOWFALL().
+ */
+function konamicode_konamicode_snowfall() {
+  $settings = array(
+    'snowfall' => array(
+      'path' => drupal_get_path('module', 'konamicode'),
+      'flakeCount' => (int)variable_get('konamicode_snowfall_flakecount', '200'),
+      'flakeColor' => variable_get('konamicode_snowfall_flakecolor', '#ffffff'),
+      'minSize' => (int)variable_get('konamicode_snowfall_minsize', '2'),
+      'maxSize' => (int)variable_get('konamicode_snowfall_maxsize', '5'),
+      'minSpeed' => (int)variable_get('konamicode_snowfall_minspeed', '1'),
+      'maxSpeed' => (int)variable_get('konamicode_snowfall_maxspeed', '5'),
+      'round' => variable_get('konamicode_snowfall_round', TRUE),
+      'shadow' => variable_get('konamicode_snowfall_shadow', TRUE),
+    ),
+  );
+  drupal_add_js($settings, array('type' => 'setting', 'scope' => JS_DEFAULT));
+}
+
