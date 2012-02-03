@@ -85,9 +85,8 @@ function acquiaustarterit_preprocess_html(&$variables, $hook) {
  * @param $hook
  *   The name of the template being rendered ("page" in this case.)
  */
-/* -- Delete this line if you want to use this function
-function acquiaustarterit_preprocess_page(&$variables, $hook) {
-  $variables['sample_variable'] = t('Lorem ipsum.');
+function acquiausubtheme_preprocess_page(&$variables, $hook) {
+  $variables['site_name'] = t('Acquia<span class="highlight-u">U</span>');
 }
 // */
 

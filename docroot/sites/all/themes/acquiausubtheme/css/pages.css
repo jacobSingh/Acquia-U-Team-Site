@@ -108,8 +108,8 @@ div#site-name /* The name of the website */ {
   clear: both; /* Clear the logo */
 }
 
-span .char7 {
-  color: #999;
+.highlight-u {
+  color: #067BBA;
 }
 /*
  * Main (container for everything else)
