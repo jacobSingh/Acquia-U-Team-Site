@@ -96,6 +96,7 @@ h2.block-title /* Block title */ {
 }
 
 #block-system-powered-by /* "Powered by Drupal" block */ {
+    color: #FFF;
     padding: 25px 0;
 }
 
