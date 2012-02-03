@@ -96,6 +96,7 @@ h2.block-title /* Block title */ {
 }
 
 #block-system-powered-by /* "Powered by Drupal" block */ {
+    padding: 25px 0;
 }
 
 #block-user-login /* "User login form" block */ {
