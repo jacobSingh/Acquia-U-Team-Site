@@ -27,22 +27,6 @@ body {
 #page {
 }
 
-a {
-  color: #E95C33;
-  text-decoration: none;
-  -moz-transition: color 0.4s ease-in-out;
-  -webkit-transition: color 0.4s ease-in-out;
-  transition: color 0.4s ease-in-out;
-}
-
-a:hover {
-  color: #067BBA;
-  text-decoration: none;
-  -moz-transition: color 0.4s ease-in-out;
-  -webkit-transition: color 0.4s ease-in-out;
-  transition: color 0.4s ease-in-out;
-}
-
 /*
  * The skip-link link will be completely hidden until a user tabs to the link.
  * See the element-focusable rule in system.base.css.
@@ -64,7 +48,6 @@ a:hover {
   background: none repeat scroll 0 0 #383838;
   height: 120px;
   margin: 0;
-  border-bottom: 400px solid #0AC5F4;
 }
 
 #header .section {
@@ -238,6 +221,10 @@ ul.links li {
 }
 
 .more-link /* Aggregator, blog, and forum more link */ {
+}
+
+.views-row-odd {
+  background: #cdcdcd;
 }
 
 /*

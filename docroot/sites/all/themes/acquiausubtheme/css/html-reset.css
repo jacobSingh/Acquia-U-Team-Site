@@ -307,6 +307,12 @@ label {
 }
 
 input {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border: 1px solid #CDCDCD;
+  padding: 3px;
+  
 }
 
 select {
@@ -330,14 +336,21 @@ button {
  * The order of link states are based on Eric Meyer's article:
  * http://meyerweb.com/eric/thoughts/2007/06/11/who-ordered-the-link-states
  */
-a:link {
-}
-
-a:visited {
+a:link, a:visited {
+  color: #E95C33;
+  text-decoration: none;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
 }
 
 a:hover,
 a:focus {
+  color: #067BBA;
+  text-decoration: none;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
 }
 
 a:active {
