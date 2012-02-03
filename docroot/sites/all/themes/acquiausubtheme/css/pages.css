@@ -272,6 +272,9 @@ ul.links li {
   border-bottom: solid 25px #383838;
   padding: 25px 50px;
 }
+.feed-icon {
+  padding: 10px 0;
+}
 
 /*
  * Page bottom
