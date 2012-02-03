@@ -35,7 +35,7 @@ base theme  = zen
 
 stylesheets[all][]        = css/html-reset.css
 stylesheets[all][]        = css/wireframes.css
-stylesheets[all][]        = css/layout-fixed.css
+stylesheets[all][]        = css/layout-liquid.css
 stylesheets[all][]        = css/page-backgrounds.css
 stylesheets[all][]        = css/tabs.css
 stylesheets[all][]        = css/pages.css
@@ -66,6 +66,7 @@ stylesheets-conditional[lte IE 6][all][]  = css/ie6.css
 ; Optionally add some JavaScripts to your theme.
 
 ;scripts[] = js/script.js
+scripts[] = js/jquery.lettering-0.6.min.js
 
 
 

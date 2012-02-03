@@ -12,6 +12,8 @@
  * Body
  */
 body {
+  background: #F2F2F2;
+  border-top: 5px solid #E95C33;
   margin: 0;
   padding: 0;
 }
@@ -20,6 +22,22 @@ body {
 }
 
 #page {
+}
+
+a {
+  color: #E95C33;
+  text-decoration: none;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
+}
+
+a:hover {
+  color: #067BBA;
+  text-decoration: none;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
 }
 
 /*
@@ -40,6 +58,9 @@ body {
  * Header
  */
 #header {
+  background: none repeat scroll 0 0 #383838;
+  height: 300px;
+  margin: 0 0 20px;
 }
 
 #header .section {
@@ -55,26 +76,42 @@ body {
   vertical-align: bottom;
 }
 
+#logo:hover img {
+  vertical-align: bottom;
+}
+
 #name-and-slogan /* Wrapper for website name and slogan */ {
   float: left;
+  margin: 0 auto;
 }
 
 h1#site-name,
 div#site-name /* The name of the website */ {
   margin: 0;
-  font-size: 2em;
+  font-size: 4em;
+  font-weight: normal;
+  letter-spacing: 1px;
   line-height: 1.5em;
+  margin: 15px;
 }
 
 #site-name a:link,
 #site-name a:visited {
-  color: #000;
+  color: #FFFFFF;
   text-decoration: none;
+  text-transform: uppercase;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
 }
 
 #site-name a:hover,
 #site-name a:focus {
-  text-decoration: underline;
+  color: #E95C33;
+  text-decoration: none;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
 }
 
 #site-slogan /* The slogan (or tagline) of a website */ {
@@ -84,10 +121,15 @@ div#site-name /* The name of the website */ {
   clear: both; /* Clear the logo */
 }
 
+.char7 {
+  color: #999;
+}
 /*
  * Main (container for everything else)
  */
 #main-wrapper {
+  margin: 0 auto;
+  width: 960px;
 }
 
 #main {
@@ -97,6 +139,7 @@ div#site-name /* The name of the website */ {
  * Content
  */
 #content {
+  line-height: 1.75em;
 }
 
 #content .section {
@@ -115,6 +158,7 @@ h2.block-title, /* Block title */
 h2.title, /* Comment section heading */
 h2.comment-form, /* Comment form heading */
 h3.title /* Comment title */ {
+  color: #E95C33;
   margin: 0;
 }
 

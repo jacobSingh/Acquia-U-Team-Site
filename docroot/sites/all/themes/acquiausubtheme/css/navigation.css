@@ -3,13 +3,37 @@
  * Navigation Styling
  */
 
+#main-menu li a {
+  color: #FFFFFF;
+  border-bottom: solid 1px #FFFFFF;
+  letter-spacing: 1px;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
+}
+
+#main-menu li a:hover {
+  color: #E95C33;
+  border-bottom: solid 2px #E95C33;
+  -moz-transition: border-bottom-color 0.4s ease-in-out;
+  -webkit-transition: border-bottom-color 0.4s ease-in-out;
+  transition: border-bottom-color 0.4s ease-in-out;
+}
 
 /*
  * The active item in a Drupal menu
  */
-li a.active {
-  color: #000;
+#main-menu li a.active {
+  color: #E95C33 !important;
+  border-bottom: solid 2px #E95C33 !important;
+  padding-bottom: 5px;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
 }
+
 
 /*
  * Navigation bar

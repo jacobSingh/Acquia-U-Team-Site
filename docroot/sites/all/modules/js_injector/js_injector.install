@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the js_injector module.
+ *
+ */
+
+/**
+ * Implements hook_install().
+ */
+function js_injector_install() {
+}
+
+/**
+ * Implements hook_schema().
+ */
+function js_injector_schema() {
+  $schema['js_injector_rule'] = array(
+    'fields' => array(
+      'crid' => array(
+        'description' => 'The primary identifier for the JS injection rule',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'title' => array(
+        'description' => 'The descriptive title of the JS injection rule',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE),
+      'rule_type' => array(
+        'description' => 'The type of rule to use when determining if the JS should be injected',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'rule_conditions' => array(
+        'description' => 'The data to evaluate when determining if the JS should be injected',
+        'type' => 'text',
+        'not null' => TRUE),
+      'media' => array(
+        'description' => 'The media type of the JS file (screen, print, etc.)',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE),
+      'preprocess' => array(
+        'description' => 'Whether the JS file should be included by the JS preprocessor',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+    ),
+    'primary key' => array('crid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function js_injector_uninstall() {
+  cache_clear_all('js_injector:*', 'cache', TRUE);
+  $rules = db_query("SELECT * FROM {js_injector_rule}", array(), array('fetch' => PDO::FETCH_ASSOC))->fetchAllAssoc('crid');
+  foreach($rules as $id => $rule) {
+    file_unmanaged_delete(_js_injector_rule_path($id));
+  }
+  db_drop_table('js_injector_rule');
+}
+
+/**
+ * Implements hook_requirements().
+ * We'll use this to prevent installation of the module if the file directory
+ * is not available and writable.
+ */
+function js_injector_requirements($phase) {
+  $status = REQUIREMENT_OK;
+  $dir = 'public://js_injector';
+  if (!file_prepare_directory($dir, FILE_MODIFY_PERMISSIONS)) {
+    if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+      $status = REQUIREMENT_ERROR;
+    }
+  }
+  $requirements = array(
+    'js_injector' => array(
+      'title' => t('JS Injector directory writable'),
+      'description' => $status == REQUIREMENT_OK ? t('JS Injector Directory %dir is writable', array('%dir' => $dir)) : t('Directory %dir is not writable', array('%dir' => $dir)),
+      'severity' => $status,
+      'value' => t('Not writable'),
+    ),
+  );
+  return $requirements;
+}
