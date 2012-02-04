@@ -132,8 +132,9 @@ div#site-name /* The name of the website */ {
 #content .section {
 }
 
-.node-10 {
-  background: #F2F2F2;
+#node-10 {
+  background: #E7E7E7;
+  padding: 15px 15px 0;
 }
 
 
