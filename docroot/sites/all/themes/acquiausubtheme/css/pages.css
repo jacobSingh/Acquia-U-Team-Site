@@ -263,6 +263,7 @@ ul.links li {
 .region-footer {
   background: #383838;
   border-bottom: solid 25px #383838;
+  min-height: 150px;
   padding: 25px 50px;
 }
 .feed-icon {
