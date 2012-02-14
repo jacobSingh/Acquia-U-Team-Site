@@ -271,6 +271,7 @@ ul.links li {
 }
 .region-footer .region h2 {
   color: #067BBA;
+  margin-bottom: 20px;
 }
 .region-footer .region a:link,
 .region-footer .region a:visited {
