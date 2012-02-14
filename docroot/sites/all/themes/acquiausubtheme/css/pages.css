@@ -269,6 +269,9 @@ ul.links li {
   min-height: 150px;
   padding: 50px 0 25px;
 }
+.region-footer .region {
+  padding: 0 10px;
+}
 .region-footer .region h2 {
   color: #067BBA;
   margin-bottom: 20px;
