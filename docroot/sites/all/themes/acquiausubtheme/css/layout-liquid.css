@@ -144,6 +144,31 @@ body {
  */
 .region-footer {
 }
+.region-footer .section {
+  margin: 0 auto;
+  width: 960px;
+}
+.region-footer-first {
+  float: left;
+  width: 220px;
+}
+.region-footer-second {
+  float: left;
+  width: 220px;
+}
+.region-footer-third {
+  float: left;
+  width: 220px;
+}
+.region-footer-fourth {
+  float: left;
+  width: 220px;
+}
+.region-footer-bottom {
+  clear: both;
+  float: left;
+}
+
 
 /*
  * Page bottom
