@@ -274,10 +274,21 @@ ul.links li {
 }
 .region-footer .region a:link,
 .region-footer .region a:visited {
-  color: #AAA;
+  color: #FFF;
 }
 .region-footer .region a:hover,
 .region-footer .region a:active {
+  color: #E95C33;
+}
+.region-footer-bottom .block .content {
+  color: #999;
+}
+.region-footer-bottom .block .content a:link,
+.region-footer-bottom .block .content a:visited {
+  color: #EEE;
+}
+.region-footer-bottom .block .content a:hover,
+.region-footer-bottom .block .content a:active {
   color: #E95C33;
 }
 .feed-icon {
