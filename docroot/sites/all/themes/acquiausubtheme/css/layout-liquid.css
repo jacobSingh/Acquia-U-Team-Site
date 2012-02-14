@@ -142,7 +142,8 @@ body {
 /*
  * Footer
  */
-.region-footer {
+.region-footer .region {
+  padding: 10px;
 }
 .region-footer .section {
   margin: 0 auto;
