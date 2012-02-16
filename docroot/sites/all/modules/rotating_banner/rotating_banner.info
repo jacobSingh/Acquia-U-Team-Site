@@ -9,5 +9,5 @@ files[] = rotating_banner.install
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "rotating_banner"
-datestamp = "1301573571"
+datestamp = "1301544000"
 

@@ -180,6 +180,7 @@ function rotating_banner_block_info() {
     foreach ($result as $row) {
       $blocks[$row->rbid] = array(
         'info' => t('Rotating banner: @title', array('@title' => $row->title)),
+        'cache' => DRUPAL_NO_CACHE,
       );
     }
   }
@@ -238,8 +239,14 @@ function rotating_banner_block_configure($delta) {
   $rb_form['slides']['slide_table']['weight'] = array('#tree' => TRUE);
   
   foreach ($slides as $slide) {
-    $media = media_load($slide->fid);
-    $preview = field_view_field('media', $media, 'file', 'media_preview');
+    if (module_exists('file_entity')) {
+      $loaded_file = file_load($slide->fid);
+      $preview = file_view_file($loaded_file, 'media_preview');
+    }
+    else {
+      $media = media_load($slide->fid);
+      $preview = field_view_field('media', $media, 'file', 'media_preview');
+    }
     $preview['#theme_wrappers'][] = 'media_thumbnail';
 
     $i++;
