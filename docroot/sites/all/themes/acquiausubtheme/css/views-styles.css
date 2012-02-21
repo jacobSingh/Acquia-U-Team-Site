@@ -6,3 +6,7 @@
 .view-taxonomy-term .node-teaser {
   padding: 0.75em;
 }
+
+.view-taxonomy-term ul.links {
+  margin: 1.5em 0 0;
+}
