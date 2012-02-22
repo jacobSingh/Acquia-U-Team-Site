@@ -1,0 +1,23 @@
+name = JS injector
+description = Adds JS to the page output based on configurable rules.
+core = 7.x
+
+files[] = js_injector.admin.inc
+files[] = js_injector.install
+files[] = js_injector.module
+files[] = js_injector.test
+
+configure = admin/config/development/js-injector
+; Information added by drupal.org packaging script on 2011-06-03
+version = "7.x-1.5"
+core = "7.x"
+project = "js_injector"
+datestamp = "1307069515"
+
+
+; Information added by drupal.org packaging script on 2011-08-29
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "js_injector"
+datestamp = "1314578325"
+

@@ -1,0 +1,43 @@
+name = The Morning After
+description = A port of The Morning After to Drupal (ProsePoint port).<br />The Morning After original theme is by Arun Kale. 
+core = 7.x
+
+stylesheets[all][] = html-elements.css
+stylesheets[all][] = tma.css
+
+regions[header] = Header
+regions[highlighted] = Highlighted
+regions[help] = Help
+regions[content] = Content
+regions[sidebar_top] = Above sidebar
+regions[sidebar_first] = Sidebar first
+regions[sidebar_second] = Sidebar second
+regions[content_bottom_left] = Content bottom left
+regions[content_bottom_right] = Content bottom right
+regions[content_bottom] = Content bottom
+regions[footer] = Footer
+regions_hidden[page_top] = Page top
+regions_hidden[page_bottom] = Page bottom
+
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = favicon
+features[] = main_menu
+features[] = secondary_menu
+
+settings[tma_breadcrumb] = yes
+settings[tma_breadcrumb_separator] = ' › '
+settings[tma_breadcrumb_home] = 1
+settings[tma_breadcrumb_leading] = 1
+settings[tma_breadcrumb_trailing] = 1
+settings[tma_breadcrumb_title] = 0
+
+; Information added by drupal.org packaging script on 2011-11-12
+version = "7.x-1.0-beta3"
+core = "7.x"
+project = "tma"
+datestamp = "1321069235"
+

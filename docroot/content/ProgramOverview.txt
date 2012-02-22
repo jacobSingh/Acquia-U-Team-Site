@@ -1,0 +1,47 @@
+Title: 
+Acquia U Overview 
+
+Body: 
+The demand for Drupal talent is skyrocketing. Acquia is focused on hiring and training great Drupal engineers and client advisors to give the world exactly what it needs: more Drupalists. Acquia U is a program designed for recent and upcoming college graduates and people building a career in web technology. Acquia U candidates are hired full-time as Client Advisors and enrolled into our comprehensive Drupal training program. Also read our press release.
+
+We're looking for recent or imminent college graduates who want great experience and foundational training as part of their employment, but we're also open to anyone who can demonstrate a basic knowledge of web development and has a strong track record of self-motivation.
+
+The Acquia U program combines a full-time job with training that includes:
+
+    Six weeks of paid hands-on Drupal and supporting LAMP skills training, real-world business training around presentation and problem solving skills - plus the opportunity to work individually and in groups to learn and demonstrate mastery of these skills
+    
+    Three 6-week paid rotations with our technical teams: Engineering, Professional Services, Client Advisory
+    
+    Full time employment at Acquia as a Client Advisor on the Client Advisory team, where you will work with our Support, Engineering, and Professional 
+    Services teams to execute and manage Drupal projects for our clients and partners - Complete with real-world experience in demonstrating the value, flexibility, and extensive capabilities of Drupal
+   
+   Ample opportunity for growth at Acquia as your Drupal expertise deepens 
+
+
+Interested? Great! Acquia U candidates should fulfill the following requirements:
+
+    Show a demonstrated interest in web development and emerging technologies
+    
+    Have a working knowledge of html and css
+    
+    Be recent or imminent college graduates. (Career changers and US Veterans also welcome to apply)
+    
+    Be located in (or be willing to relocate to) the greater Boston area
+    
+    Be able to legally work in the United States of America
+    
+    Have a Computer Science or Engineering backgrounds (preferred), although exceptional candidates from all backgrounds will be considered
+
+Also very helpful are strong customer interaction skills and excellent written communication abilities.
+
+Ready to Join? Apply today! <!--link to: http://www.acquia.com/content/employment-inquiries?source_id=acquiaU>
+
+You don't have to wait for us to get back to you to get started on your Drupal adventure. Get started today!
+
+    Drupal Gardens <!--link to:http://www.drupalgardens.com/>- you can easily build a Drupal website (and manage users, site structure and content) in a controlled Drupal environment. Bonus points for helpful participation, assisting, or lending a hand in the community forums.
+    
+    DevDesktop <!--link to:http://www.acquia.com/downloads>- get a local installation of Drupal (and the AMP stack) on your laptop.
+    
+    Drupal Community <!--link to:http://groups.drupal.org/>- find a local gathering of "Drupalists" and go say hello! Go to the link and search for your location. Boston people go here.
+    
+    Drupal Training <!--link to:http://training.acquia.com/events>- get formal training in Drupal - events happening globally, as well as other resources you may find useful.

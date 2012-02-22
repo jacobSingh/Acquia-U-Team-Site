@@ -1,0 +1,307 @@
+/**
+ * @file
+ * Page Styling
+ *
+ * Style the markup found in page.tpl.php. Also includes some styling of
+ * miscellaneous Drupal elements that appear in the $content variable, such as
+ * ul.links, .pager, .more-link, etc.
+ */
+
+
+/*
+ * Body
+ */
+
+
+
+body {
+  background: #F2F2F2;
+  border-top: 6px solid #067BBA;
+  margin: 0;
+  padding: 0;
+}
+
+#page-wrapper {
+}
+
+#page {
+}
+
+/*
+ * The skip-link link will be completely hidden until a user tabs to the link.
+ * See the element-focusable rule in system.base.css.
+ */
+#skip-link a,
+#skip-link a:visited {
+  display: block;
+  width: 100%;
+  padding: 2px 0 3px 0;
+  text-align: center;
+  background-color: #666;
+  color: #fff;
+}
+
+/*
+ * Header
+ */
+#header {
+  background: none repeat scroll 0 0 #383838;
+  height: 120px;
+  margin: 0;
+}
+
+#header .section {
+}
+
+#logo /* Wrapping link for logo */ {
+  float: left; /* LTR */
+  margin: 0;
+  padding: 0;
+}
+
+#logo img {
+  vertical-align: bottom;
+}
+
+#logo:hover img {
+  vertical-align: bottom;
+}
+
+#name-and-slogan /* Wrapper for website name and slogan */ {
+  float: left;
+  margin: 0 auto;
+}
+
+h1#site-name,
+div#site-name /* The name of the website */ {
+  margin: 0;
+  font-size: 4em;
+  font-weight: normal;
+  letter-spacing: 1px;
+  line-height: 1.5em;
+  margin: 15px;
+}
+
+#site-name a:link,
+#site-name a:visited {
+  color: #FFFFFF;
+  text-decoration: none;
+  text-transform: uppercase;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
+}
+
+#site-name a:hover,
+#site-name a:focus {
+  color: #E95C33;
+  text-decoration: none;
+  -moz-transition: color 0.4s ease-in-out;
+  -webkit-transition: color 0.4s ease-in-out;
+  transition: color 0.4s ease-in-out;
+}
+
+#site-slogan /* The slogan (or tagline) of a website */ {
+}
+
+.region-header /* Wrapper for any blocks placed in the header region */ {
+  clear: both; /* Clear the logo */
+}
+
+.highlight-u {
+  color: #067BBA;
+}
+/*
+ * Main (container for everything else)
+ */
+#main-wrapper {
+  margin: 0 auto;
+  width: 960px;
+}
+
+#main {
+}
+
+/*
+ * Content
+ */
+#content {
+  line-height: 1.75em;
+}
+
+#content .section {
+}
+
+#node-10 {
+  background: #E7E7E7;
+  padding: 15px 15px 0;
+}
+
+
+.region-highlighted {
+}
+
+.breadcrumb /* The path to the current page in the form of a list of links */ {
+  padding-bottom: 0; /* Undo system.css */
+}
+
+h1.title, /* The title of the page */
+h2.node-title, /* Title of a piece of content when it is given in a list of content */
+h2.block-title, /* Block title */
+h2.title, /* Comment section heading */
+h2.comment-form, /* Comment form heading */
+h3.title /* Comment title */ {
+  color: #E95C33;
+  margin: 0;
+}
+
+tr.even /* Some tables have rows marked even or odd. */ {
+  /* background-color: #eee; */ /* Drupal core uses a #eee background */
+}
+
+tr.odd {
+  /* background-color: #eee; */ /* Drupal core uses a #eee background */
+}
+
+div.messages /* Important messages (status, warning, and error) for the user. See also the declarations in messages.css. */ {
+  margin: 1.5em 0; /* Drupal core uses "6px 0" margin */
+}
+
+div.messages ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+div.status /* Normal priority messages */ {
+}
+
+div.warning,
+tr.warning /* Medium priority messages */ {
+  /* border: 1px solid #f0c020; */ /* Drupal core uses: 1px solid #f0c020 */
+}
+
+div.error,
+tr.error /* High priority messages. See also the .error declaration below. */ {
+}
+
+.error /* Errors that are separate from div.messages status messages. */ {
+  /* color: #e55; */ /* Drupal core uses a #e55 background */
+}
+
+.warning /* Warnings that are separate from div.messages status messages. */ {
+  /* color: #e09010; */ /* Drupal core uses a #e09010 background */
+}
+
+div.tabs /* See also the tabs.css file. */ {
+}
+
+.region-help /* Help text on a page */ {
+}
+
+.more-help-link /* Link to more help */ {
+}
+
+.region-content /* Wrapper for the actual page content */ {
+}
+
+ul.links /* List of links */ {
+}
+
+ul.links.inline {
+  display: block; /* Let the links be inline, but the container be a block. */
+}
+
+ul.links li {
+  padding: 0 1em 0 0; /* LTR */
+}
+
+.item-list .pager /* A list of page numbers when more than 1 page of content is available */ {
+  padding: 0;
+}
+
+.item-list .pager li /* Each page number in the pager list */ {
+  padding: 0 0.5em;
+}
+
+.feed-icon /* The link to the RSS or Atom feed for the current list of content */ {
+}
+
+.more-link /* Aggregator, blog, and forum more link */ {
+}
+
+.views-row-odd {
+  background: #cdcdcd;
+}
+
+/*
+ * First sidebar (on left in LTR languages, on right in RTL)
+ *
+ * Remember to NOT add padding or margin to your .region-sidebar-first
+ * (see the layout.css file.)
+ */
+.region-sidebar-first {
+}
+
+.region-sidebar-first .section {
+}
+
+/*
+ * Second sidebar (on right in LTR languages, on left in RTL)
+ *
+ * Remember to NOT add padding or margin to your .region-sidebar-second
+ * (see the layout.css file.)
+ */
+.region-sidebar-second {
+}
+
+.region-sidebar-second .section {
+}
+
+/*
+ * Footer
+ */
+.region-footer {
+  background: #383838;
+  border-bottom: solid 25px #383838;
+  color: white;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 150px;
+  padding: 50px 0 25px;
+}
+.region-footer .region {
+  padding: 0 10px;
+}
+.region-footer .region h2 {
+  color: #067BBA;
+  margin-bottom: 20px;
+}
+.region-footer .region a:link,
+.region-footer .region a:visited {
+  color: #FFF;
+}
+.region-footer .region a:hover,
+.region-footer .region a:active {
+  color: #E95C33;
+}
+.region-footer-bottom .block .content {
+  color: #999;
+}
+.region-footer-bottom .block .content a:link,
+.region-footer-bottom .block .content a:visited {
+  color: #EEE;
+}
+.region-footer-bottom .block .content a:hover,
+.region-footer-bottom .block .content a:active {
+  color: #E95C33;
+}
+.feed-icon {
+  padding: 20px 0;
+}
+
+/*
+ * Page bottom
+ */
+.region-bottom /* Wrapper for any blocks placed in the page bottom region */ {
+  background: #383838;
+}

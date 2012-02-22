@@ -1,0 +1,16 @@
+name = Konami Code
+description = Performs special actions when the user enters the Konami Code.
+core = 7.x
+
+files[] = konamicode.admin.inc
+files[] = konamicode.install
+files[] = konamicode.module
+
+configure = admin/config/system/konamicode
+
+; Information added by drupal.org packaging script on 2011-12-23
+version = "7.x-1.7"
+core = "7.x"
+project = "konamicode"
+datestamp = "1324670744"
+
