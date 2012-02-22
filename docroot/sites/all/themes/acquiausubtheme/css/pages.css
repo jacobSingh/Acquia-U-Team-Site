@@ -15,7 +15,7 @@
 
 
 body {
-  background: #F2F2F2;
+  background: #bada55;
   border-top: 6px solid #067BBA;
   margin: 0;
   padding: 0;
@@ -84,7 +84,7 @@ div#site-name /* The name of the website */ {
 
 #site-name a:link,
 #site-name a:visited {
-  color: #FFFFFF;
+  color: #ffaabb;
   text-decoration: none;
   text-transform: uppercase;
   -moz-transition: color 0.4s ease-in-out;
